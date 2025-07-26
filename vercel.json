@@ -26,10 +26,5 @@
   "env": {
     "PYTHONPATH": "/var/task",
     "FLASK_ENV": "production"
-  },
-  "functions": {
-    "app.py": {
-      "runtime": "python3.9"
-    }
   }
 }
