@@ -123,6 +123,13 @@ class QuestionnaireSystem {
     showQuestionnaire() {
         this.elements.landing.classList.remove('active');
         this.elements.questionnaire.classList.add('active');
+        
+        // Add fixed navigation class for progress bar styling
+        const progressContainer = document.querySelector('.progress-container');
+        if (progressContainer) {
+            progressContainer.classList.add('fixed-nav');
+        }
+        
         this.renderCurrentQuestion();
         
         // Focus management for accessibility
@@ -639,6 +646,12 @@ class QuestionnaireSystem {
         this.elements.results.classList.remove('active');
         this.elements.questionnaire.classList.remove('active');
         this.elements.landing.classList.add('active');
+        
+        // Remove fixed navigation class from progress bar
+        const progressContainer = document.querySelector('.progress-container');
+        if (progressContainer) {
+            progressContainer.classList.remove('fixed-nav');
+        }
         
         // Clear any error states
         this.hideError();
