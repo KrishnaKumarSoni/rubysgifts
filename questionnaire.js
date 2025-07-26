@@ -302,29 +302,6 @@ class QuestionnaireSystem {
         }
     }
 
-    syncTextareaToChips(questionId, text) {
-        if (!text) {
-            this.selectedChips[questionId] = [];
-            this.updateChipVisualStates(questionId);
-            return;
-        }
-
-        // Parse comma-separated values
-        const values = text.split(',').map(v => v.trim()).filter(v => v.length > 0);
-        
-        // Find which values match existing chips
-        const question = this.questions.find(q => q.id === questionId);
-        if (!question) return;
-
-        const availableChipTexts = question.chips.map(chip => chip.text.toLowerCase());
-        const matchingChips = values.filter(value => 
-            availableChipTexts.includes(value.toLowerCase())
-        );
-
-        // Update selected chips to match textarea
-        this.selectedChips[questionId] = matchingChips;
-        this.updateChipVisualStates(questionId);
-    }
 
     toggleChip(chipElement, chip, questionId) {
         const isSelected = chipElement.classList.contains('selected');
@@ -370,28 +347,40 @@ class QuestionnaireSystem {
         const selectedChips = this.selectedChips[questionId] || [];
         const currentValue = answerInput.value.trim();
         
-        // Merge existing custom text with selected chips
+        // Get custom text that's not from chips
         const chipTexts = selectedChips.filter(text => text.trim().length > 0);
         const customTexts = this.extractCustomText(currentValue, chipTexts);
         
-        // Combine chips and custom text, removing duplicates
-        const allTexts = [...chipTexts, ...customTexts].filter((text, index, arr) => 
-            arr.indexOf(text) === index && text.trim().length > 0
-        );
+        // Combine chips and custom text, removing duplicates (case-insensitive)
+        const allTexts = [...chipTexts, ...customTexts];
+        const uniqueTexts = allTexts.filter((text, index) => {
+            if (!text || text.trim().length === 0) return false;
+            const lowerText = text.toLowerCase();
+            return allTexts.findIndex(t => t.toLowerCase() === lowerText) === index;
+        });
         
-        const finalText = allTexts.join(', ');
+        const finalText = uniqueTexts.join(', ');
         answerInput.value = finalText;
         this.answers[questionId] = finalText;
+        
+        // Debug logging
+        console.log(`Updated answer input for ${questionId}:`, {
+            selectedChips: selectedChips,
+            customTexts: customTexts,
+            finalText: finalText
+        });
     }
 
     extractCustomText(currentValue, chipTexts) {
         if (!currentValue) return [];
         
-        // Split by comma and filter out chip texts
+        // Split by comma and filter out chip texts (case-insensitive)
         const parts = currentValue.split(',').map(part => part.trim());
+        const chipTextsLower = chipTexts.map(text => text.toLowerCase());
+        
         return parts.filter(part => 
             part.length > 0 && 
-            !chipTexts.some(chip => chip.toLowerCase() === part.toLowerCase())
+            !chipTextsLower.includes(part.toLowerCase())
         );
     }
 
@@ -780,9 +769,22 @@ class QuestionnaireSystem {
             availableChipTexts.includes(item.toLowerCase())
         );
 
-        // Update selected chips to match textarea content
-        this.selectedChips[questionId] = matchingChips;
+        // Update selected chips to match textarea content - preserve original case from chip data
+        this.selectedChips[questionId] = matchingChips.map(chipText => {
+            const originalChip = question.chipData.find(chip => 
+                chip.text.toLowerCase() === chipText.toLowerCase()
+            );
+            return originalChip ? originalChip.text : chipText;
+        });
+        
         this.updateChipVisualStates(questionId);
+        
+        // Debug logging
+        console.log(`Synced textarea to chips for ${questionId}:`, {
+            textareaValue: textareaValue,
+            textItems: textItems,
+            matchingChips: this.selectedChips[questionId]
+        });
     }
 
     updateChipVisualStates(questionId) {
@@ -804,15 +806,6 @@ class QuestionnaireSystem {
         });
     }
 
-    extractCustomText(currentValue, chipTexts) {
-        // Extract custom text that's not from chips
-        if (!currentValue) return [];
-        
-        const allItems = currentValue.split(',').map(item => item.trim()).filter(item => item.length > 0);
-        const chipTextsLower = chipTexts.map(text => text.toLowerCase());
-        
-        return allItems.filter(item => !chipTextsLower.includes(item.toLowerCase()));
-    }
 
     addChipToSelection(chipText, questionId) {
         if (!this.selectedChips[questionId]) {
