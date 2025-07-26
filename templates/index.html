@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ruby's gifts</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    
+    <style>
+        :root {
+            --orange-primary: #FF6600;
+            --orange-light: #FFB366;
+            --orange-dark: #CC5200;
+            --text-dark: #333333;
+            --text-medium: #666666;
+            --text-light: #999999;
+            --background: #FFFFFF;
+            --background-light: #F8F9FA;
+            --border-light: #E5E5E5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--background);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--orange-primary);
+            margin-bottom: 10px;
+            text-transform: lowercase;
+        }
+
+        .header p {
+            color: var(--text-medium);
+            font-size: 1.1rem;
+        }
+
+        /* Landing page */
+        .landing {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .landing h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-transform: lowercase;
+        }
+
+        .landing p {
+            font-size: 1.2rem;
+            color: var(--text-medium);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-primary {
+            background-color: var(--orange-primary);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            border-radius: 32px;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: lowercase;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--orange-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Questionnaire */
+        .questionnaire {
+            display: none;
+        }
+
+        .question-container {
+            background: var(--background-light);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .question-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            text-transform: lowercase;
+        }
+
+        .progress-bar {
+            background: var(--border-light);
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--orange-primary);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Search input */
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--orange-primary);
+        }
+
+        /* Chips */
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 32px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            user-select: none;
+            text-transform: lowercase;
+            min-height: 44px; /* Touch-friendly */
+        }
+
+        .chip:hover {
+            border-color: var(--orange-light);
+            background: #FFF5F0;
+        }
+
+        .chip.selected {
+            background: var(--orange-primary);
+            border-color: var(--orange-primary);
+            color: white;
+        }
+
+        .chip i {
+            font-size: 1.1rem;
+        }
+
+        .chip .check-icon {
+            display: none;
+        }
+
+        .chip.selected .check-icon {
+            display: inline;
+        }
+
+        .chip.selected .default-icon {
+            display: none;
+        }
+
+        .no-results {
+            text-align: center;
+            color: var(--text-medium);
+            padding: 40px;
+            font-style: italic;
+        }
+
+        /* Answer textarea */
+        .answer-container {
+            margin-bottom: 30px;
+        }
+
+        .answer-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .answer-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .answer-textarea:focus {
+            outline: none;
+            border-color: var(--orange-primary);
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-medium);
+            border: 2px solid var(--border-light);
+            padding: 12px 24px;
+            border-radius: 32px;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: lowercase;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--orange-primary);
+            color: var(--orange-primary);
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Results */
+        .results {
+            display: none;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .results-header h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-transform: lowercase;
+        }
+
+        .gift-cards {
+            display: grid;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .gift-card {
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .gift-card:hover {
+            border-color: var(--orange-light);
+            transform: translateY(-2px);
+        }
+
+        .gift-card h3 {
+            color: var(--orange-primary);
+            margin-bottom: 12px;
+            font-size: 1.3rem;
+        }
+
+        .gift-card .description {
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .gift-card .reason {
+            margin-bottom: 12px;
+            color: var(--text-medium);
+            font-style: italic;
+        }
+
+        .gift-card .price {
+            color: var(--orange-primary);
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-medium);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            color: var(--orange-primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #FFE5E5;
+            border: 2px solid #FF6B6B;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            color: #CC0000;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .question-container {
+                padding: 24px 20px;
+            }
+
+            .chip {
+                min-height: 48px; /* Larger touch targets on mobile */
+                padding: 14px 18px;
+            }
+
+            .chips-container {
+                max-height: 300px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .landing h2 {
+                font-size: 1.6rem;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .nav-buttons .btn-primary,
+            .nav-buttons .btn-secondary {
+                width: 100%;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles */
+        .chip:focus,
+        .btn-primary:focus,
+        .btn-secondary:focus {
+            outline: 2px solid var(--orange-primary);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ruby's gifts</h1>
+            <p>discover the perfect gift with ai-powered suggestions</p>
+        </div>
+
+        <!-- Landing Page -->
+        <div id="landing" class="landing">
+            <h2>find the perfect gift</h2>
+            <p>answer a few fun questions about your special someone, and we'll suggest thoughtful, personalized gifts they'll absolutely love.</p>
+            <button class="btn-primary" onclick="startQuestionnaire()">start discovering gifts</button>
+        </div>
+
+        <!-- Questionnaire -->
+        <div id="questionnaire" class="questionnaire">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="question-container">
+                <div class="question-header">
+                    <h2 id="questionText"></h2>
+                </div>
+
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        class="search-input" 
+                        id="searchInput"
+                        placeholder="search for options..."
+                        aria-label="Search chip options"
+                    >
+                </div>
+
+                <div class="chips-container" id="chipsContainer" role="group" aria-label="Selection options">
+                    <!-- Chips will be populated here -->
+                </div>
+
+                <div class="answer-container">
+                    <label class="answer-label" for="answerTextarea">your answer:</label>
+                    <textarea 
+                        class="answer-textarea" 
+                        id="answerTextarea"
+                        placeholder="select chips above or type your own answer..."
+                        aria-label="Your answer"
+                    ></textarea>
+                </div>
+
+                <div class="nav-buttons">
+                    <button class="btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>previous</button>
+                    <button class="btn-primary" id="nextBtn" onclick="nextQuestion()">next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="results">
+            <div class="results-header">
+                <h2>your perfect gifts</h2>
+                <p>here are some thoughtful suggestions based on your answers</p>
+            </div>
+
+            <div id="loadingState" class="loading">
+                <i class="ph ph-spinner"></i>
+                <p>generating your personalized gift suggestions...</p>
+            </div>
+
+            <div id="giftsContainer" class="gift-cards">
+                <!-- Gift cards will be populated here -->
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn-secondary" onclick="restartQuestionnaire()">start over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Question data with extensive chip options
+        const questions = [
+            {
+                id: 'nickname',
+                text: 'what do you call them?',
+                required: true,
+                chips: [
+                    { text: 'honey', icon: 'ph-heart' },
+                    { text: 'babe', icon: 'ph-heart' },
+                    { text: 'sweetie', icon: 'ph-heart' },
+                    { text: 'darling', icon: 'ph-heart' },
+                    { text: 'love', icon: 'ph-heart' },
+                    { text: 'buddy', icon: 'ph-user' },
+                    { text: 'friend', icon: 'ph-user' },
+                    { text: 'pal', icon: 'ph-user' },
+                    { text: 'mate', icon: 'ph-handshake' },
+                    { text: 'bro', icon: 'ph-handshake' },
+                    { text: 'sis', icon: 'ph-users' },
+                    { text: 'dude', icon: 'ph-user' },
+                    { text: 'champ', icon: 'ph-trophy' },
+                    { text: 'sunshine', icon: 'ph-sun' },
+                    { text: 'angel', icon: 'ph-heart' },
+                    { text: 'baby', icon: 'ph-heart' },
+                    { text: 'dear', icon: 'ph-heart' },
+                    { text: 'precious', icon: 'ph-heart' },
+                    { text: 'cutie', icon: 'ph-smiley' },
+                    { text: 'beautiful', icon: 'ph-sparkle' },
+                    { text: 'handsome', icon: 'ph-sparkle' },
+                    { text: 'gorgeous', icon: 'ph-sparkle' },
+                    { text: 'tiger', icon: 'ph-lightning' },
+                    { text: 'rock star', icon: 'ph-star' },
+                    { text: 'superstar', icon: 'ph-star' },
+                    { text: 'princess', icon: 'ph-crown' },
+                    { text: 'prince', icon: 'ph-crown' },
+                    { text: 'queen', icon: 'ph-crown' },
+                    { text: 'king', icon: 'ph-crown' },
+                    { text: 'boss', icon: 'ph-briefcase' },
+                    { text: 'chief', icon: 'ph-briefcase' },
+                    { text: 'captain', icon: 'ph-anchor' },
+                    { text: 'sport', icon: 'ph-basketball' },
+                    { text: 'kiddo', icon: 'ph-smiley' },
+                    { text: 'little one', icon: 'ph-heart' },
+                    { text: 'big guy', icon: 'ph-user' },
+                    { text: 'big girl', icon: 'ph-user' },
+                    { text: 'smarty', icon: 'ph-lightbulb' },
+                    { text: 'genius', icon: 'ph-lightbulb' },
+                    { text: 'silly', icon: 'ph-smiley' },
+                    { text: 'goofball', icon: 'ph-smiley' },
+                    { text: 'troublemaker', icon: 'ph-warning' },
+                    { text: 'sweetheart', icon: 'ph-heart' },
+                    { text: 'my person', icon: 'ph-heart' },
+                    { text: 'other half', icon: 'ph-heart' },
+                    { text: 'better half', icon: 'ph-heart' },
+                    { text: 'soulmate', icon: 'ph-heart' },
+                    { text: 'partner', icon: 'ph-handshake' },
+                    { text: 'companion', icon: 'ph-user' },
+                    { text: 'their name', icon: 'ph-user-circle' }
+                ]
+            },
+            {
+                id: 'relationship',
+                text: 'what\'s your relationship?',
+                required: true,
+                chips: [
+                    { text: 'romantic partner', icon: 'ph-heart' },
+                    { text: 'spouse', icon: 'ph-heart' },
+                    { text: 'boyfriend', icon: 'ph-heart' },
+                    { text: 'girlfriend', icon: 'ph-heart' },
+                    { text: 'husband', icon: 'ph-heart' },
+                    { text: 'wife', icon: 'ph-heart' },
+                    { text: 'fiancé', icon: 'ph-heart' },
+                    { text: 'fiancée', icon: 'ph-heart' },
+                    { text: 'best friend', icon: 'ph-star' },
+                    { text: 'close friend', icon: 'ph-user' },
+                    { text: 'friend', icon: 'ph-user' },
+                    { text: 'family member', icon: 'ph-users' },
+                    { text: 'sibling', icon: 'ph-users' },
+                    { text: 'brother', icon: 'ph-users' },
+                    { text: 'sister', icon: 'ph-users' },
+                    { text: 'parent', icon: 'ph-users' },
+                    { text: 'mother', icon: 'ph-heart' },
+                    { text: 'father', icon: 'ph-heart' },
+                    { text: 'mom', icon: 'ph-heart' },
+                    { text: 'dad', icon: 'ph-heart' },
+                    { text: 'child', icon: 'ph-baby' },
+                    { text: 'son', icon: 'ph-baby' },
+                    { text: 'daughter', icon: 'ph-baby' },
+                    { text: 'grandparent', icon: 'ph-users' },
+                    { text: 'grandmother', icon: 'ph-heart' },
+                    { text: 'grandfather', icon: 'ph-heart' },
+                    { text: 'grandma', icon: 'ph-heart' },
+                    { text: 'grandpa', icon: 'ph-heart' },
+                    { text: 'aunt', icon: 'ph-users' },
+                    { text: 'uncle', icon: 'ph-users' },
+                    { text: 'cousin', icon: 'ph-users' },
+                    { text: 'coworker', icon: 'ph-briefcase' },
+                    { text: 'colleague', icon: 'ph-briefcase' },
+                    { text: 'boss', icon: 'ph-briefcase' },
+                    { text: 'employee', icon: 'ph-briefcase' },
+                    { text: 'classmate', icon: 'ph-student' },
+                    { text: 'roommate', icon: 'ph-house' },
+                    { text: 'neighbor', icon: 'ph-house' },
+                    { text: 'mentor', icon: 'ph-lightbulb' },
+                    { text: 'teacher', icon: 'ph-chalkboard-teacher' },
+                    { text: 'student', icon: 'ph-student' },
+                    { text: 'crush', icon: 'ph-heart-break' },
+                    { text: 'ex-partner', icon: 'ph-user-minus' },
+                    { text: 'acquaintance', icon: 'ph-user' },
+                    { text: 'teammate', icon: 'ph-users-three' },
+                    { text: 'workout buddy', icon: 'ph-barbell' },
+                    { text: 'travel companion', icon: 'ph-airplane' },
+                    { text: 'business partner', icon: 'ph-handshake' },
+                    { text: 'study buddy', icon: 'ph-books' },
+                    { text: 'gaming friend', icon: 'ph-game-controller' }
+                ]
+            },
+            {
+                id: 'previous_gifts',
+                text: 'what have you already gifted them?',
+                required: false,
+                chips: [
+                    { text: 'chocolate', icon: 'ph-cake' },
+                    { text: 'flowers', icon: 'ph-flower' },
+                    { text: 'jewelry', icon: 'ph-diamond' },
+                    { text: 'books', icon: 'ph-book' },
+                    { text: 'clothing', icon: 'ph-t-shirt' },
+                    { text: 'perfume', icon: 'ph-drop' },
+                    { text: 'watch', icon: 'ph-watch' },
+                    { text: 'phone case', icon: 'ph-device-mobile' },
+                    { text: 'headphones', icon: 'ph-headphones' },
+                    { text: 'wallet', icon: 'ph-wallet' },
+                    { text: 'purse', icon: 'ph-handbag' },
+                    { text: 'sunglasses', icon: 'ph-sunglasses' },
+                    { text: 'shoes', icon: 'ph-sneaker' },
+                    { text: 'bag', icon: 'ph-backpack' },
+                    { text: 'mug', icon: 'ph-coffee' },
+                    { text: 'candles', icon: 'ph-candle' },
+                    { text: 'gift card', icon: 'ph-credit-card' },
+                    { text: 'money', icon: 'ph-money' },
+                    { text: 'gadgets', icon: 'ph-device-tablet' },
+                    { text: 'tech accessories', icon: 'ph-usb' },
+                    { text: 'home decor', icon: 'ph-house' },
+                    { text: 'plants', icon: 'ph-plant' },
+                    { text: 'art supplies', icon: 'ph-paint-brush' },
+                    { text: 'kitchen items', icon: 'ph-cooking-pot' },
+                    { text: 'cosmetics', icon: 'ph-makeup-brush' },
+                    { text: 'skincare', icon: 'ph-drop' },
+                    { text: 'board games', icon: 'ph-game-controller' },
+                    { text: 'puzzles', icon: 'ph-puzzle-piece' },
+                    { text: 'sports equipment', icon: 'ph-basketball' },
+                    { text: 'workout gear', icon: 'ph-barbell' },
+                    { text: 'travel items', icon: 'ph-airplane' },
+                    { text: 'stationery', icon: 'ph-pencil' },
+                    { text: 'desk accessories', icon: 'ph-desk' },
+                    { text: 'phone accessories', icon: 'ph-device-mobile' },
+                    { text: 'car accessories', icon: 'ph-car' },
+                    { text: 'subscription', icon: 'ph-calendar' },
+                    { text: 'experience gift', icon: 'ph-ticket' },
+                    { text: 'concert tickets', icon: 'ph-music-note' },
+                    { text: 'movie tickets', icon: 'ph-film-strip' },
+                    { text: 'restaurant voucher', icon: 'ph-fork-knife' },
+                    { text: 'spa voucher', icon: 'ph-heart' },
+                    { text: 'hobby supplies', icon: 'ph-palette' },
+                    { text: 'pet supplies', icon: 'ph-dog' },
+                    { text: 'baby items', icon: 'ph-baby' },
+                    { text: 'tools', icon: 'ph-wrench' },
+                    { text: 'nothing yet', icon: 'ph-x' },
+                    { text: 'too many to count', icon: 'ph-infinity' },
+                    { text: 'handmade gift', icon: 'ph-heart' },
+                    { text: 'photo gift', icon: 'ph-camera' },
+                    { text: 'custom item', icon: 'ph-star' }
+                ]
+            },
+            {
+                id: 'hates',
+                text: 'what will they absolutely hate?',
+                required: false,
+                chips: [
+                    { text: 'spiders', icon: 'ph-bug' },
+                    { text: 'loud noises', icon: 'ph-speaker-high' },
+                    { text: 'crowded places', icon: 'ph-users' },
+                    { text: 'cheap plastic', icon: 'ph-trash' },
+                    { text: 'clutter', icon: 'ph-stack' },
+                    { text: 'bright colors', icon: 'ph-palette' },
+                    { text: 'dark colors', icon: 'ph-moon' },
+                    { text: 'strong smells', icon: 'ph-nose' },
+                    { text: 'spicy food', icon: 'ph-fire' },
+                    { text: 'sweet things', icon: 'ph-cake' },
+                    { text: 'sour flavors', icon: 'ph-lemon' },
+                    { text: 'bitter taste', icon: 'ph-coffee' },
+                    { text: 'cold weather', icon: 'ph-snowflake' },
+                    { text: 'hot weather', icon: 'ph-sun' },
+                    { text: 'rain', icon: 'ph-cloud-rain' },
+                    { text: 'wind', icon: 'ph-wind' },
+                    { text: 'heights', icon: 'ph-mountains' },
+                    { text: 'water', icon: 'ph-drop' },
+                    { text: 'flying', icon: 'ph-airplane' },
+                    { text: 'driving', icon: 'ph-car' },
+                    { text: 'public speaking', icon: 'ph-microphone' },
+                    { text: 'social events', icon: 'ph-users' },
+                    { text: 'small talk', icon: 'ph-chat' },
+                    { text: 'surprises', icon: 'ph-gift' },
+                    { text: 'being late', icon: 'ph-clock' },
+                    { text: 'waiting', icon: 'ph-hourglass' },
+                    { text: 'mess', icon: 'ph-warning' },
+                    { text: 'technology', icon: 'ph-device-mobile' },
+                    { text: 'social media', icon: 'ph-share-network' },
+                    { text: 'exercise', icon: 'ph-barbell' },
+                    { text: 'sports', icon: 'ph-basketball' },
+                    { text: 'reading', icon: 'ph-book' },
+                    { text: 'movies', icon: 'ph-film-strip' },
+                    { text: 'music', icon: 'ph-music-note' },
+                    { text: 'cooking', icon: 'ph-cooking-pot' },
+                    { text: 'cleaning', icon: 'ph-broom' },
+                    { text: 'shopping', icon: 'ph-shopping-bag' },
+                    { text: 'crowds', icon: 'ph-users-three' },
+                    { text: 'noise', icon: 'ph-speaker-high' },
+                    { text: 'waste', icon: 'ph-trash' },
+                    { text: 'dishonesty', icon: 'ph-x' },
+                    { text: 'rudeness', icon: 'ph-warning' },
+                    { text: 'being rushed', icon: 'ph-timer' },
+                    { text: 'interruptions', icon: 'ph-pause' },
+                    { text: 'repetition', icon: 'ph-repeat' },
+                    { text: 'change', icon: 'ph-arrow-clockwise' },
+                    { text: 'routine', icon: 'ph-calendar' },
+                    { text: 'conflict', icon: 'ph-warning' },
+                    { text: 'drama', icon: 'ph-warning' },
+                    { text: 'gossip', icon: 'ph-chat-circle' }
+                ]
+            },
+            {
+                id: 'complaints',
+                text: 'what do they keep complaining about?',
+                required: false,
+                chips: [
+                    { text: 'traffic', icon: 'ph-car' },
+                    { text: 'work stress', icon: 'ph-briefcase' },
+                    { text: 'bad weather', icon: 'ph-cloud' },
+                    { text: 'slow internet', icon: 'ph-wifi-x' },
+                    { text: 'expensive prices', icon: 'ph-money' },
+                    { text: 'long queues', icon: 'ph-queue' },
+                    { text: 'noisy neighbors', icon: 'ph-house' },
+                    { text: 'poor sleep', icon: 'ph-bed' },
+                    { text: 'back pain', icon: 'ph-user' },
+                    { text: 'headaches', icon: 'ph-head' },
+                    { text: 'being tired', icon: 'ph-battery-empty' },
+                    { text: 'lack of time', icon: 'ph-clock' },
+                    { text: 'messy house', icon: 'ph-house' },
+                    { text: 'dirty dishes', icon: 'ph-bowl' },
+                    { text: 'laundry pile', icon: 'ph-t-shirt' },
+                    { text: 'phone battery', icon: 'ph-battery-low' },
+                    { text: 'cold coffee', icon: 'ph-coffee' },
+                    { text: 'burnt toast', icon: 'ph-fire' },
+                    { text: 'spilled drinks', icon: 'ph-drop' },
+                    { text: 'lost keys', icon: 'ph-key' },
+                    { text: 'forgotten passwords', icon: 'ph-lock' },
+                    { text: 'slow computer', icon: 'ph-desktop' },
+                    { text: 'bad wifi', icon: 'ph-wifi-x' },
+                    { text: 'dead phone', icon: 'ph-device-mobile-slash' },
+                    { text: 'empty fridge', icon: 'ph-refrigerator' },
+                    { text: 'no parking', icon: 'ph-car' },
+                    { text: 'long commute', icon: 'ph-train' },
+                    { text: 'crowded transport', icon: 'ph-bus' },
+                    { text: 'delayed flights', icon: 'ph-airplane' },
+                    { text: 'cancelled plans', icon: 'ph-x' },
+                    { text: 'bad service', icon: 'ph-warning' },
+                    { text: 'rude people', icon: 'ph-user-minus' },
+                    { text: 'loud music', icon: 'ph-speaker-high' },
+                    { text: 'bright lights', icon: 'ph-lightbulb' },
+                    { text: 'cold rooms', icon: 'ph-snowflake' },
+                    { text: 'hot weather', icon: 'ph-sun' },
+                    { text: 'humidity', icon: 'ph-drop' },
+                    { text: 'allergies', icon: 'ph-first-aid' },
+                    { text: 'mosquitoes', icon: 'ph-bug' },
+                    { text: 'spam calls', icon: 'ph-phone-x' },
+                    { text: 'junk mail', icon: 'ph-envelope-x' },
+                    { text: 'ads everywhere', icon: 'ph-x' },
+                    { text: 'social media', icon: 'ph-share-network' },
+                    { text: 'news cycle', icon: 'ph-newspaper' },
+                    { text: 'politics', icon: 'ph-flag' },
+                    { text: 'small talk', icon: 'ph-chat' },
+                    { text: 'meetings', icon: 'ph-users' },
+                    { text: 'emails', icon: 'ph-envelope' },
+                    { text: 'notifications', icon: 'ph-bell' },
+                    { text: 'updates', icon: 'ph-arrow-clockwise' }
+                ]
+            },
+            {
+                id: 'annoyances',
+                text: 'how would you complain about them to someone?',
+                required: false,
+                chips: [
+                    { text: 'always late', icon: 'ph-clock' },
+                    { text: 'too picky', icon: 'ph-magnifying-glass' },
+                    { text: 'loud chewer', icon: 'ph-mouth' },
+                    { text: 'phone addict', icon: 'ph-device-mobile' },
+                    { text: 'never listens', icon: 'ph-ear-slash' },
+                    { text: 'forgets everything', icon: 'ph-brain' },
+                    { text: 'over-organizer', icon: 'ph-stack' },
+                    { text: 'complete mess', icon: 'ph-warning' },
+                    { text: 'workaholic', icon: 'ph-briefcase' },
+                    { text: 'couch potato', icon: 'ph-television' },
+                    { text: 'social butterfly', icon: 'ph-users' },
+                    { text: 'hermit', icon: 'ph-house' },
+                    { text: 'perfectionist', icon: 'ph-star' },
+                    { text: 'procrastinator', icon: 'ph-clock' },
+                    { text: 'overthinker', icon: 'ph-brain' },
+                    { text: 'impulsive buyer', icon: 'ph-shopping-cart' },
+                    { text: 'hoarder', icon: 'ph-stack' },
+                    { text: 'minimalist', icon: 'ph-minus' },
+                    { text: 'drama queen', icon: 'ph-crown' },
+                    { text: 'too serious', icon: 'ph-user' },
+                    { text: 'class clown', icon: 'ph-smiley' },
+                    { text: 'party animal', icon: 'ph-confetti' },
+                    { text: 'early bird', icon: 'ph-sun' },
+                    { text: 'night owl', icon: 'ph-moon' },
+                    { text: 'coffee addict', icon: 'ph-coffee' },
+                    { text: 'health freak', icon: 'ph-heart' },
+                    { text: 'junk food lover', icon: 'ph-hamburger' },
+                    { text: 'gym rat', icon: 'ph-barbell' },
+                    { text: 'fashion obsessed', icon: 'ph-t-shirt' },
+                    { text: 'tech geek', icon: 'ph-desktop' },
+                    { text: 'book worm', icon: 'ph-book' },
+                    { text: 'movie buff', icon: 'ph-film-strip' },
+                    { text: 'music snob', icon: 'ph-music-note' },
+                    { text: 'control freak', icon: 'ph-steering-wheel' },
+                    { text: 'people pleaser', icon: 'ph-heart' },
+                    { text: 'attention seeker', icon: 'ph-eye' },
+                    { text: 'know-it-all', icon: 'ph-lightbulb' },
+                    { text: 'gossip spreader', icon: 'ph-chat-circle' },
+                    { text: 'mood swings', icon: 'ph-arrow-up-down' },
+                    { text: 'stubborn', icon: 'ph-x' },
+                    { text: 'indecisive', icon: 'ph-question' },
+                    { text: 'chronic complainer', icon: 'ph-warning' },
+                    { text: 'always positive', icon: 'ph-smiley' },
+                    { text: 'pessimist', icon: 'ph-cloud' },
+                    { text: 'overthinker', icon: 'ph-brain' },
+                    { text: 'impulsive', icon: 'ph-lightning' },
+                    { text: 'cautious', icon: 'ph-shield' },
+                    { text: 'risk taker', icon: 'ph-lightning' },
+                    { text: 'creature of habit', icon: 'ph-repeat' },
+                    { text: 'change lover', icon: 'ph-arrow-clockwise' }
+                ]
+            },
+            {
+                id: 'budget',
+                text: 'what\'s your budget?',
+                required: true,
+                chips: [
+                    { text: 'under ₹500', icon: 'ph-coins' },
+                    { text: '₹500-1000', icon: 'ph-coins' },
+                    { text: '₹1000-2000', icon: 'ph-money' },
+                    { text: '₹2000-5000', icon: 'ph-money' },
+                    { text: '₹5000-10000', icon: 'ph-currency-dollar' },
+                    { text: '₹10000-20000', icon: 'ph-currency-dollar' },
+                    { text: '₹20000-50000', icon: 'ph-bank' },
+                    { text: 'above ₹50000', icon: 'ph-bank' },
+                    { text: 'no budget limit', icon: 'ph-infinity' },
+                    { text: 'whatever it takes', icon: 'ph-heart' },
+                    { text: 'looking for deals', icon: 'ph-percent' },
+                    { text: 'quality over price', icon: 'ph-star' },
+                    { text: 'bargain hunter', icon: 'ph-magnifying-glass' },
+                    { text: 'willing to splurge', icon: 'ph-diamond' },
+                    { text: 'budget conscious', icon: 'ph-calculator' },
+                    { text: 'mid-range', icon: 'ph-balance-scale' },
+                    { text: 'premium only', icon: 'ph-crown' },
+                    { text: 'handmade preferred', icon: 'ph-heart' },
+                    { text: 'experience over things', icon: 'ph-ticket' },
+                    { text: 'practical gifts', icon: 'ph-toolbox' },
+                    { text: 'luxury items', icon: 'ph-diamond' },
+                    { text: 'unique finds', icon: 'ph-star' },
+                    { text: 'local products', icon: 'ph-map-pin' },
+                    { text: 'sustainable choice', icon: 'ph-leaf' },
+                    { text: 'tech gadgets', icon: 'ph-device-tablet' },
+                    { text: 'fashion items', icon: 'ph-t-shirt' },
+                    { text: 'home goods', icon: 'ph-house' },
+                    { text: 'books/media', icon: 'ph-book' },
+                    { text: 'food/drinks', icon: 'ph-wine' },
+                    { text: 'subscription service', icon: 'ph-calendar' },
+                    { text: 'gift card', icon: 'ph-credit-card' },
+                    { text: 'cash gift', icon: 'ph-money' },
+                    { text: 'diy project', icon: 'ph-wrench' },
+                    { text: 'group gift', icon: 'ph-users-three' },
+                    { text: 'surprise me', icon: 'ph-gift' },
+                    { text: 'something special', icon: 'ph-sparkle' },
+                    { text: 'memorable gift', icon: 'ph-heart' },
+                    { text: 'practical need', icon: 'ph-list-checks' },
+                    { text: 'fun splurge', icon: 'ph-smiley' },
+                    { text: 'thoughtful gesture', icon: 'ph-heart' }
+                ]
+            },
+            {
+                id: 'limitations',
+                text: 'any other limitations?',
+                required: false,
+                chips: [
+                    { text: 'allergy-free', icon: 'ph-shield-check' },
+                    { text: 'eco-friendly', icon: 'ph-leaf' },
+                    { text: 'portable', icon: 'ph-backpack' },
+                    { text: 'small size', icon: 'ph-minus-circle' },
+                    { text: 'large size', icon: 'ph-plus-circle' },
+                    { text: 'lightweight', icon: 'ph-feather' },
+                    { text: 'durable', icon: 'ph-shield' },
+                    { text: 'fragile ok', icon: 'ph-warning' },
+                    { text: 'no fragile items', icon: 'ph-x-circle' },
+                    { text: 'washable', icon: 'ph-drop' },
+                    { text: 'low maintenance', icon: 'ph-check' },
+                    { text: 'high tech', icon: 'ph-cpu' },
+                    { text: 'low tech', icon: 'ph-prohibition' },
+                    { text: 'no electronics', icon: 'ph-device-mobile-slash' },
+                    { text: 'battery free', icon: 'ph-battery-empty' },
+                    { text: 'plug-in required', icon: 'ph-plug' },
+                    { text: 'wireless only', icon: 'ph-wifi' },
+                    { text: 'silent operation', icon: 'ph-speaker-x' },
+                    { text: 'colorful', icon: 'ph-palette' },
+                    { text: 'neutral colors', icon: 'ph-circle' },
+                    { text: 'bright colors', icon: 'ph-sun' },
+                    { text: 'dark colors', icon: 'ph-moon' },
+                    { text: 'personalized', icon: 'ph-user-circle' },
+                    { text: 'generic is fine', icon: 'ph-package' },
+                    { text: 'custom made', icon: 'ph-wrench' },
+                    { text: 'brand name', icon: 'ph-trademark' },
+                    { text: 'no brand preference', icon: 'ph-equals' },
+                    { text: 'local brand', icon: 'ph-map-pin' },
+                    { text: 'international brand', icon: 'ph-globe' },
+                    { text: 'vintage style', icon: 'ph-clock-clockwise' },
+                    { text: 'modern design', icon: 'ph-lightning' },
+                    { text: 'classic look', icon: 'ph-crown' },
+                    { text: 'trendy', icon: 'ph-trend-up' },
+                    { text: 'timeless', icon: 'ph-infinity' },
+                    { text: 'seasonal', icon: 'ph-calendar' },
+                    { text: 'year-round use', icon: 'ph-calendar-blank' },
+                    { text: 'indoor use', icon: 'ph-house' },
+                    { text: 'outdoor use', icon: 'ph-tree' },
+                    { text: 'travel friendly', icon: 'ph-airplane' },
+                    { text: 'home use only', icon: 'ph-house' },
+                    { text: 'office appropriate', icon: 'ph-briefcase' },
+                    { text: 'casual use', icon: 'ph-t-shirt' },
+                    { text: 'formal occasion', icon: 'ph-necktie' },
+                    { text: 'kid friendly', icon: 'ph-baby' },
+                    { text: 'adult only', icon: 'ph-user' },
+                    { text: 'pet safe', icon: 'ph-dog' },
+                    { text: 'food safe', icon: 'ph-fork-knife' },
+                    { text: 'non-toxic', icon: 'ph-shield-check' },
+                    { text: 'hypoallergenic', icon: 'ph-shield-check' }
+                ]
+            }
+        ];
+
+        // App state
+        let currentQuestionIndex = 0;
+        let answers = {};
+        let selectedChips = {};
+
+        // Initialize app
+        function startQuestionnaire() {
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('questionnaire').style.display = 'block';
+            currentQuestionIndex = 0;
+            answers = {};
+            selectedChips = {};
+            showQuestion(currentQuestionIndex);
+            updateProgress();
+        }
+
+        function showQuestion(index) {
+            const question = questions[index];
+            document.getElementById('questionText').textContent = question.text;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('answerTextarea').value = answers[question.id] || '';
+            
+            // Reset selected chips for this question  
+            selectedChips[question.id] = selectedChips[question.id] || [];
+            
+            renderChips(question.chips, question.id);
+            updateNavigationButtons();
+            
+            // Focus search input for better UX
+            document.getElementById('searchInput').focus();
+        }
+
+        function renderChips(chips, questionId) {
+            const container = document.getElementById('chipsContainer');
+            container.innerHTML = '';
+            
+            chips.forEach(chip => {
+                const chipElement = document.createElement('button');
+                chipElement.className = 'chip';
+                chipElement.setAttribute('role', 'checkbox');
+                chipElement.setAttribute('tabindex', '0');
+                chipElement.setAttribute('aria-label', `Select ${chip.text}`);
+                
+                const isSelected = selectedChips[questionId].includes(chip.text);
+                if (isSelected) {
+                    chipElement.classList.add('selected');
+                    chipElement.setAttribute('aria-checked', 'true');
+                } else {
+                    chipElement.setAttribute('aria-checked', 'false');
+                }
+                
+                chipElement.innerHTML = `
+                    <i class="ph ${chip.icon} default-icon"></i>
+                    <i class="ph ph-check check-icon"></i>
+                    <span>${chip.text}</span>
+                `;
+                
+                chipElement.addEventListener('click', () => toggleChip(chip.text, questionId));
+                chipElement.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleChip(chip.text, questionId);
+                    }
+                });
+                
+                container.appendChild(chipElement);
+            });
+        }
+
+        function toggleChip(chipText, questionId) {
+            const chipIndex = selectedChips[questionId].indexOf(chipText);
+            
+            if (chipIndex > -1) {
+                // Deselect chip
+                selectedChips[questionId].splice(chipIndex, 1);
+            } else {
+                // Select chip  
+                selectedChips[questionId].push(chipText);
+            }
+            
+            // Update visual state
+            renderChips(questions[currentQuestionIndex].chips, questionId);
+            
+            // Sync with textarea
+            syncTextarea(questionId);
+        }
+
+        function syncTextarea(questionId) {
+            const textarea = document.getElementById('answerTextarea');
+            const selected = selectedChips[questionId];
+            
+            if (selected.length > 0) {
+                textarea.value = selected.join(', ');
+            }
+            
+            // Store in answers
+            answers[questionId] = textarea.value;
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const chips = document.querySelectorAll('.chip');
+            let visibleCount = 0;
+            
+            chips.forEach(chip => {
+                const text = chip.textContent.toLowerCase();
+                const isVisible = text.includes(searchTerm);
+                chip.style.display = isVisible ? 'inline-flex' : 'none';
+                if (isVisible) visibleCount++;
+            });
+            
+            // Show no results message
+            const container = document.getElementById('chipsContainer');
+            let noResults = container.querySelector('.no-results');
+            
+            if (visibleCount === 0 && searchTerm.length > 0) {
+                if (!noResults) {
+                    noResults = document.createElement('div');
+                    noResults.className = 'no-results';
+                    noResults.textContent = 'no matches found. try typing in the text area below.';
+                    container.appendChild(noResults);
+                }
+            } else if (noResults) {
+                noResults.remove();
+            }
+        });
+
+        // Textarea sync
+        document.getElementById('answerTextarea').addEventListener('input', (e) => {
+            const questionId = questions[currentQuestionIndex].id;
+            answers[questionId] = e.target.value;
+        });
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.textContent = 'generate gifts';
+            } else {
+                nextBtn.textContent = 'next';
+            }
+        }
+
+        function nextQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            const answer = document.getElementById('answerTextarea').value.trim();
+            
+            // Validate required questions
+            if (currentQuestion.required && !answer) {
+                alert('please provide an answer before continuing');
+                return;
+            }
+            
+            // Save answer
+            answers[currentQuestion.id] = answer;
+            
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion(currentQuestionIndex);
+                updateProgress();
+            } else {
+                // Generate gifts
+                generateGifts();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                // Save current answer
+                const currentQuestion = questions[currentQuestionIndex];
+                answers[currentQuestion.id] = document.getElementById('answerTextarea').value.trim();
+                
+                currentQuestionIndex--;
+                showQuestion(currentQuestionIndex);
+                updateProgress();
+            }
+        }
+
+        async function generateGifts() {
+            // Hide questionnaire, show results
+            document.getElementById('questionnaire').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            // Show loading state
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('giftsContainer').style.display = 'none';
+            
+            try {
+                const response = await fetch('/generate_gifts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ answers: answers })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayGifts(data.suggestions);
+                } else {
+                    throw new Error(data.error || 'Failed to generate gifts');
+                }
+            } catch (error) {
+                console.error('Error generating gifts:', error);
+                displayError(error.message);
+            }
+        }
+
+        function displayGifts(suggestions) {
+            const container = document.getElementById('giftsContainer');
+            container.innerHTML = '';
+            
+            suggestions.forEach((gift, index) => {
+                const card = document.createElement('div');
+                card.className = 'gift-card';
+                card.innerHTML = `
+                    <h3>${gift.title}</h3>
+                    <p class="description">${gift.description}</p>
+                    <p class="reason">${gift.reason}</p>
+                    <p class="price">${gift.price}</p>
+                `;
+                container.appendChild(card);
+            });
+            
+            // Hide loading, show results
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('giftsContainer').style.display = 'grid';
+        }
+
+        function displayError(message) {
+            const container = document.getElementById('giftsContainer');
+            container.innerHTML = `
+                <div class="error">
+                    <h3>oops! something went wrong</h3>
+                    <p>${message}</p>
+                    <button class="btn-primary" onclick="generateGifts()" style="margin-top: 16px;">
+                        try again
+                    </button>
+                </div>
+            `;
+            
+            // Hide loading, show error
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('giftsContainer').style.display = 'block';
+        }
+
+        function restartQuestionnaire() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('landing').style.display = 'block';
+            currentQuestionIndex = 0;
+            answers = {};
+            selectedChips = {};
+        }
+
+        // Initialize selected chips for all questions
+        questions.forEach(question => {
+            selectedChips[question.id] = [];
+        });
+
+        // Keyboard navigation for accessibility
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('searchInput').blur();
+                document.getElementById('answerTextarea').blur();
+            }
+        });
+    </script>
+</body>
+</html>

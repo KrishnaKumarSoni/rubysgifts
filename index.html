@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruby's Gifts - AI-Powered Gift Recommendations</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Landing Page -->
+    <div id="landing" class="page active">
+        <div class="container">
+            <div class="landing-content">
+                <h1 class="landing-title">ruby's gifts</h1>
+                <p class="landing-subtitle">discover the perfect gift with ai-powered recommendations</p>
+                <p class="landing-description">
+                    answer a few fun questions using our interactive chip system, 
+                    and we'll suggest thoughtful gift ideas tailored just for them
+                </p>
+                <button id="start-btn" class="btn btn-primary">
+                    <i class="ph ph-gift"></i>
+                    start discovering
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questionnaire Page -->
+    <div id="questionnaire" class="page">
+        <div class="container">
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="current-question">1</span> of <span id="total-questions">8</span>
+                </div>
+            </div>
+
+            <!-- Question Container -->
+            <div id="question-container" class="question-container">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+
+            <!-- Navigation -->
+            <div class="navigation">
+                <button id="prev-btn" class="btn btn-secondary" disabled>
+                    <i class="ph ph-arrow-left"></i>
+                    previous
+                </button>
+                <button id="next-btn" class="btn btn-primary" disabled>
+                    next
+                    <i class="ph ph-arrow-right"></i>
+                </button>
+                <button id="submit-btn" class="btn btn-primary" style="display: none;" disabled>
+                    <i class="ph ph-sparkle"></i>
+                    get gift ideas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Page -->
+    <div id="results" class="page">
+        <div class="container">
+            <div class="results-header">
+                <h2 class="results-title">your perfect gift ideas</h2>
+                <p class="results-subtitle">ai-curated suggestions based on your answers</p>
+            </div>
+            
+            <div id="gift-cards" class="gift-cards">
+                <!-- Gift cards will be dynamically inserted here -->
+            </div>
+
+            <div class="results-actions">
+                <button id="retry-btn" class="btn btn-secondary">
+                    <i class="ph ph-arrow-clockwise"></i>
+                    try again
+                </button>
+                <button id="new-search-btn" class="btn btn-primary">
+                    <i class="ph ph-plus"></i>
+                    find more gifts
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">crafting personalized gift ideas...</p>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="error-message">
+        <div class="error-content">
+            <i class="ph ph-warning-circle"></i>
+            <h3>oops! something went wrong</h3>
+            <p id="error-text">we couldn't generate gift ideas right now. please try again.</p>
+            <button id="error-retry-btn" class="btn btn-primary">try again</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="chip-data.js"></script>
+    <script src="questionnaire.js"></script>
+</body>
+</html>
