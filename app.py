@@ -30,8 +30,6 @@ from typing import Dict, List, Any, Optional
 from flask import Flask, request, jsonify, send_from_directory, render_template_string
 from flask_cors import CORS
 from dotenv import load_dotenv
-import openai
-from openai import OpenAI
 
 # Configure logging
 logging.basicConfig(
@@ -54,22 +52,47 @@ class Config:
     PORT = int(os.getenv('PORT', 5000))
     HOST = os.getenv('HOST', '0.0.0.0')
     
+    # Production settings
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-change-in-production')
+    FLASK_ENV = os.getenv('FLASK_ENV', 'development')
+    
     # OpenAI Configuration
     OPENAI_MODEL = 'gpt-4o-mini'
     OPENAI_MAX_TOKENS = 1500
     OPENAI_TEMPERATURE = 0.7
+    
+    @staticmethod
+    def is_production():
+        """Check if running in production environment."""
+        return os.getenv('FLASK_ENV') == 'production' or os.getenv('VERCEL_URL') is not None
 
 app.config.from_object(Config)
 
-# Enable CORS for all routes
-CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000"])
+# Configure CORS for both development and production
+cors_origins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5000"]
 
-# Initialize OpenAI client
+# Add production origins
+if os.getenv('VERCEL_URL'):
+    cors_origins.append(f"https://{os.getenv('VERCEL_URL')}")
+
+# Add custom domain if specified
+if os.getenv('PRODUCTION_URL'):
+    cors_origins.append(os.getenv('PRODUCTION_URL'))
+
+# Enable CORS for all routes
+CORS(app, origins=cors_origins, supports_credentials=True)
+
+# Verify OpenAI API key is configured
 if not app.config['OPENAI_API_KEY']:
     logger.error("OPENAI_API_KEY not found in environment variables")
-    raise ValueError("OPENAI_API_KEY is required")
-
-openai_client = OpenAI(api_key=app.config['OPENAI_API_KEY'])
+    if Config.is_production():
+        # In production, this is a critical error
+        raise ValueError("OPENAI_API_KEY is required for production deployment")
+    else:
+        # In development, log warning but don't crash
+        logger.warning("OPENAI_API_KEY not configured - API calls will fail")
+else:
+    logger.info("OpenAI API key configured successfully")
 
 # Input validation schemas
 REQUIRED_QUESTIONS = [
@@ -205,44 +228,72 @@ Ensure the JSON is valid and properly formatted."""
 
 def generate_gift_ideas(answers: Dict[str, str]) -> Dict[str, Any]:
     """
-    Generate gift ideas using OpenAI API.
+    Generate gift ideas using OpenAI API via direct HTTP calls (Vercel-compatible).
     
     Args:
         answers: Dictionary containing sanitized questionnaire responses
         
     Returns:
-        Dictionary containing generated gift ideas or error information
+        Dictionary containing generated gift ideas
         
     Raises:
         Exception: If OpenAI API call fails
     """
+    # Check if API key is available
+    api_key = app.config.get('OPENAI_API_KEY')
+    if not api_key:
+        logger.error("OpenAI API key not found")
+        raise Exception("AI service not configured properly.")
+    
+    # Strip any whitespace/newlines from API key
+    api_key = api_key.strip()
+    
+    import requests
+    import json
+    
     try:
         prompt = create_gift_generation_prompt(answers)
         
-        logger.info("Sending request to OpenAI API")
+        logger.info("Sending request to OpenAI API via HTTP")
         
-        response = openai_client.chat.completions.create(
-            model=app.config['OPENAI_MODEL'],
-            messages=[
+        # Use direct HTTP call instead of OpenAI SDK (Vercel-compatible approach)
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        
+        payload = {
+            "model": "gpt-3.5-turbo",
+            "messages": [
                 {
                     "role": "system", 
-                    "content": "You are a helpful and creative gift advisor. Always respond with valid JSON only."
+                    "content": "You are a helpful gift advisor. Respond with valid JSON containing exactly 3 gift ideas in this format: {\"gift_ideas\": [{\"title\": \"Gift Name\", \"description\": \"Why perfect\", \"starter\": \"How to present\", \"reaction\": \"Expected reaction\"}]}"
                 },
                 {
                     "role": "user", 
                     "content": prompt
                 }
             ],
-            max_tokens=app.config['OPENAI_MAX_TOKENS'],
-            temperature=app.config['OPENAI_TEMPERATURE'],
-            response_format={"type": "json_object"}
+            "max_tokens": 800,
+            "temperature": 0.7
+        }
+        
+        response = requests.post(
+            'https://api.openai.com/v1/chat/completions',
+            headers=headers,
+            json=payload,
+            timeout=25
         )
         
-        # Extract and parse the response
-        content = response.choices[0].message.content
+        if not response.ok:
+            logger.error(f"OpenAI API request failed with status {response.status_code}: {response.text}")
+            raise Exception(f"OpenAI API request failed: {response.status_code}")
+        
+        response_data = response.json()
+        content = response_data['choices'][0]['message']['content']
+        
         logger.info(f"Received response from OpenAI: {len(content)} characters")
         
-        import json
         try:
             gift_data = json.loads(content)
             return gift_data
@@ -251,21 +302,13 @@ def generate_gift_ideas(answers: Dict[str, str]) -> Dict[str, Any]:
             logger.error(f"Raw response: {content}")
             raise Exception("Invalid JSON response from AI service")
             
-    except openai.APITimeoutError:
+    except requests.exceptions.Timeout:
         logger.error("OpenAI API request timed out")
         raise Exception("AI service request timed out. Please try again.")
     
-    except openai.RateLimitError:
-        logger.error("OpenAI API rate limit exceeded")
-        raise Exception("AI service rate limit exceeded. Please try again later.")
-    
-    except openai.APIConnectionError:
+    except requests.exceptions.ConnectionError:
         logger.error("Failed to connect to OpenAI API")
         raise Exception("Failed to connect to AI service. Please check your internet connection.")
-    
-    except openai.AuthenticationError:
-        logger.error("OpenAI API authentication failed")
-        raise Exception("AI service authentication failed. Please check configuration.")
     
     except Exception as e:
         logger.error(f"Unexpected error in OpenAI API call: {str(e)}")
@@ -290,8 +333,67 @@ def health_check():
         "status": "healthy",
         "service": "Ruby's Gifts API",
         "version": "1.0.0",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
+        "openai_configured": bool(app.config.get('OPENAI_API_KEY')),
+        "api_key_present": bool(app.config.get('OPENAI_API_KEY'))
     })
+
+@app.route('/test_openai', methods=['GET'])
+def test_openai():
+    """Test OpenAI connection via HTTP."""
+    api_key = app.config.get('OPENAI_API_KEY')
+    if not api_key:
+        return jsonify({
+            "success": False,
+            "error": "OpenAI API key not configured",
+            "api_key_present": False
+        }), 500
+    
+    # Strip any whitespace/newlines from API key
+    api_key = api_key.strip()
+    
+    try:
+        import requests
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        
+        payload = {
+            "model": "gpt-3.5-turbo",
+            "messages": [{"role": "user", "content": "Say hello"}],
+            "max_tokens": 10
+        }
+        
+        response = requests.post(
+            'https://api.openai.com/v1/chat/completions',
+            headers=headers,
+            json=payload,
+            timeout=10
+        )
+        
+        if response.ok:
+            data = response.json()
+            return jsonify({
+                "success": True,
+                "message": "OpenAI connection successful",
+                "response": data['choices'][0]['message']['content']
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": f"API request failed: {response.status_code}",
+                "details": response.text
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"OpenAI test failed: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        }), 500
 
 @app.route('/generate_gifts', methods=['POST'])
 def generate_gifts():
@@ -425,13 +527,16 @@ def internal_error(error):
     }), 500
 
 if __name__ == '__main__':
-    # Validate configuration before starting
-    if not app.config['OPENAI_API_KEY']:
-        logger.error("OPENAI_API_KEY not configured. Please check your .env file.")
-        exit(1)
+    # Validate configuration before starting (development only)
+    if not Config.is_production():
+        if not app.config['OPENAI_API_KEY']:
+            logger.error("OPENAI_API_KEY not configured. Please check your .env file.")
+            logger.error("The app will start but gift generation will not work.")
     
     logger.info(f"Starting Ruby's Gifts Flask server on {app.config['HOST']}:{app.config['PORT']}")
     logger.info(f"Debug mode: {app.config['DEBUG']}")
+    logger.info(f"Environment: {'Production' if Config.is_production() else 'Development'}")
+    logger.info(f"CORS origins: {cors_origins}")
     
     app.run(
         host=app.config['HOST'],

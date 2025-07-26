@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/phosphor-icons"></script>
     
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=2.0">
 </head>
 <body>
     <!-- Landing Page -->
@@ -84,6 +84,10 @@
             </div>
 
             <div class="results-actions">
+                <button id="reveal-all-btn" class="reveal-all-btn" onclick="giftRevealSystem.revealAllGifts()" style="display: none;">
+                    <i class="ph ph-sparkle"></i>
+                    reveal all gifts
+                </button>
                 <button id="retry-btn" class="btn btn-secondary">
                     <i class="ph ph-arrow-clockwise"></i>
                     try again
@@ -115,7 +119,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="chip-data.js"></script>
-    <script src="questionnaire.js"></script>
+    <script src="chip-data.js?v=2.0"></script>
+    <script src="gift-reveal.js?v=2.0"></script>
+    <script src="questionnaire.js?v=2.0"></script>
 </body>
 </html>

@@ -2,11 +2,20 @@
   "version": 2,
   "builds": [
     {
-      "src": "app.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
+      "src": "wsgi.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "*.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -15,16 +24,26 @@
       "dest": "/static/$1"
     },
     {
-      "src": "/(.*\\.(js|css|html|png|jpg|jpeg|gif|svg|ico))",
-      "dest": "/$1"
+      "src": "/(chip-data\\.js|questionnaire\\.js|gift-reveal\\.js|styles\\.css|index\\.html)",
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "src": "/health",
+      "dest": "/wsgi.py"
+    },
+    {
+      "src": "/test_openai",
+      "dest": "/wsgi.py"
+    },
+    {
+      "src": "/generate_gifts",
+      "dest": "/wsgi.py"
     },
     {
       "src": "/(.*)",
-      "dest": "/app.py"
+      "dest": "/wsgi.py"
     }
-  ],
-  "env": {
-    "PYTHONPATH": "/var/task",
-    "FLASK_ENV": "production"
-  }
+  ]
 }

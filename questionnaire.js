@@ -1,5 +1,5 @@
 // Ruby's Gifts Questionnaire System
-// Advanced chip-based interface with search, multi-select, and accessibility
+// Advanced chip-based interface with multi-select and accessibility
 
 class QuestionnaireSystem {
     constructor() {
@@ -98,31 +98,59 @@ class QuestionnaireSystem {
     init() {
         this.bindEvents();
         this.updateProgressBar();
-        this.elements.totalQuestions.textContent = this.totalQuestions;
+        
+        // Set total questions with null check
+        if (this.elements.totalQuestions) {
+            this.elements.totalQuestions.textContent = this.totalQuestions;
+        }
         
         // Initialize first question when questionnaire is shown
         this.renderCurrentQuestion();
     }
 
     bindEvents() {
-        // Page navigation
-        this.elements.startBtn.addEventListener('click', () => this.showQuestionnaire());
-        this.elements.prevBtn.addEventListener('click', () => this.previousQuestion());
-        this.elements.nextBtn.addEventListener('click', () => this.nextQuestion());
-        this.elements.submitBtn.addEventListener('click', () => this.submitQuestionnaire());
+        // Page navigation - add null checks for each element
+        if (this.elements.startBtn) {
+            this.elements.startBtn.addEventListener('click', () => this.showQuestionnaire());
+        }
+        
+        if (this.elements.prevBtn) {
+            this.elements.prevBtn.addEventListener('click', () => this.previousQuestion());
+        }
+        
+        if (this.elements.nextBtn) {
+            this.elements.nextBtn.addEventListener('click', () => this.nextQuestion());
+        }
+        
+        if (this.elements.submitBtn) {
+            this.elements.submitBtn.addEventListener('click', () => this.submitQuestionnaire());
+        }
         
         // Results actions
-        this.elements.retryBtn.addEventListener('click', () => this.resetQuestionnaire());
-        this.elements.newSearchBtn.addEventListener('click', () => this.resetQuestionnaire());
-        this.elements.errorRetryBtn.addEventListener('click', () => this.hideError());
+        if (this.elements.retryBtn) {
+            this.elements.retryBtn.addEventListener('click', () => this.resetQuestionnaire());
+        }
+        
+        if (this.elements.newSearchBtn) {
+            this.elements.newSearchBtn.addEventListener('click', () => this.resetQuestionnaire());
+        }
+        
+        if (this.elements.errorRetryBtn) {
+            this.elements.errorRetryBtn.addEventListener('click', () => this.hideError());
+        }
 
         // Keyboard navigation
         document.addEventListener('keydown', (e) => this.handleKeyNavigation(e));
     }
 
     showQuestionnaire() {
-        this.elements.landing.classList.remove('active');
-        this.elements.questionnaire.classList.add('active');
+        if (this.elements.landing) {
+            this.elements.landing.classList.remove('active');
+        }
+        
+        if (this.elements.questionnaire) {
+            this.elements.questionnaire.classList.add('active');
+        }
         
         // Add fixed navigation class for progress bar styling
         const progressContainer = document.querySelector('.progress-container');
@@ -134,8 +162,8 @@ class QuestionnaireSystem {
         
         // Focus management for accessibility
         setTimeout(() => {
-            const searchInput = document.querySelector('.search-input');
-            if (searchInput) searchInput.focus();
+            const firstChip = document.querySelector('.chip');
+            if (firstChip) firstChip.focus();
         }, 100);
     }
 
@@ -148,17 +176,6 @@ class QuestionnaireSystem {
             <div class="question" data-question-id="${question.id}">
                 <h2 class="question-title">${question.title}</h2>
                 
-                <div class="search-container">
-                    <i class="ph ph-magnifying-glass search-icon"></i>
-                    <input 
-                        type="text" 
-                        class="search-input" 
-                        placeholder="search options..." 
-                        aria-label="Search ${question.title} options"
-                        autocomplete="off"
-                    >
-                </div>
-
                 <div class="chip-grid" 
                      role="grid" 
                      aria-label="${question.title} options"
@@ -184,7 +201,9 @@ class QuestionnaireSystem {
             </div>
         `;
 
-        this.elements.questionContainer.innerHTML = questionHTML;
+        if (this.elements.questionContainer) {
+            this.elements.questionContainer.innerHTML = questionHTML;
+        }
         
         // Render chips and bind events
         this.renderChips(question);
@@ -239,6 +258,18 @@ class QuestionnaireSystem {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 this.toggleChip(chipElement, chip, questionId);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.focusNextChip(chipElement);
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.focusPrevChip(chipElement);
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                this.focusFirstChip(chipElement.closest('.chip-grid'));
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                this.focusLastChip(chipElement.closest('.chip-grid'));
             }
         });
 
@@ -246,18 +277,7 @@ class QuestionnaireSystem {
     }
 
     bindQuestionEvents(question) {
-        const searchInput = document.querySelector('.search-input');
         const answerInput = document.querySelector(`#answer-${question.id}`);
-
-        if (searchInput) {
-            // Debounced search for better performance
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(this.debounceTimeout);
-                this.debounceTimeout = setTimeout(() => {
-                    this.filterChips(e.target.value, question.id);
-                }, 150);
-            });
-        }
 
         if (answerInput) {
             // Save answer on input and sync with chip states
@@ -282,8 +302,38 @@ class QuestionnaireSystem {
         }
     }
 
+    syncTextareaToChips(questionId, text) {
+        if (!text) {
+            this.selectedChips[questionId] = [];
+            this.updateChipVisualStates(questionId);
+            return;
+        }
+
+        // Parse comma-separated values
+        const values = text.split(',').map(v => v.trim()).filter(v => v.length > 0);
+        
+        // Find which values match existing chips
+        const question = this.questions.find(q => q.id === questionId);
+        if (!question) return;
+
+        const availableChipTexts = question.chips.map(chip => chip.text.toLowerCase());
+        const matchingChips = values.filter(value => 
+            availableChipTexts.includes(value.toLowerCase())
+        );
+
+        // Update selected chips to match textarea
+        this.selectedChips[questionId] = matchingChips;
+        this.updateChipVisualStates(questionId);
+    }
+
     toggleChip(chipElement, chip, questionId) {
         const isSelected = chipElement.classList.contains('selected');
+        
+        // Add visual feedback
+        chipElement.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            chipElement.style.transform = '';
+        }, 150);
         
         if (isSelected) {
             // Deselect chip
@@ -302,6 +352,10 @@ class QuestionnaireSystem {
         
         this.updateAnswerInput(questionId);
         this.updateNavigation();
+        
+        // Debug logging
+        console.log(`Chip "${chip.text}" ${isSelected ? 'deselected' : 'selected'} for question ${questionId}`);
+        console.log('Current selections:', this.selectedChips[questionId] || []);
     }
 
     // Methods moved to end of class with enhancements
@@ -330,64 +384,20 @@ class QuestionnaireSystem {
         this.answers[questionId] = finalText;
     }
 
-    filterChips(searchTerm, questionId) {
-        const chipGrid = document.querySelector(`[data-question-id="${questionId}"]`);
-        if (!chipGrid) return;
-
-        const chips = chipGrid.querySelectorAll('.chip');
-        const normalizedSearch = searchTerm.toLowerCase().trim();
-        let visibleCount = 0;
-
-        chips.forEach(chip => {
-            const chipText = chip.getAttribute('data-chip-text').toLowerCase();
-            const isMatch = chipText.includes(normalizedSearch) || 
-                           this.fuzzyMatch(chipText, normalizedSearch);
-            
-            if (isMatch || !searchTerm) {
-                chip.style.display = 'flex';
-                visibleCount++;
-            } else {
-                chip.style.display = 'none';
-            }
-        });
-
-        // Show "no results" message if needed
-        this.toggleNoResultsMessage(chipGrid, visibleCount === 0 && searchTerm);
-    }
-
-    fuzzyMatch(text, search) {
-        // Simple fuzzy matching for typos
-        if (search.length < 3) return false;
+    extractCustomText(currentValue, chipTexts) {
+        if (!currentValue) return [];
         
-        let searchIndex = 0;
-        for (let i = 0; i < text.length && searchIndex < search.length; i++) {
-            if (text[i] === search[searchIndex]) {
-                searchIndex++;
-            }
-        }
-        return searchIndex === search.length;
+        // Split by comma and filter out chip texts
+        const parts = currentValue.split(',').map(part => part.trim());
+        return parts.filter(part => 
+            part.length > 0 && 
+            !chipTexts.some(chip => chip.toLowerCase() === part.toLowerCase())
+        );
     }
 
-    toggleNoResultsMessage(chipGrid, show) {
-        let noResults = chipGrid.querySelector('.no-results');
-        
-        if (show && !noResults) {
-            noResults = document.createElement('div');
-            noResults.className = 'no-results';
-            noResults.innerHTML = `
-                <div class="no-results-icon">
-                    <i class="ph ph-magnifying-glass"></i>
-                </div>
-                <div class="no-results-text">
-                    no matching options found.<br>
-                    try a different search or type your custom answer below.
-                </div>
-            `;
-            chipGrid.appendChild(noResults);
-        } else if (!show && noResults) {
-            noResults.remove();
-        }
-    }
+
+
+
 
     restoreQuestionState(question) {
         // Restore previous answer
@@ -405,6 +415,12 @@ class QuestionnaireSystem {
         if (answerInput) {
             answerInput.removeAttribute('data-manual-edit');
         }
+        
+        // Debug logging
+        console.log(`Restored state for question ${question.id}:`, {
+            answer: this.answers[question.id],
+            selectedChips: this.selectedChips[question.id] || []
+        });
     }
 
     previousQuestion() {
@@ -438,16 +454,28 @@ class QuestionnaireSystem {
         const isLastQuestion = this.currentQuestionIndex === this.totalQuestions - 1;
         const hasValidAnswer = this.hasValidAnswer(question);
 
-        // Update button states
-        this.elements.prevBtn.disabled = isFirstQuestion;
-        this.elements.nextBtn.style.display = isLastQuestion ? 'none' : 'inline-flex';
-        this.elements.submitBtn.style.display = isLastQuestion ? 'inline-flex' : 'none';
+        // Update button states with null checks
+        if (this.elements.prevBtn) {
+            this.elements.prevBtn.disabled = isFirstQuestion;
+        }
+        
+        if (this.elements.nextBtn) {
+            this.elements.nextBtn.style.display = isLastQuestion ? 'none' : 'inline-flex';
+        }
+        
+        if (this.elements.submitBtn) {
+            this.elements.submitBtn.style.display = isLastQuestion ? 'inline-flex' : 'none';
+        }
         
         // Enable next/submit only if current question is valid
         if (isLastQuestion) {
-            this.elements.submitBtn.disabled = !hasValidAnswer || !this.allRequiredAnswered();
+            if (this.elements.submitBtn) {
+                this.elements.submitBtn.disabled = !hasValidAnswer || !this.allRequiredAnswered();
+            }
         } else {
-            this.elements.nextBtn.disabled = !hasValidAnswer;
+            if (this.elements.nextBtn) {
+                this.elements.nextBtn.disabled = !hasValidAnswer;
+            }
         }
     }
 
@@ -464,8 +492,19 @@ class QuestionnaireSystem {
 
     updateProgressBar() {
         const progress = ((this.currentQuestionIndex + 1) / this.totalQuestions) * 100;
-        this.elements.progressFill.style.width = `${progress}%`;
-        this.elements.currentQuestion.textContent = this.currentQuestionIndex + 1;
+        
+        // Null checks to prevent DOM reference errors
+        if (this.elements.progressFill) {
+            this.elements.progressFill.style.width = `${progress}%`;
+        }
+        
+        if (this.elements.currentQuestion) {
+            this.elements.currentQuestion.textContent = this.currentQuestionIndex + 1;
+        }
+        
+        if (this.elements.totalQuestions) {
+            this.elements.totalQuestions.textContent = this.totalQuestions;
+        }
     }
 
     handleKeyNavigation(e) {
@@ -477,23 +516,25 @@ class QuestionnaireSystem {
                 if (document.activeElement.tagName !== 'INPUT' && 
                     document.activeElement.tagName !== 'TEXTAREA') {
                     e.preventDefault();
-                    if (!this.elements.prevBtn.disabled) this.previousQuestion();
+                    if (this.elements.prevBtn && !this.elements.prevBtn.disabled) {
+                        this.previousQuestion();
+                    }
                 }
                 break;
             case 'ArrowRight':
                 if (document.activeElement.tagName !== 'INPUT' && 
                     document.activeElement.tagName !== 'TEXTAREA') {
                     e.preventDefault();
-                    if (!this.elements.nextBtn.disabled && this.elements.nextBtn.style.display !== 'none') {
+                    if (this.elements.nextBtn && !this.elements.nextBtn.disabled && this.elements.nextBtn.style.display !== 'none') {
                         this.nextQuestion();
-                    } else if (!this.elements.submitBtn.disabled && this.elements.submitBtn.style.display !== 'none') {
+                    } else if (this.elements.submitBtn && !this.elements.submitBtn.disabled && this.elements.submitBtn.style.display !== 'none') {
                         this.submitQuestionnaire();
                     }
                 }
                 break;
             case 'Escape':
                 // Close any modals or return to previous state
-                if (this.elements.errorMessage.classList.contains('active')) {
+                if (this.elements.errorMessage && this.elements.errorMessage.classList.contains('active')) {
                     this.hideError();
                 }
                 break;
@@ -589,50 +630,77 @@ class QuestionnaireSystem {
     }
 
     renderGiftCards(gifts) {
-        const cardsHTML = gifts.map(gift => `
-            <div class="gift-card">
-                <h3 class="gift-card-title">${gift.title}</h3>
-                <p class="gift-card-description">${gift.description}</p>
-                ${gift.starter ? `<div class="gift-card-starter"><strong>How to present it:</strong> ${gift.starter}</div>` : ''}
-                ${gift.reaction ? `<div class="gift-card-reaction"><strong>Expected reaction:</strong> ${gift.reaction}</div>` : ''}
-                ${gift.price ? `<div class="gift-card-price">${gift.price}</div>` : ''}
-            </div>
-        `).join('');
-        
-        this.elements.giftCards.innerHTML = cardsHTML;
+        // Use the gift reveal system instead of direct rendering
+        if (typeof giftRevealSystem !== 'undefined') {
+            giftRevealSystem.setGiftData(gifts);
+            giftRevealSystem.renderGiftBoxes();
+        } else {
+            // Fallback to direct rendering if gift reveal system is not available
+            const cardsHTML = gifts.map(gift => `
+                <div class="gift-card">
+                    <h3 class="gift-card-title">${gift.title}</h3>
+                    <p class="gift-card-description">${gift.description}</p>
+                    ${gift.starter ? `<div class="gift-card-starter"><strong>How to present it:</strong> ${gift.starter}</div>` : ''}
+                    ${gift.reaction ? `<div class="gift-card-reaction"><strong>Expected reaction:</strong> ${gift.reaction}</div>` : ''}
+                    ${gift.price ? `<div class="gift-card-price">${gift.price}</div>` : ''}
+                </div>
+            `).join('');
+            
+            this.elements.giftCards.innerHTML = cardsHTML;
+        }
     }
 
     showLoading() {
-        this.elements.loading.classList.add('active');
+        if (this.elements.loading) {
+            this.elements.loading.classList.add('active');
+        }
         document.body.style.overflow = 'hidden';
     }
 
     hideLoading() {
-        this.elements.loading.classList.remove('active');
+        if (this.elements.loading) {
+            this.elements.loading.classList.remove('active');
+        }
         document.body.style.overflow = '';
     }
 
     showResults() {
-        this.elements.questionnaire.classList.remove('active');
-        this.elements.results.classList.add('active');
+        if (this.elements.questionnaire) {
+            this.elements.questionnaire.classList.remove('active');
+        }
+        
+        if (this.elements.results) {
+            this.elements.results.classList.add('active');
+        }
         
         // Announce to screen readers
         this.announceToScreenReader('Gift recommendations loaded successfully');
     }
 
     showError(message) {
-        document.getElementById('error-text').textContent = message;
-        this.elements.errorMessage.classList.add('active');
+        const errorText = document.getElementById('error-text');
+        if (errorText) {
+            errorText.textContent = message;
+        }
+        
+        if (this.elements.errorMessage) {
+            this.elements.errorMessage.classList.add('active');
+        }
+        
         document.body.style.overflow = 'hidden';
         
         // Focus error dialog for accessibility
         setTimeout(() => {
-            this.elements.errorRetryBtn.focus();
+            if (this.elements.errorRetryBtn) {
+                this.elements.errorRetryBtn.focus();
+            }
         }, 100);
     }
 
     hideError() {
-        this.elements.errorMessage.classList.remove('active');
+        if (this.elements.errorMessage) {
+            this.elements.errorMessage.classList.remove('active');
+        }
         document.body.style.overflow = '';
     }
 
@@ -643,9 +711,17 @@ class QuestionnaireSystem {
         this.selectedChips = {};
         
         // Return to landing page
-        this.elements.results.classList.remove('active');
-        this.elements.questionnaire.classList.remove('active');
-        this.elements.landing.classList.add('active');
+        if (this.elements.results) {
+            this.elements.results.classList.remove('active');
+        }
+        
+        if (this.elements.questionnaire) {
+            this.elements.questionnaire.classList.remove('active');
+        }
+        
+        if (this.elements.landing) {
+            this.elements.landing.classList.add('active');
+        }
         
         // Remove fixed navigation class from progress bar
         const progressContainer = document.querySelector('.progress-container');
@@ -756,6 +832,59 @@ class QuestionnaireSystem {
             this.selectedChips[questionId] = this.selectedChips[questionId].filter(
                 text => text.toLowerCase() !== chipText.toLowerCase()
             );
+        }
+    }
+
+    // Keyboard navigation helpers
+    focusNextChip(currentChip) {
+        if (!currentChip) return;
+        
+        const chipGrid = currentChip.closest('.chip-grid');
+        if (!chipGrid) return;
+        
+        const chips = Array.from(chipGrid.querySelectorAll('.chip'));
+        if (chips.length === 0) return;
+        
+        const currentIndex = chips.indexOf(currentChip);
+        const nextIndex = currentIndex < chips.length - 1 ? currentIndex + 1 : 0;
+        
+        if (chips[nextIndex]) {
+            chips[nextIndex].focus();
+        }
+    }
+
+    focusPrevChip(currentChip) {
+        if (!currentChip) return;
+        
+        const chipGrid = currentChip.closest('.chip-grid');
+        if (!chipGrid) return;
+        
+        const chips = Array.from(chipGrid.querySelectorAll('.chip'));
+        if (chips.length === 0) return;
+        
+        const currentIndex = chips.indexOf(currentChip);
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : chips.length - 1;
+        
+        if (chips[prevIndex]) {
+            chips[prevIndex].focus();
+        }
+    }
+
+    focusFirstChip(chipGrid) {
+        if (!chipGrid) return;
+        
+        const firstChip = chipGrid.querySelector('.chip');
+        if (firstChip) {
+            firstChip.focus();
+        }
+    }
+
+    focusLastChip(chipGrid) {
+        if (!chipGrid) return;
+        
+        const chips = chipGrid.querySelectorAll('.chip');
+        if (chips.length > 0) {
+            chips[chips.length - 1].focus();
         }
     }
 }
