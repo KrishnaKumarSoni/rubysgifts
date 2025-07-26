@@ -36,7 +36,7 @@ class GiftRevealSystem {
                 <div class="gift-box ${this.revealedGifts.has(index) ? 'revealed' : ''}" 
                      onclick="giftRevealSystem.revealGift(${index})">
                     <div class="gift-box-image">
-                        <img src="https://gallery.yopriceville.com/var/albums/Free-Clipart-Pictures/Valentine%27s-Day-PNG/Transparent_Gift_Box_with_Heart_PNG_Clipart.png?m=1629819649" 
+                        <img src="giftbox-image.png" 
                              alt="Gift Box" 
                              class="gift-box-img ${this.revealedGifts.has(index) ? 'hidden' : ''}">
                     </div>

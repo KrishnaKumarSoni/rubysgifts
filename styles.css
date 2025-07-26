@@ -531,32 +531,29 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .gift-box {
-    background: white;
-    border: 1px solid rgba(226, 232, 240, 0.5);
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    height: 280px;
-    max-height: 300px;
+    height: 300px;
+    max-height: 350px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .gift-box:hover,
 .gift-box:focus-within {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border-color: rgba(255, 102, 0, 0.3);
+    transform: translateY(-8px) scale(1.05);
 }
 
 .gift-box.revealing {
-    transform: scale(1.02);
-    box-shadow: 0 8px 24px rgba(255, 102, 0, 0.2);
+    transform: scale(1.1);
 }
 
 .gift-box-image {
@@ -568,10 +565,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .gift-box-img {
-    width: 80px;
+    width: 120px;
     height: auto;
     transition: all 0.5s ease;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
 }
 
 .gift-box-img.hidden {
@@ -586,9 +583,13 @@ h1, h2, h3, h4, h5, h6 {
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    padding: 0.5rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .gift-content.visible {
