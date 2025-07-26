@@ -47,12 +47,6 @@ class GiftRevealSystem {
                         ${gift.reaction ? `<div class="gift-reaction"><strong>Expected reaction:</strong> ${gift.reaction}</div>` : ''}
                     </div>
                 </div>
-                ${!this.revealedGifts.has(index) ? `
-                    <div class="gift-box-prompt">
-                        <i class="ph ph-gift"></i>
-                        <span>Click to reveal your gift!</span>
-                    </div>
-                ` : ''}
             </div>
         `).join('');
 
@@ -76,18 +70,11 @@ class GiftRevealSystem {
         const giftBox = document.querySelector(`[data-gift-index="${index}"] .gift-box`);
         const giftBoxImg = document.querySelector(`[data-gift-index="${index}"] .gift-box-img`);
         const giftContent = document.querySelector(`[data-gift-index="${index}"] .gift-content`);
-        const giftPrompt = document.querySelector(`[data-gift-index="${index}"] .gift-box-prompt`);
 
         if (!giftBox) return;
 
         // Add reveal animation class
         giftBox.classList.add('revealing');
-        
-        // Hide the prompt
-        if (giftPrompt) {
-            giftPrompt.style.opacity = '0';
-            setTimeout(() => giftPrompt.remove(), 300);
-        }
 
         // Trigger confetti animation
         this.triggerConfetti(giftBox);
