@@ -347,12 +347,18 @@ class QuestionnaireSystem {
         const selectedChips = this.selectedChips[questionId] || [];
         const currentValue = answerInput.value.trim();
         
-        // Get custom text that's not from chips
-        const chipTexts = selectedChips.filter(text => text.trim().length > 0);
-        const customTexts = this.extractCustomText(currentValue, chipTexts);
+        // Get ALL available chip texts for this question to properly filter custom text
+        const question = this.questions.find(q => q.id === questionId);
+        const allAvailableChipTexts = question ? question.chipData.map(chip => chip.text) : [];
         
-        // Combine chips and custom text, removing duplicates (case-insensitive)
-        const allTexts = [...chipTexts, ...customTexts];
+        // Extract custom text that's not from any chip (selected or unselected)
+        const customTexts = this.extractCustomText(currentValue, allAvailableChipTexts);
+        
+        // Combine only selected chips and custom text
+        const selectedChipTexts = selectedChips.filter(text => text.trim().length > 0);
+        const allTexts = [...selectedChipTexts, ...customTexts];
+        
+        // Remove duplicates (case-insensitive)
         const uniqueTexts = allTexts.filter((text, index) => {
             if (!text || text.trim().length === 0) return false;
             const lowerText = text.toLowerCase();
@@ -378,6 +384,7 @@ class QuestionnaireSystem {
         const parts = currentValue.split(',').map(part => part.trim());
         const chipTextsLower = chipTexts.map(text => text.toLowerCase());
         
+        // Filter out empty parts and any text that matches available chip texts
         return parts.filter(part => 
             part.length > 0 && 
             !chipTextsLower.includes(part.toLowerCase())

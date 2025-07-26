@@ -271,26 +271,29 @@ h1, h2, h3, h4, h5, h6 {
 .chip-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.75rem;
     margin-bottom: 1.5rem;
     max-height: 50vh;
     overflow-y: auto;
-    padding: 0;
+    padding: 1rem;
     align-items: flex-start;
     justify-content: flex-start;
+    align-content: flex-start;
 }
 
 /* Desktop spacing */
 @media (min-width: 768px) {
     .chip-grid {
-        gap: 0.75rem;
+        gap: 1rem;
         margin-bottom: 2rem;
+        padding: 1.5rem;
     }
 }
 
-@media (max-width: 768px) {
+/* Mobile spacing */
+@media (max-width: 767px) {
     .chip-grid {
-        gap: 0.5rem;
+        gap: 0.75rem;
         padding: 1rem;
         max-height: 40vh;
     }
@@ -314,23 +317,24 @@ h1, h2, h3, h4, h5, h6 {
 .chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 0.8rem;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
     background: white;
     border: 1.5px solid #e2e8f0;
-    border-radius: 20px;
+    border-radius: 24px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     font-weight: 500;
     text-transform: lowercase;
-    min-height: 40px; /* Touch-friendly */
+    min-height: 44px; /* Touch-friendly */
     position: relative;
     overflow: hidden;
     width: auto;
     flex-shrink: 0;
     white-space: nowrap;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin: 0; /* Remove any margin that could affect spacing */
     
     /* Keyboard navigation */
     outline: none;
@@ -339,12 +343,12 @@ h1, h2, h3, h4, h5, h6 {
 /* Desktop enhancements */
 @media (min-width: 768px) {
     .chip {
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
-        font-size: 0.875rem;
-        min-height: 44px;
-        border-radius: 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        gap: 0.6rem;
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        border-radius: 26px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 }
 
@@ -908,13 +912,14 @@ h1, h2, h3, h4, h5, h6 {
     
     .chip-grid {
         max-height: 300px;
-        gap: 0.5rem;
-        padding: 0.5rem;
+        gap: 0.75rem;
+        padding: 1rem;
     }
     
     .chip {
-        font-size: 0.85rem;
-        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+        padding: 0.65rem 0.9rem;
+        min-height: 40px;
     }
     
     .navigation {
@@ -965,13 +970,14 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (max-width: 480px) {
     .chip-grid {
-        gap: 0.5rem;
-        padding: 0.5rem;
+        gap: 0.6rem;
+        padding: 0.75rem;
     }
     
     .chip {
-        padding: 0.7rem 0.9rem;
-        font-size: 0.8rem;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.75rem;
+        min-height: 38px;
     }
     
     .chip-icon {
@@ -1050,37 +1056,41 @@ h1, h2, h3, h4, h5, h6 {
     outline-offset: 2px;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    body {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-        color: #e2e8f0;
-    }
-    
-    .chip {
-        background: #2d3748;
-        border-color: #4a5568;
-        color: #e2e8f0;
-    }
-    
-    .chip:hover {
-        border-color: #ff6600;
-    }
-    
-    .search-input,
-    .answer-input {
-        background: #2d3748;
-        border-color: #4a5568;
-        color: #e2e8f0;
-    }
-    
-    .gift-card {
-        background: #2d3748;
-        border-color: #4a5568;
-    }
-    
-    .error-content {
-        background: #2d3748;
-        color: #e2e8f0;
-    }
+/* Force light mode only - no dark mode support */
+body {
+    background: linear-gradient(135deg, #fff5f0 0%, #fed7aa 100%) !important;
+    color: #2d3748 !important;
+}
+
+.chip {
+    background: white !important;
+    border-color: #e2e8f0 !important;
+    color: #2d3748 !important;
+}
+
+.chip.selected {
+    background: #ff6600 !important;
+    color: white !important;
+    border-color: #ff6600 !important;
+}
+
+.answer-input {
+    background: white !important;
+    border-color: #e2e8f0 !important;
+    color: #2d3748 !important;
+}
+
+.gift-card {
+    background: white !important;
+    border-color: #e2e8f0 !important;
+    color: inherit !important;
+}
+
+.error-content {
+    background: white !important;
+    color: #2d3748 !important;
+}
+
+.navigation {
+    background: white !important;
 }
