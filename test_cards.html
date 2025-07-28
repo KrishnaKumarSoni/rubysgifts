@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruby's Gifts - Test Cards</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #fff;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .gift-cards {
+            display: flex;
+            gap: 24px;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Ruby's Gifts - Compact Card Test</h1>
+        <p>Testing the new 20% smaller compact card design with orange CTA buttons and icons.</p>
+        
+        <div class="gift-cards" id="gift-cards">
+            <!-- Cards will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Sample gift data for testing
+        const testGifts = [
+            {
+                title: "Adventure Escape Room Experience",
+                description: "Your buddy's habit of always being late may stem from a desire for excitement and spontaneity. An adventure escape room experience combines the thrill of solving puzzles with the challenge of time pressure, catering to their need for adrenaline.",
+                starter: "Present a mysterious envelope with a message inviting them to an 'escape mission' together. Build anticipation by hinting at the excitement and challenges awaiting them.",
+                reaction: "Your buddy is likely to feel thrilled and engaged, appreciating the thought put into a unique experience that aligns with their adventurous spirit.",
+                price_range: "800-1000₹",
+                amazon_link: "https://www.amazon.in/s?k=Adventure+escape+room+experience&tag=kamazon01-21",
+                images: [
+                    {
+                        url: "https://images-na.ssl-images-amazon.com/images/I/61KYRD8B3KL._AC_SL1500_.jpg",
+                        title: "adventure escape room experience - Premium Product 1"
+                    }
+                ]
+            }
+        ];
+
+        // Render gift cards using the same function from app.py
+        function renderGiftCards(gifts) {
+            const giftCardsContainer = document.getElementById('gift-cards');
+            
+            gifts.forEach((gift, index) => {
+                const cardHTML = `
+                    <div class="gift-card" style="flex: 0 0 278px; height: 544px; background: linear-gradient(135deg, #fff 0%, #fef7ed 100%); border-radius: 16px; padding: 0; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: all 0.3s ease;">
+                        <div class="card-image" style="position: absolute; top: 0; left: 0; right: 0; height: 180px; background: url('${gift.images[0]?.url || 'https://via.placeholder.com/278x180'}') center/cover; border-radius: 16px 16px 0 0;"></div>
+                        
+                        <div class="card-content" style="position: absolute; top: 180px; left: 0; right: 0; bottom: 0; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div class="content-top">
+                                <h3 class="gift-title" style="margin: 0 0 12px 0; font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: #1a1a1a; line-height: 1.3; display: flex; align-items: center; gap: 8px;">
+                                    <i class="ph ph-gift" style="color: #FF6600; font-size: 22px;"></i>
+                                    ${gift.title}
+                                </h3>
+                                
+                                <div class="gift-description" style="margin-bottom: 16px;">
+                                    <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
+                                        <i class="ph ph-info" style="color: #666; font-size: 16px; margin-top: 2px; flex-shrink: 0;"></i>
+                                        <p style="margin: 0; font-size: 13px; color: #666; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">${gift.description}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="gift-starter" style="margin-bottom: 16px;">
+                                    <p style="margin: 0; font-size: 13px; color: #333; line-height: 1.4; font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"><strong>How to present:</strong> ${gift.starter}</p>
+                                </div>
+                                
+                                <div class="gift-reaction" style="margin-bottom: 16px;">
+                                    <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                        <i class="ph ph-smiley" style="color: #FF6600; font-size: 16px; margin-top: 2px; flex-shrink: 0;"></i>
+                                        <p style="margin: 0; font-size: 13px; color: #444; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;"><strong>Expected reaction:</strong> ${gift.reaction}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="content-bottom">
+                                <div class="price-section" style="margin-bottom: 16px;">
+                                    <span style="font-size: 18px; font-weight: 700; color: #FF6600;">${gift.price_range}</span>
+                                </div>
+                                
+                                <a href="${gift.amazon_link}" target="_blank" class="buy-button" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; background: linear-gradient(135deg, #FF6600 0%, #e55a00 100%); color: white; text-decoration: none; border-radius: 32px; font-weight: 600; font-size: 14px; transition: all 0.3s ease; text-align: center; box-shadow: 0 2px 8px rgba(255, 102, 0, 0.3);">
+                                    <i class="ph ph-shopping-cart" style="font-size: 16px;"></i>
+                                    Find on Amazon
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                giftCardsContainer.innerHTML += cardHTML;
+            });
+        }
+
+        // Load test cards
+        renderGiftCards(testGifts);
+    </script>
+</body>
+</html>
