@@ -51,7 +51,6 @@ class GiftRevealSystem {
         `).join('');
 
         giftCardsContainer.innerHTML = giftBoxesHTML;
-        this.updateRevealAllButton();
     }
 
     updateRevealAllButton() {
@@ -89,9 +88,6 @@ class GiftRevealSystem {
 
         // Announce to screen readers
         this.announceGiftReveal(this.giftData[index].title);
-        
-        // Update reveal all button
-        this.updateRevealAllButton();
     }
 
     triggerConfetti(element) {

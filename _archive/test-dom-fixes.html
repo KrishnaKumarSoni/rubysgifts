@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruby's Gifts - DOM Fixes Test</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css?v=2.0">
+    
+    <style>
+        body {
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ruby's Gifts - DOM Fixes Test</h1>
+    
+    <div class="test-section">
+        <h2>Progress Bar Elements Test</h2>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 50%;"></div>
+            </div>
+            <div class="progress-text">
+                <span id="current-question">4</span> of <span id="total-questions">8</span>
+            </div>
+        </div>
+        <div id="progress-test-result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Navigation Elements Test</h2>
+        <div class="navigation">
+            <div class="navigation-content">
+                <button id="prev-btn" class="btn btn-secondary">
+                    <i class="ph ph-arrow-left"></i>
+                    previous
+                </button>
+                <button id="next-btn" class="btn btn-primary">
+                    next
+                    <i class="ph ph-arrow-right"></i>
+                </button>
+                <button id="submit-btn" class="btn btn-primary" style="display: none;">
+                    <i class="ph ph-sparkle"></i>
+                    get gift ideas
+                </button>
+            </div>
+        </div>
+        <div id="navigation-test-result" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Page Elements Test</h2>
+        <div id="landing" class="page">Landing Page</div>
+        <div id="questionnaire" class="page active">Questionnaire Page</div>
+        <div id="results" class="page">Results Page</div>
+        <div id="loading" class="loading-overlay">Loading</div>
+        <div id="error-message" class="error-message">Error Message</div>
+        <div id="question-container" class="question-container">Question Container</div>
+        <div id="gift-cards" class="gift-cards">Gift Cards</div>
+        <button id="start-btn" class="btn btn-primary">Start</button>
+        <button id="retry-btn" class="btn btn-secondary">Retry</button>
+        <button id="new-search-btn" class="btn btn-primary">New Search</button>
+        <button id="error-retry-btn" class="btn btn-primary">Error Retry</button>
+        <div id="page-test-result" class="test-result"></div>
+    </div>
+
+    <script>
+        // Test DOM element availability
+        function runDOMTests() {
+            const tests = [
+                { name: 'Progress Elements', elements: ['current-question', 'total-questions', 'progress-fill'] },
+                { name: 'Navigation Elements', elements: ['prev-btn', 'next-btn', 'submit-btn'] },
+                { name: 'Page Elements', elements: ['landing', 'questionnaire', 'results', 'loading', 'error-message', 'question-container', 'gift-cards', 'start-btn', 'retry-btn', 'new-search-btn', 'error-retry-btn'] }
+            ];
+
+            tests.forEach((test, index) => {
+                const resultDiv = document.querySelectorAll('.test-result')[index];
+                const missing = [];
+                const found = [];
+
+                test.elements.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        found.push(id);
+                    } else {
+                        missing.push(id);
+                    }
+                });
+
+                if (missing.length === 0) {
+                    resultDiv.className = 'test-result success';
+                    resultDiv.innerHTML = `✓ All ${test.name} found: ${found.join(', ')}`;
+                } else {
+                    resultDiv.className = 'test-result error';
+                    resultDiv.innerHTML = `✗ Missing ${test.name}: ${missing.join(', ')}<br>Found: ${found.join(', ')}`;
+                }
+            });
+        }
+
+        // Test the QuestionnaireSystem initialization
+        function testQuestionnaireSystem() {
+            try {
+                console.log('Testing QuestionnaireSystem initialization...');
+                
+                // Mock chip data if not available
+                if (typeof CHIP_DATA === 'undefined') {
+                    window.CHIP_DATA = {
+                        nicknames: [{ text: 'buddy', icon: 'ph-user' }],
+                        relationships: [{ text: 'friend', icon: 'ph-heart' }],
+                        previousGifts: [{ text: 'book', icon: 'ph-book' }],
+                        dislikes: [{ text: 'spiders', icon: 'ph-bug' }],
+                        complaints: [{ text: 'traffic', icon: 'ph-car' }],
+                        quirks: [{ text: 'always late', icon: 'ph-clock' }],
+                        budget: [{ text: 'under ₹500', icon: 'ph-coin' }],
+                        limitations: [{ text: 'eco-friendly', icon: 'ph-leaf' }]
+                    };
+                }
+
+                // Test if QuestionnaireSystem can be created without errors
+                const system = new QuestionnaireSystem();
+                console.log('✓ QuestionnaireSystem created successfully');
+                
+                // Test progress bar update
+                system.updateProgressBar();
+                console.log('✓ updateProgressBar() executed without errors');
+                
+                // Test navigation update
+                system.updateNavigation();
+                console.log('✓ updateNavigation() executed without errors');
+                
+                return true;
+            } catch (error) {
+                console.error('✗ QuestionnaireSystem test failed:', error);
+                return false;
+            }
+        }
+
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            runDOMTests();
+            
+            // Load and test questionnaire system
+            const script = document.createElement('script');
+            script.src = 'questionnaire.js?v=2.0';
+            script.onload = () => {
+                setTimeout(() => {
+                    const success = testQuestionnaireSystem();
+                    const div = document.createElement('div');
+                    div.className = success ? 'test-result success' : 'test-result error';
+                    div.innerHTML = success ? '✓ QuestionnaireSystem tests passed' : '✗ QuestionnaireSystem tests failed (check console)';
+                    document.body.appendChild(div);
+                }, 100);
+            };
+            script.onerror = () => {
+                const div = document.createElement('div');
+                div.className = 'test-result error';
+                div.innerHTML = '✗ Failed to load questionnaire.js';
+                document.body.appendChild(div);
+            };
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>

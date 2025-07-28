@@ -20,18 +20,62 @@
 <body>
     <!-- Landing Page -->
     <div id="landing" class="page active">
+        <div class="stars">
+            <!-- Background stars -->
+            <div class="star" style="top: 15%; left: 80%; animation-delay: 0.5s;"></div>
+            <div class="star" style="top: 60%; left: 85%; animation-delay: 1.5s;"></div>
+            <div class="star" style="top: 80%; left: 75%; animation-delay: 3s;"></div>
+            <div class="star" style="top: 25%; left: 90%; animation-delay: 2.5s;"></div>
+            <div class="star" style="top: 40%; left: 70%; animation-delay: 4s;"></div>
+            <div class="star" style="top: 10%; left: 60%; animation-delay: 1s;"></div>
+            <div class="star" style="top: 85%; left: 65%; animation-delay: 3.5s;"></div>
+            <div class="star" style="top: 45%; left: 95%; animation-delay: 0.8s;"></div>
+            <div class="star" style="top: 70%; left: 82%; animation-delay: 2.2s;"></div>
+            <div class="star" style="top: 30%; left: 88%; animation-delay: 4.2s;"></div>
+            <div class="star" style="top: 55%; left: 92%; animation-delay: 1.8s;"></div>
+            <div class="star" style="top: 20%; left: 72%; animation-delay: 3.8s;"></div>
+            <div class="star" style="top: 75%; left: 68%; animation-delay: 0.3s;"></div>
+            <div class="star" style="top: 35%; left: 78%; animation-delay: 2.8s;"></div>
+            <div class="star" style="top: 90%; left: 85%; animation-delay: 1.3s;"></div>
+            
+            <!-- Left side stars -->
+            <div class="star" style="top: 12%; left: 15%; animation-delay: 0.7s;"></div>
+            <div class="star" style="top: 35%; left: 8%; animation-delay: 2.1s;"></div>
+            <div class="star" style="top: 65%; left: 12%; animation-delay: 3.7s;"></div>
+            <div class="star" style="top: 82%; left: 18%; animation-delay: 1.4s;"></div>
+            <div class="star" style="top: 28%; left: 22%; animation-delay: 4.1s;"></div>
+            <div class="star" style="top: 48%; left: 5%; animation-delay: 0.9s;"></div>
+            <div class="star" style="top: 75%; left: 25%; animation-delay: 2.6s;"></div>
+            <div class="star" style="top: 18%; left: 30%; animation-delay: 3.2s;"></div>
+            
+            <!-- Center area stars -->
+            <div class="star" style="top: 8%; left: 45%; animation-delay: 1.6s;"></div>
+            <div class="star" style="top: 22%; left: 52%; animation-delay: 3.4s;"></div>
+            <div class="star" style="top: 38%; left: 42%; animation-delay: 0.6s;"></div>
+            <div class="star" style="top: 58%; left: 48%; animation-delay: 2.9s;"></div>
+            <div class="star" style="top: 72%; left: 55%; animation-delay: 4.3s;"></div>
+            <div class="star" style="top: 88%; left: 40%; animation-delay: 1.1s;"></div>
+            <div class="star" style="top: 15%; left: 38%; animation-delay: 3.6s;"></div>
+            <div class="star" style="top: 45%; left: 58%; animation-delay: 0.4s;"></div>
+        </div>
         <div class="container">
             <div class="landing-content">
-                <h1 class="landing-title">ruby's gifts</h1>
-                <p class="landing-subtitle">discover the perfect gift with ai-powered recommendations</p>
+                <h1 class="landing-title">Ruby's Gifts</h1>
+                <p class="landing-subtitle">Discover the perfect gift with AI-powered recommendations</p>
                 <p class="landing-description">
-                    answer a few fun questions using our interactive chip system, 
+                    Answer a few fun questions using our interactive chip system, 
                     and we'll suggest thoughtful gift ideas tailored just for them
                 </p>
-                <button id="start-btn" class="btn btn-primary">
-                    <i class="ph ph-gift"></i>
-                    start discovering
-                </button>
+                <div class="landing-buttons">
+                    <button id="start-btn" class="btn btn-primary">
+                        <i class="ph ph-gift"></i>
+                        start discovering
+                    </button>
+                    <button id="test-btn" class="btn btn-secondary test-btn">
+                        <i class="ph ph-lightning"></i>
+                        test gifts
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -86,20 +130,13 @@
                 <!-- Gift cards will be dynamically inserted here -->
             </div>
 
-            <div class="results-actions">
-                <button id="reveal-all-btn" class="reveal-all-btn" onclick="giftRevealSystem.revealAllGifts()" style="display: none;">
-                    <i class="ph ph-sparkle"></i>
-                    reveal all gifts
-                </button>
-            </div>
         </div>
     </div>
 
     <!-- Loading Overlay -->
     <div id="loading" class="loading-overlay">
         <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">crafting personalized gift ideas...</p>
+            <img src="loading.gif" alt="Loading" class="loading-gif" autoplay>
         </div>
     </div>
 

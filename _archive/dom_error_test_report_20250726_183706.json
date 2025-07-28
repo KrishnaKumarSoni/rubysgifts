@@ -1,0 +1,135 @@
+{
+  "test_run": {
+    "timestamp": "20250726_183706",
+    "total_tests": 6,
+    "tests_with_errors": 4,
+    "total_errors": 9,
+    "success_rate": "33.3%"
+  },
+  "critical_issues": [
+    {
+      "test": "initial_dom",
+      "error": "http://127.0.0.1:5000/questionnaire.js?v=2.0 453:50 Uncaught TypeError: Cannot set properties of null (setting 'textContent')",
+      "severity": "HIGH"
+    },
+    {
+      "test": "initial_dom",
+      "error": "http://127.0.0.1:5000/favicon.ico - Failed to load resource: the server responded with a status of 404 (NOT FOUND)",
+      "severity": "HIGH"
+    },
+    {
+      "test": "questionnaire_start",
+      "error": "http://127.0.0.1:5000/questionnaire.js?v=2.0 453:50 Uncaught TypeError: Cannot set properties of null (setting 'textContent')",
+      "severity": "HIGH"
+    },
+    {
+      "test": "keyboard_navigation",
+      "error": "Enter key test failed: Message: stale element reference: stale element not found in the current frame\n  (Session info: chrome=138.0.7204.169); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception\nStacktrace:\n0   chromedriver                        0x000000010125f570 cxxbridge1$str$ptr + 2731064\n1   chromedriver                        0x0000000101257468 cxxbridge1$str$ptr + 2698032\n2   chromedriver                        0x0000000100da63f8 cxxbridge1$string$len + 90664\n3   chromedriver                        0x0000000100dac0b0 cxxbridge1$string$len + 114400\n4   chromedriver                        0x0000000100dae67c cxxbridge1$string$len + 124076\n5   chromedriver                        0x0000000100e2f81c cxxbridge1$string$len + 652876\n6   chromedriver                        0x0000000100e2eb1c cxxbridge1$string$len + 649548\n7   chromedriver                        0x0000000100de1a0c cxxbridge1$string$len + 333884\n8   chromedriver                        0x00000001012225f4 cxxbridge1$str$ptr + 2481340\n9   chromedriver                        0x000000010122585c cxxbridge1$str$ptr + 2494244\n10  chromedriver                        0x0000000101203248 cxxbridge1$str$ptr + 2353424\n11  chromedriver                        0x0000000101226118 cxxbridge1$str$ptr + 2496480\n12  chromedriver                        0x00000001011f42f8 cxxbridge1$str$ptr + 2292160\n13  chromedriver                        0x000000010124600c cxxbridge1$str$ptr + 2627284\n14  chromedriver                        0x0000000101246198 cxxbridge1$str$ptr + 2627680\n15  chromedriver                        0x00000001012570a4 cxxbridge1$str$ptr + 2697068\n16  libsystem_pthread.dylib             0x00000001865cef94 _pthread_start + 136\n17  libsystem_pthread.dylib             0x00000001865c9d34 thread_start + 8\n",
+      "severity": "HIGH"
+    },
+    {
+      "test": "keyboard_navigation",
+      "error": "http://127.0.0.1:5000/questionnaire.js?v=2.0 756:66 Uncaught TypeError: Cannot read properties of null (reading 'querySelectorAll')",
+      "severity": "HIGH"
+    },
+    {
+      "test": "keyboard_navigation",
+      "error": "http://127.0.0.1:5000/questionnaire.js?v=2.0 453:50 Uncaught TypeError: Cannot set properties of null (setting 'textContent')",
+      "severity": "HIGH"
+    },
+    {
+      "test": "progress_bar",
+      "error": "Question counter elements not found",
+      "severity": "HIGH"
+    }
+  ],
+  "test_results": {
+    "initial_dom": {
+      "test_name": "Initial DOM Elements",
+      "errors": [
+        "http://127.0.0.1:5000/questionnaire.js?v=2.0 453:50 Uncaught TypeError: Cannot set properties of null (setting 'textContent')",
+        "http://127.0.0.1:5000/favicon.ico - Failed to load resource: the server responded with a status of 404 (NOT FOUND)"
+      ],
+      "missing_elements": [
+        "Current question counter (#current-question)",
+        "Total questions counter (#total-questions)"
+      ],
+      "null_references": [
+        "landing",
+        "questionnaire",
+        "results",
+        "loading",
+        "errorMessage",
+        "questionContainer",
+        "progressFill",
+        "currentQuestion",
+        "totalQuestions",
+        "prevBtn",
+        "nextBtn",
+        "submitBtn",
+        "startBtn",
+        "retryBtn",
+        "newSearchBtn",
+        "errorRetryBtn",
+        "giftCards"
+      ],
+      "class_check": {
+        "classExists": true,
+        "elementsCache": [],
+        "instanceExists": true
+      }
+    },
+    "questionnaire_start": {
+      "test_name": "Questionnaire Start",
+      "errors": [
+        "http://127.0.0.1:5000/questionnaire.js?v=2.0 453:50 Uncaught TypeError: Cannot set properties of null (setting 'textContent')"
+      ],
+      "navigation_success": true,
+      "question_rendered": true,
+      "progress_bar_working": true
+    },
+    "chip_functionality": {
+      "test_name": "Chip Functionality",
+      "errors": [],
+      "chips_rendered": true,
+      "chip_selection_works": true,
+      "textarea_sync_works": true,
+      "chip_count": 55
+    },
+    "keyboard_navigation": {
+      "test_name": "Keyboard Navigation",
+      "errors": [
+        "Arrow key navigation failed",
+        "Enter key test failed: Message: stale element reference: stale element not found in the current frame\n  (Session info: chrome=138.0.7204.169); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception\nStacktrace:\n0   chromedriver                        0x000000010125f570 cxxbridge1$str$ptr + 2731064\n1   chromedriver                        0x0000000101257468 cxxbridge1$str$ptr + 2698032\n2   chromedriver                        0x0000000100da63f8 cxxbridge1$string$len + 90664\n3   chromedriver                        0x0000000100dac0b0 cxxbridge1$string$len + 114400\n4   chromedriver                        0x0000000100dae67c cxxbridge1$string$len + 124076\n5   chromedriver                        0x0000000100e2f81c cxxbridge1$string$len + 652876\n6   chromedriver                        0x0000000100e2eb1c cxxbridge1$string$len + 649548\n7   chromedriver                        0x0000000100de1a0c cxxbridge1$string$len + 333884\n8   chromedriver                        0x00000001012225f4 cxxbridge1$str$ptr + 2481340\n9   chromedriver                        0x000000010122585c cxxbridge1$str$ptr + 2494244\n10  chromedriver                        0x0000000101203248 cxxbridge1$str$ptr + 2353424\n11  chromedriver                        0x0000000101226118 cxxbridge1$str$ptr + 2496480\n12  chromedriver                        0x00000001011f42f8 cxxbridge1$str$ptr + 2292160\n13  chromedriver                        0x000000010124600c cxxbridge1$str$ptr + 2627284\n14  chromedriver                        0x0000000101246198 cxxbridge1$str$ptr + 2627680\n15  chromedriver                        0x00000001012570a4 cxxbridge1$str$ptr + 2697068\n16  libsystem_pthread.dylib             0x00000001865cef94 _pthread_start + 136\n17  libsystem_pthread.dylib             0x00000001865c9d34 thread_start + 8\n",
+        "http://127.0.0.1:5000/questionnaire.js?v=2.0 756:66 Uncaught TypeError: Cannot read properties of null (reading 'querySelectorAll')",
+        "http://127.0.0.1:5000/questionnaire.js?v=2.0 453:50 Uncaught TypeError: Cannot set properties of null (setting 'textContent')"
+      ],
+      "arrow_navigation_works": false,
+      "enter_selection_works": false,
+      "question_navigation_works": true
+    },
+    "progress_bar": {
+      "test_name": "Progress Bar Updates",
+      "errors": [
+        "Next button is disabled, cannot test progress",
+        "Question counter elements not found"
+      ],
+      "initial_progress": "284px",
+      "progress_after_navigation": null,
+      "progress_updates_correctly": false
+    },
+    "focus_management": {
+      "test_name": "Focus Management",
+      "errors": [],
+      "aria_labels_present": true,
+      "focus_management_works": true,
+      "selected_state_announced": true
+    }
+  },
+  "recommendations": [
+    "Fix missing DOM elements in HTML structure",
+    "Add null checks for DOM element references in JavaScript",
+    "Fix keyboard navigation between chips",
+    "Fix progress bar update mechanism"
+  ]
+}

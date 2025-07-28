@@ -1,0 +1,200 @@
+[
+  {
+    "category": "\ud83c\udfa8 UI Improvements Validation",
+    "priority": "Critical",
+    "tests": [
+      {
+        "test_id": "UI-01",
+        "name": "Chip Layout - Content Hugging",
+        "description": "Verify chips hug their content instead of being full-width",
+        "steps": [
+          "1. Navigate to questionnaire",
+          "2. Observe chip appearance on any question",
+          "3. Verify chips are pill-shaped and size to content",
+          "4. Check that multiple chips can fit on same row",
+          "5. Confirm chips don't stretch to full container width"
+        ],
+        "expected": "Chips should be compact, pill-shaped, and arrange in a flexible grid",
+        "status": "pending"
+      },
+      {
+        "test_id": "UI-02",
+        "name": "Fixed Bottom Navigation",
+        "description": "Confirm navigation is fixed at bottom and doesn't require scrolling",
+        "steps": [
+          "1. Start questionnaire",
+          "2. Scroll down within a question with many chips",
+          "3. Verify prev/next buttons remain visible at bottom",
+          "4. Check progress bar is also fixed",
+          "5. Ensure navigation doesn't overlap content"
+        ],
+        "expected": "Navigation should be always visible at bottom without scrolling",
+        "status": "pending"
+      },
+      {
+        "test_id": "UI-03",
+        "name": "Subtle Search Bar Styling",
+        "description": "Verify search bar has subtle, integrated appearance",
+        "steps": [
+          "1. Observe search bar on each question",
+          "2. Check for subtle border and background",
+          "3. Verify it integrates well with overall design",
+          "4. Test focus state styling",
+          "5. Confirm placeholder text is appropriate"
+        ],
+        "expected": "Search bar should feel integrated, not prominent or distracting",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "category": "\ud83d\udcf1 Mobile Responsiveness",
+    "priority": "Critical",
+    "tests": [
+      {
+        "test_id": "MOB-01",
+        "name": "Mobile Chip Interactions",
+        "description": "Test chip selection and scrolling on mobile devices",
+        "steps": [
+          "1. Access site on mobile device (or use dev tools)",
+          "2. Navigate to questionnaire",
+          "3. Test chip tapping - should be easy to select",
+          "4. Verify chip grid scrolls smoothly",
+          "5. Check minimum touch target size (44px)"
+        ],
+        "expected": "All chip interactions should work smoothly on touch devices",
+        "status": "pending"
+      },
+      {
+        "test_id": "MOB-02",
+        "name": "Fixed Navigation on Mobile",
+        "description": "Verify fixed navigation works properly on mobile",
+        "steps": [
+          "1. Use mobile device or resize browser",
+          "2. Navigate through questionnaire",
+          "3. Verify fixed navigation positioning",
+          "4. Check that navigation doesn't overlap content",
+          "5. Test progress bar visibility"
+        ],
+        "expected": "Fixed navigation should work flawlessly on mobile",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "category": "\ud83d\udd04 Core Functionality",
+    "priority": "Critical",
+    "tests": [
+      {
+        "test_id": "FUNC-01",
+        "name": "Complete User Flow",
+        "description": "Test entire flow from landing to results",
+        "steps": [
+          "1. Start from landing page",
+          "2. Click 'Start' button",
+          "3. Complete all 8 questions using chip selections",
+          "4. Mix chip selections with manual text input",
+          "5. Submit and verify AI-generated results"
+        ],
+        "expected": "Complete flow should work without errors",
+        "status": "pending"
+      },
+      {
+        "test_id": "FUNC-02",
+        "name": "Chip Search Functionality",
+        "description": "Test search filtering on each question",
+        "steps": [
+          "1. Go to each question in the questionnaire",
+          "2. Type in search box and verify chips filter",
+          "3. Test partial matches and case insensitivity",
+          "4. Try typos to test fuzzy matching",
+          "5. Clear search and verify all chips return"
+        ],
+        "expected": "Search should filter chips in real-time with fuzzy matching",
+        "status": "pending"
+      },
+      {
+        "test_id": "FUNC-03",
+        "name": "Chip-Textarea Synchronization",
+        "description": "Test sync between chip selections and text input",
+        "steps": [
+          "1. Select multiple chips on a question",
+          "2. Verify text appears in textarea below",
+          "3. Manually edit textarea content",
+          "4. Add custom text alongside chip selections",
+          "5. Verify selections persist through navigation"
+        ],
+        "expected": "Chips and textarea should stay perfectly synchronized",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "category": "\u267f Accessibility",
+    "priority": "Important",
+    "tests": [
+      {
+        "test_id": "A11Y-01",
+        "name": "Keyboard Navigation",
+        "description": "Test keyboard-only navigation",
+        "steps": [
+          "1. Use only Tab key to navigate",
+          "2. Verify all chips are focusable",
+          "3. Use Enter/Space to select chips",
+          "4. Test arrow keys for navigation",
+          "5. Verify focus indicators are visible"
+        ],
+        "expected": "All functionality should be keyboard accessible",
+        "status": "pending"
+      },
+      {
+        "test_id": "A11Y-02",
+        "name": "Screen Reader Compatibility",
+        "description": "Test with screen reader",
+        "steps": [
+          "1. Enable screen reader (VoiceOver, NVDA, etc.)",
+          "2. Navigate through questionnaire",
+          "3. Verify chip states are announced",
+          "4. Check ARIA labels are descriptive",
+          "5. Test form submission announcements"
+        ],
+        "expected": "All content should be accessible to screen readers",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "category": "\u26a1 Performance & Edge Cases",
+    "priority": "Important",
+    "tests": [
+      {
+        "test_id": "PERF-01",
+        "name": "High Chip Count Performance",
+        "description": "Test performance with many chips",
+        "steps": [
+          "1. Navigate to questions with 50+ chips",
+          "2. Test search responsiveness",
+          "3. Verify smooth scrolling in chip grid",
+          "4. Check selection responsiveness",
+          "5. Monitor for any lag or freezing"
+        ],
+        "expected": "Interface should remain responsive with high chip counts",
+        "status": "pending"
+      },
+      {
+        "test_id": "PERF-02",
+        "name": "API Integration & Error Handling",
+        "description": "Test API calls and error scenarios",
+        "steps": [
+          "1. Complete questionnaire and submit",
+          "2. Verify loading indicator appears",
+          "3. Check AI-generated results quality",
+          "4. Test with minimal answers",
+          "5. Test error handling (disconnect internet temporarily)"
+        ],
+        "expected": "API should work reliably with proper error handling",
+        "status": "pending"
+      }
+    ]
+  }
+]

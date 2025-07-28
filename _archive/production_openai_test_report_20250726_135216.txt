@@ -1,0 +1,57 @@
+
+PRODUCTION OPENAI INTEGRATION TEST REPORT
+=========================================
+Generated: 2025-07-26 13:52:16
+Target URL: https://rubysgifts-ph21dum8d-krishnas-projects-cc548bc4.vercel.app
+
+SUMMARY
+-------
+Total Tests: 11
+Passed: 0
+Failed: 11
+Success Rate: 0.0%
+Total Execution Time: 0.93 seconds
+
+PERFORMANCE METRICS
+-------------------
+Average Response Time: 0.08 seconds
+Max Response Time: 0.10 seconds
+Min Response Time: 0.03 seconds
+Concurrent Success Rate: 0.0%
+
+DETAILED TEST RESULTS
+---------------------
+✗ FAIL - health_endpoint: Health endpoint status: 401
+    Details: {'status_code': 401, 'response_time': 0.129152, 'response_data': None}
+✗ FAIL - user_flow_chip_selections_only: User flow test: Complete questionnaire using only chip selections
+    Details: {'status_code': 401, 'response_time': 0.3592240810394287, 'input_size': 414, 'response_size': 13446}
+✗ FAIL - user_flow_manual_text_only: User flow test: Complete questionnaire using only manual text input
+    Details: {'status_code': 401, 'response_time': 0.04675889015197754, 'input_size': 637, 'response_size': 13446}
+✗ FAIL - user_flow_mixed_input: User flow test: Mixed chip selections and custom text
+    Details: {'status_code': 401, 'response_time': 0.04008293151855469, 'input_size': 546, 'response_size': 13446}
+✗ FAIL - user_flow_minimal_answers: User flow test: Minimal but valid answers
+    Details: {'status_code': 401, 'response_time': 0.03400993347167969, 'input_size': 196, 'response_size': 13446}
+✗ FAIL - user_flow_detailed_answers: User flow test: Very detailed and comprehensive answers
+    Details: {'status_code': 401, 'response_time': 0.034558773040771484, 'input_size': 1486, 'response_size': 13446}
+✗ FAIL - error_empty_request: Error handling for empty_request
+    Details: {'expected_status': 400, 'actual_status': 401, 'response_text': '<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Authentication Required</title><style>/*!normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css*/html{line-height:1.15;-webkit-text-size-adjust:100%;height:-webkit-fill-available}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color'}
+✗ FAIL - error_missing_required_fields: Error handling for missing_required_fields
+    Details: {'expected_status': 400, 'actual_status': 401, 'response_text': '<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Authentication Required</title><style>/*!normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css*/html{line-height:1.15;-webkit-text-size-adjust:100%;height:-webkit-fill-available}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color'}
+✗ FAIL - error_invalid_data_types: Error handling for invalid_data_types
+    Details: {'expected_status': 400, 'actual_status': 401, 'response_text': '<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Authentication Required</title><style>/*!normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css*/html{line-height:1.15;-webkit-text-size-adjust:100%;height:-webkit-fill-available}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color'}
+✗ FAIL - error_extremely_long_input: Error handling for extremely_long_input
+    Details: {'expected_status': 400, 'actual_status': 401, 'response_text': '<!doctype html><html lang=en><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Authentication Required</title><style>/*!normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css*/html{line-height:1.15;-webkit-text-size-adjust:100%;height:-webkit-fill-available}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color'}
+✗ FAIL - performance_concurrent: Concurrent performance test (avg: 0.08s, success: 0/5)
+    Details: {'average_response_time': 0.08349661827087403, 'max_response_time': 0.1044149398803711, 'min_response_time': 0.032952070236206055, 'concurrent_success_rate': 0.0, 'total_requests': 5}
+
+ERROR CASES ENCOUNTERED
+-----------------------
+- empty_request: Expected 400, Got 401
+- missing_required_fields: Expected 400, Got 401
+- invalid_data_types: Expected 400, Got 401
+- extremely_long_input: Expected 400, Got 401
+
+RECOMMENDATIONS
+---------------
+✗ OpenAI integration has significant issues that need attention
+✓ Response times are excellent

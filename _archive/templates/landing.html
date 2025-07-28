@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}ruby's gifts - find the perfect gift{% endblock %}
+
+{% block content %}
+<div class="landing-container">
+    <div class="hero-section">
+        <div class="hero-content">
+            <h2 class="hero-title">find the perfect gift for anyone</h2>
+            <p class="hero-description">
+                answer a few fun questions about your special someone, and we'll generate 
+                personalized gift ideas that they'll actually love. no more guessing, 
+                no more generic presents.
+            </p>
+            
+            <div class="hero-features">
+                <div class="feature">
+                    <i class="ph ph-heart feature-icon"></i>
+                    <span>personalized suggestions</span>
+                </div>
+                <div class="feature">
+                    <i class="ph ph-lightbulb feature-icon"></i>
+                    <span>creative ideas</span>
+                </div>
+                <div class="feature">
+                    <i class="ph ph-clock feature-icon"></i>
+                    <span>takes 2 minutes</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hero-visual">
+            <div class="gift-preview">
+                <i class="ph ph-gift gift-icon"></i>
+                <div class="sparkles">
+                    <span class="sparkle">✨</span>
+                    <span class="sparkle">✨</span>
+                    <span class="sparkle">✨</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="cta-section">
+        <button class="start-button" onclick="startQuestionnaire()">
+            <i class="ph ph-arrow-right"></i>
+            <span>start finding gifts</span>
+        </button>
+        
+        <p class="disclaimer">
+            completely free • no signup required • powered by ai
+        </p>
+    </div>
+    
+    <div class="examples-section">
+        <h3 class="examples-title">perfect for gifting to:</h3>
+        <div class="examples-grid">
+            <div class="example-item">
+                <i class="ph ph-heart"></i>
+                <span>romantic partners</span>
+            </div>
+            <div class="example-item">
+                <i class="ph ph-users"></i>
+                <span>family members</span>
+            </div>
+            <div class="example-item">
+                <i class="ph ph-star"></i>
+                <span>best friends</span>
+            </div>
+            <div class="example-item">
+                <i class="ph ph-briefcase"></i>
+                <span>colleagues</span>
+            </div>
+            <div class="example-item">
+                <i class="ph ph-graduation-cap"></i>
+                <span>teachers</span>
+            </div>
+            <div class="example-item">
+                <i class="ph ph-question"></i>
+                <span>anyone special</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function startQuestionnaire() {
+    // Add a subtle loading state
+    const button = document.querySelector('.start-button');
+    const originalContent = button.innerHTML;
+    
+    button.innerHTML = '<i class="ph ph-spinner"></i><span>starting...</span>';
+    button.classList.add('loading');
+    
+    // Navigate to questionnaire after brief delay for UX
+    setTimeout(() => {
+        window.location.href = '/questionnaire';
+    }, 800);
+}
+
+// Add subtle animations on load
+document.addEventListener('DOMContentLoaded', () => {
+    const elements = document.querySelectorAll('.hero-content > *, .hero-visual, .cta-section > *, .examples-section > *');
+    
+    elements.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Animate sparkles
+    const sparkles = document.querySelectorAll('.sparkle');
+    sparkles.forEach((sparkle, index) => {
+        sparkle.style.animationDelay = `${index * 0.5}s`;
+    });
+});
+</script>
+{% endblock %}

@@ -24,6 +24,7 @@ class QuestionnaireSystem {
             nextBtn: document.getElementById('next-btn'),
             submitBtn: document.getElementById('submit-btn'),
             startBtn: document.getElementById('start-btn'),
+            testBtn: document.getElementById('test-btn'),
             retryBtn: document.getElementById('retry-btn'),
             newSearchBtn: document.getElementById('new-search-btn'),
             errorRetryBtn: document.getElementById('error-retry-btn'),
@@ -112,6 +113,10 @@ class QuestionnaireSystem {
         // Page navigation - add null checks for each element
         if (this.elements.startBtn) {
             this.elements.startBtn.addEventListener('click', () => this.showQuestionnaire());
+        }
+        
+        if (this.elements.testBtn) {
+            this.elements.testBtn.addEventListener('click', () => this.testGiftGeneration());
         }
         
         if (this.elements.prevBtn) {
@@ -564,15 +569,18 @@ class QuestionnaireSystem {
         try {
             // Prepare API request data
             const requestData = {
-                call_them: this.answers.nicknames || '',
-                relationship: this.answers.relationships || '',
-                previous_gifts: this.answers.previousGifts || '',
-                hate: this.answers.dislikes || '',
+                call_them: this.answers.call_them || this.answers.nicknames || '',
+                relationship: this.answers.relationship || this.answers.relationships || '',
+                previous_gifts: this.answers.previous_gifts || this.answers.previousGifts || '',
+                hate: this.answers.hate || this.answers.dislikes || '',
                 complaints: this.answers.complaints || '',
-                complain_about_them: this.answers.quirks || '',
+                complain_about_them: this.answers.complain_about_them || this.answers.quirks || '',
                 budget: this.answers.budget || '',
                 limitations: this.answers.limitations || ''
             };
+            
+            // Debug log to see what's being sent
+            console.log('API Request Data:', requestData);
             
             // Call the Flask API
             const response = await fetch('/generate_gifts', {
@@ -751,6 +759,35 @@ class QuestionnaireSystem {
         setTimeout(() => {
             document.body.removeChild(announcement);
         }, 1000);
+    }
+
+    // Test function to skip questionnaire and generate gifts with sample data
+    async testGiftGeneration() {
+        // Fill sample answers with correct API field names
+        this.answers = {
+            call_them: 'buddy',
+            relationship: 'best friend',
+            previous_gifts: 'books, coffee mug, funny t-shirt',
+            hate: 'loud noises, spicy food, horror movies',
+            complaints: 'traffic, work stress, bad weather',
+            complain_about_them: 'always running late, too many meetings',
+            budget: '₹500-1500',
+            limitations: 'no allergies, eco-friendly preferred'
+        };
+        
+        // Show loading immediately
+        this.showLoading();
+        
+        try {
+            // Generate gifts with sample data
+            await this.generateGiftIdeas();
+            this.showResults();
+        } catch (error) {
+            console.error('Error generating test gifts:', error);
+            this.showError('Failed to generate gift ideas. Please try again.');
+        } finally {
+            this.hideLoading();
+        }
     }
 
     // NEW METHODS FOR ENHANCED MULTI-SELECT FUNCTIONALITY
