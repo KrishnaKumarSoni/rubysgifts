@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Image Test - Ruby's Gifts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .gift-card {
+            border: 1px solid #ddd;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .image-container {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .image-item {
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 4px;
+            text-align: center;
+            background: #f9f9f9;
+        }
+        .image-item img {
+            max-width: 150px;
+            max-height: 150px;
+            display: block;
+        }
+        .image-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        button {
+            background: #FF6600;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #e55a00;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .test-results {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .image-analysis {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #FF6600;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ruby's Gifts - Production Image Test</h1>
+    <p>Testing the live production app at <strong>https://rubysgifts.kks.im</strong> to verify real images are being displayed.</p>
+
+    <div class="test-section">
+        <h2>Test Configuration</h2>
+        <div id="test-config">
+            <p><strong>API Endpoint:</strong> https://rubysgifts.kks.im/generate_gifts</p>
+            <p><strong>Focus:</strong> Verify real images (not placeholders) are returned</p>
+            <p><strong>Test Scenario:</strong> Gift recommendation for a tech-savvy friend</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Image Test Controls</h2>
+        <button onclick="testGiftGeneration()">Test Gift Generation with Images</button>
+        <button onclick="testImageSearch()">Test Direct Image Search</button>
+        <button onclick="testHealthCheck()">Check API Health</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'https://rubysgifts.kks.im';
+        
+        function logResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'test-results';
+            results.innerHTML += `<div class="${className}"><strong>[${timestamp}]</strong> ${message}</div>`;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testHealthCheck() {
+            logResult('Testing API health check...');
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                logResult(`Health Check Results:`, 'success');
+                logResult(`- Service Status: ${data.status}`);
+                logResult(`- OpenAI Configured: ${data.openai_configured}`);
+                logResult(`- Image Search Available: ${data.image_search_available}`);
+                logResult(`- Image Search Status: ${data.image_search_status}`);
+                logResult(`- Amazon Affiliate Tag: ${data.amazon_affiliate_tag}`);
+                
+            } catch (error) {
+                logResult(`Health check failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testImageSearch() {
+            logResult('Testing direct image search functionality...');
+            try {
+                const response = await fetch(`${API_BASE}/test_image_search?query=MacBook Pro laptop&count=3`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    logResult(`Image Search Results:`, 'success');
+                    logResult(`- Query: ${data.query}`);
+                    logResult(`- Images Found: ${data.images_found}`);
+                    logResult(`- Source Breakdown: ${JSON.stringify(data.source_breakdown)}`);
+                    
+                    if (data.images && data.images.length > 0) {
+                        analyzeImages(data.images, 'Image Search Test');
+                    }
+                } else {
+                    logResult(`Image search failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                logResult(`Image search test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGiftGeneration() {
+            logResult('Testing full gift generation with image integration...');
+            
+            const testData = {
+                call_them: "buddy",
+                relationship: "best friend",
+                previous_gifts: "chocolate, book",
+                hate: "cheap plastic, loud noises",
+                complaints: "work stress, slow laptop",
+                complain_about_them: "always procrastinating, picky about tech",
+                budget: "under 10000₹",
+                limitations: "must be useful for work"
+            };
+
+            try {
+                logResult('Sending gift generation request...');
+                
+                const response = await fetch(`${API_BASE}/generate_gifts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success && data.gift_ideas) {
+                    logResult(`Gift generation successful! Generated ${data.gift_ideas.length} gift ideas.`, 'success');
+                    
+                    data.gift_ideas.forEach((gift, index) => {
+                        displayGiftCard(gift, index + 1);
+                    });
+                    
+                    // Analyze images across all gifts
+                    const allImages = data.gift_ideas.flatMap(gift => gift.images || []);
+                    if (allImages.length > 0) {
+                        analyzeImages(allImages, 'Gift Generation');
+                    } else {
+                        logResult('No images found in gift recommendations!', 'error');
+                    }
+                    
+                } else {
+                    logResult(`Gift generation failed: ${data.error || 'Unknown error'}`, 'error');
+                }
+                
+            } catch (error) {
+                logResult(`Gift generation error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayGiftCard(gift, index) {
+            const results = document.getElementById('results');
+            
+            let imagesHtml = '';
+            if (gift.images && gift.images.length > 0) {
+                imagesHtml = `
+                    <div class="image-container">
+                        ${gift.images.map(img => `
+                            <div class="image-item">
+                                <img src="${img.url}" alt="${img.title}" 
+                                     onerror="this.style.border='2px solid red'; this.alt='Failed to load: ${img.url}'">
+                                <div class="image-info">
+                                    <div>Source: ${img.source}</div>
+                                    <div>Size: ${img.width}x${img.height}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                imagesHtml = '<div class="error">No images provided for this gift!</div>';
+            }
+
+            const giftHtml = `
+                <div class="gift-card">
+                    <h3>Gift ${index}: ${gift.title}</h3>
+                    <p><strong>Description:</strong> ${gift.description}</p>
+                    <p><strong>Starter:</strong> ${gift.starter}</p>
+                    <p><strong>Expected Reaction:</strong> ${gift.reaction}</p>
+                    <p><strong>Price Range:</strong> ${gift.price_range}</p>
+                    <p><strong>Amazon Link:</strong> <a href="${gift.amazon_link}" target="_blank">View on Amazon</a></p>
+                    ${imagesHtml}
+                </div>
+            `;
+            
+            results.innerHTML += giftHtml;
+        }
+
+        function analyzeImages(images, context) {
+            const results = document.getElementById('results');
+            
+            // Count image sources
+            const sourceCounts = {};
+            const realImageCount = images.filter(img => 
+                img.source !== 'Placeholder' && 
+                img.source !== 'Enhanced Placeholder' &&
+                !img.url.includes('placeholder') &&
+                !img.url.includes('dummyimage')
+            ).length;
+            
+            images.forEach(img => {
+                sourceCounts[img.source] = (sourceCounts[img.source] || 0) + 1;
+            });
+            
+            const isUsingRealImages = realImageCount > 0;
+            const imageQuality = realImageCount / images.length;
+            
+            const analysisHtml = `
+                <div class="image-analysis">
+                    <h3>Image Analysis - ${context}</h3>
+                    <p><strong>Total Images:</strong> ${images.length}</p>
+                    <p><strong>Real Images:</strong> ${realImageCount} (${Math.round(imageQuality * 100)}%)</p>
+                    <p><strong>Placeholder Images:</strong> ${images.length - realImageCount}</p>
+                    <p><strong>Source Breakdown:</strong></p>
+                    <ul>
+                    ${Object.entries(sourceCounts).map(([source, count]) => 
+                        `<li>${source}: ${count} images</li>`
+                    ).join('')}
+                    </ul>
+                    <p><strong>Status:</strong> 
+                        <span style="color: ${isUsingRealImages ? 'green' : 'red'}; font-weight: bold;">
+                            ${isUsingRealImages ? 'REAL IMAGES DETECTED' : 'ONLY PLACEHOLDERS FOUND'}
+                        </span>
+                    </p>
+                </div>
+            `;
+            
+            results.innerHTML += analysisHtml;
+            
+            // Log summary
+            if (isUsingRealImages) {
+                logResult(`✅ SUCCESS: Real images are being used! ${realImageCount}/${images.length} images are from real sources.`, 'success');
+            } else {
+                logResult(`❌ ISSUE: Only placeholder images found. No real product images detected.`, 'error');
+            }
+        }
+
+        // Auto-run health check on page load
+        window.addEventListener('load', () => {
+            logResult('Page loaded. Ready to test Ruby\'s Gifts production app.');
+            testHealthCheck();
+        });
+    </script>
+</body>
+</html>

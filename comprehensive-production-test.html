@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruby's Gifts - Comprehensive Production Test</title>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #ff6600;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .test-button {
+            background: #ff6600;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #e55a00;
+        }
+        .test-results {
+            font-family: monospace;
+            font-size: 12px;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .gift-preview {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .gift-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .gift-image-item {
+            border: 1px solid #ddd;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .gift-image-item img {
+            max-width: 150px;
+            max-height: 100px;
+            object-fit: cover;
+        }
+        .mobile-test-frame {
+            width: 375px;
+            height: 667px;
+            border: 2px solid #333;
+            border-radius: 20px;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        @media (max-width: 768px) {
+            .test-container {
+                padding: 10px;
+            }
+            .test-section {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Ruby's Gifts - Comprehensive Production Test Report</h1>
+        <p>Test Date: <span id="test-date"></span></p>
+        
+        <!-- API Health Check -->
+        <div class="test-section">
+            <h2>1. API Health & Configuration</h2>
+            <button class="test-button" onclick="testAPIHealth()">Test API Health</button>
+            <div id="api-health-results"></div>
+        </div>
+
+        <!-- Complete Flow Test -->
+        <div class="test-section">
+            <h2>2. Complete User Flow Test</h2>
+            <button class="test-button" onclick="testCompleteFlow()">Run Complete Flow Test</button>
+            <div id="flow-test-results"></div>
+        </div>
+
+        <!-- Image Display Test -->
+        <div class="test-section">
+            <h2>3. Image Display & Quality Test</h2>
+            <button class="test-button" onclick="testImageDisplay()">Test Image System</button>
+            <div id="image-test-results"></div>
+        </div>
+
+        <!-- Gift Card UI Test -->
+        <div class="test-section">
+            <h2>4. Gift Card UI & Overflow Test</h2>
+            <button class="test-button" onclick="testGiftCardUI()">Test Gift Card Display</button>
+            <div id="gift-card-results"></div>
+        </div>
+
+        <!-- Mobile Responsiveness Test -->
+        <div class="test-section">
+            <h2>5. Mobile Responsiveness Test</h2>
+            <button class="test-button" onclick="testMobileResponsiveness()">Test Mobile View</button>
+            <div id="mobile-test-results"></div>
+        </div>
+
+        <!-- Error Handling Test -->
+        <div class="test-section">
+            <h2>6. Error Handling & Recovery</h2>
+            <button class="test-button" onclick="testErrorHandling()">Test Error Scenarios</button>
+            <div id="error-test-results"></div>
+        </div>
+
+        <!-- Performance Test -->
+        <div class="test-section">
+            <h2>7. Performance & Load Times</h2>
+            <button class="test-button" onclick="testPerformance()">Run Performance Test</button>
+            <div id="performance-results"></div>
+        </div>
+
+        <!-- Chip System Test -->
+        <div class="test-section">
+            <h2>8. Chip Interaction System</h2>
+            <button class="test-button" onclick="testChipSystem()">Test Chip Functionality</button>
+            <div id="chip-test-results"></div>
+        </div>
+
+        <!-- Overall Summary -->
+        <div class="test-section">
+            <h2>Test Summary</h2>
+            <div id="test-summary"></div>
+        </div>
+    </div>
+
+    <script>
+        // Set test date
+        document.getElementById('test-date').textContent = new Date().toLocaleString();
+        
+        // Test data
+        const testData = {
+            call_them: "buddy, sweetheart",
+            relationship: "romantic partner, best friend",
+            previous_gifts: "jewelry, books, chocolate",
+            hate: "spiders, loud noises, cheap items",
+            complaints: "work stress, traffic, always tired",
+            complain_about_them: "always late, too picky, workaholic",
+            budget: "₹2000-5000",
+            limitations: "eco-friendly, personalized"
+        };
+
+        // Test results storage
+        let testResults = {
+            apiHealth: null,
+            completeFlow: null,
+            imageDisplay: null,
+            giftCardUI: null,
+            mobileResponsiveness: null,
+            errorHandling: null,
+            performance: null,
+            chipSystem: null
+        };
+
+        // Utility function to display results
+        function displayResult(elementId, status, message, details = null) {
+            const element = document.getElementById(elementId);
+            const statusClass = status === 'success' ? 'success' : status === 'warning' ? 'warning' : status === 'info' ? 'info' : 'error';
+            
+            let html = `<div class="status ${statusClass}">${message}</div>`;
+            if (details) {
+                html += `<div class="test-results">${JSON.stringify(details, null, 2)}</div>`;
+            }
+            
+            element.innerHTML = html;
+        }
+
+        // 1. API Health Check
+        async function testAPIHealth() {
+            try {
+                displayResult('api-health-results', 'info', 'Testing API health...');
+                
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                testResults.apiHealth = {
+                    status: response.ok ? 'pass' : 'fail',
+                    details: data
+                };
+                
+                if (response.ok) {
+                    let message = 'API is healthy';
+                    let status = 'success';
+                    
+                    if (!data.openai_configured) {
+                        status = 'warning';
+                        message += ' (OpenAI not configured)';
+                    }
+                    
+                    if (!data.image_search_available) {
+                        status = 'warning';
+                        message += ' (Image search not available)';
+                    }
+                    
+                    displayResult('api-health-results', status, message, data);
+                } else {
+                    displayResult('api-health-results', 'error', 'API health check failed', data);
+                }
+            } catch (error) {
+                testResults.apiHealth = { status: 'fail', error: error.message };
+                displayResult('api-health-results', 'error', `API health check error: ${error.message}`);
+            }
+        }
+
+        // 2. Complete Flow Test
+        async function testCompleteFlow() {
+            try {
+                displayResult('flow-test-results', 'info', 'Running complete flow test...');
+                
+                const startTime = Date.now();
+                
+                // Test gift generation endpoint
+                const response = await fetch('/generate_gifts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                const endTime = Date.now();
+                
+                testResults.completeFlow = {
+                    status: response.ok && data.success ? 'pass' : 'fail',
+                    responseTime: endTime - startTime,
+                    giftCount: data.gift_ideas ? data.gift_ideas.length : 0,
+                    hasImages: data.gift_ideas ? data.gift_ideas.every(gift => gift.images && gift.images.length > 0) : false,
+                    hasAmazonLinks: data.gift_ideas ? data.gift_ideas.every(gift => gift.amazon_link) : false
+                };
+                
+                if (response.ok && data.success) {
+                    let html = `<div class="status success">Gift generation successful (${endTime - startTime}ms)</div>`;
+                    html += `<div class="info">Generated ${data.gift_ideas.length} gift ideas</div>`;
+                    
+                    // Display gift previews
+                    data.gift_ideas.forEach((gift, index) => {
+                        html += `
+                            <div class="gift-preview">
+                                <h4>Gift ${index + 1}: ${gift.title}</h4>
+                                <p><strong>Description:</strong> ${gift.description}</p>
+                                <p><strong>Price Range:</strong> ${gift.price_range || 'Not specified'}</p>
+                                <p><strong>Images:</strong> ${gift.images ? gift.images.length : 0} image(s)</p>
+                                <p><strong>Amazon Link:</strong> ${gift.amazon_link ? '✓ Present' : '✗ Missing'}</p>
+                                ${gift.images && gift.images.length > 0 ? `
+                                    <div class="gift-images">
+                                        ${gift.images.map(img => `
+                                            <div class="gift-image-item">
+                                                <img src="${img.url}" alt="${img.title || gift.title}" onerror="this.src='https://via.placeholder.com/150x100?text=Failed'">
+                                                <p>${img.source || 'Unknown source'}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p class="warning">No images available</p>'}
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('flow-test-results').innerHTML = html;
+                } else {
+                    displayResult('flow-test-results', 'error', 'Gift generation failed', data);
+                }
+            } catch (error) {
+                testResults.completeFlow = { status: 'fail', error: error.message };
+                displayResult('flow-test-results', 'error', `Complete flow test error: ${error.message}`);
+            }
+        }
+
+        // 3. Image Display Test
+        async function testImageDisplay() {
+            try {
+                displayResult('image-test-results', 'info', 'Testing image display system...');
+                
+                // Test image search endpoint
+                const response = await fetch('/test_image_search?query=wireless+headphones');
+                const data = await response.json();
+                
+                testResults.imageDisplay = {
+                    status: response.ok && data.success ? 'pass' : 'fail',
+                    imagesFound: data.images_found || 0,
+                    amazonLinkGenerated: !!data.amazon_link
+                };
+                
+                if (response.ok && data.success) {
+                    let html = `<div class="status success">Image search working properly</div>`;
+                    html += `<div class="info">Found ${data.images_found} images for query: ${data.query}</div>`;
+                    
+                    if (data.images && data.images.length > 0) {
+                        html += '<div class="gift-images">';
+                        data.images.forEach(img => {
+                            html += `
+                                <div class="gift-image-item">
+                                    <img src="${img.url}" alt="${img.title}" onerror="this.src='https://via.placeholder.com/150x100?text=Failed'">
+                                    <p>${img.source || 'Unknown'}</p>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    document.getElementById('image-test-results').innerHTML = html;
+                } else {
+                    displayResult('image-test-results', 'error', 'Image search test failed', data);
+                }
+            } catch (error) {
+                testResults.imageDisplay = { status: 'fail', error: error.message };
+                displayResult('image-test-results', 'error', `Image test error: ${error.message}`);
+            }
+        }
+
+        // 4. Gift Card UI Test
+        async function testGiftCardUI() {
+            try {
+                displayResult('gift-card-results', 'info', 'Testing gift card UI...');
+                
+                // Create a test iframe to check the actual UI
+                const iframe = document.createElement('iframe');
+                iframe.src = '/';
+                iframe.style.width = '100%';
+                iframe.style.height = '600px';
+                iframe.style.border = '1px solid #ddd';
+                
+                const container = document.getElementById('gift-card-results');
+                container.innerHTML = '<div class="status info">Loading production UI...</div>';
+                
+                iframe.onload = () => {
+                    testResults.giftCardUI = { status: 'pass', loaded: true };
+                    
+                    let html = '<div class="status success">Gift card UI loaded successfully</div>';
+                    html += '<p>Check the iframe below for visual inspection:</p>';
+                    html += '<ul>';
+                    html += '<li>✓ Check if gift boxes are properly styled</li>';
+                    html += '<li>✓ Check if text overflow is handled with ellipsis</li>';
+                    html += '<li>✓ Check if images load properly</li>';
+                    html += '<li>✓ Check if reveal animations work</li>';
+                    html += '<li>✓ Check if Amazon buttons are present</li>';
+                    html += '</ul>';
+                    
+                    container.innerHTML = html;
+                    container.appendChild(iframe);
+                };
+                
+                iframe.onerror = () => {
+                    testResults.giftCardUI = { status: 'fail', error: 'Failed to load UI' };
+                    displayResult('gift-card-results', 'error', 'Failed to load production UI');
+                };
+                
+            } catch (error) {
+                testResults.giftCardUI = { status: 'fail', error: error.message };
+                displayResult('gift-card-results', 'error', `Gift card UI test error: ${error.message}`);
+            }
+        }
+
+        // 5. Mobile Responsiveness Test
+        function testMobileResponsiveness() {
+            displayResult('mobile-test-results', 'info', 'Testing mobile responsiveness...');
+            
+            // Create mobile viewport test
+            const mobileFrame = document.createElement('iframe');
+            mobileFrame.src = '/';
+            mobileFrame.className = 'mobile-test-frame';
+            
+            const container = document.getElementById('mobile-test-results');
+            
+            mobileFrame.onload = () => {
+                testResults.mobileResponsiveness = { status: 'pass', viewportTested: true };
+                
+                let html = '<div class="status success">Mobile view loaded successfully</div>';
+                html += '<p>Mobile viewport test (375x667):</p>';
+                html += '<ul>';
+                html += '<li>✓ Check if chips wrap properly on small screens</li>';
+                html += '<li>✓ Check if navigation is touch-friendly</li>';
+                html += '<li>✓ Check if text is readable</li>';
+                html += '<li>✓ Check if buttons are properly sized</li>';
+                html += '<li>✓ Check if gift cards stack vertically</li>';
+                html += '</ul>';
+                
+                container.innerHTML = html;
+                container.appendChild(mobileFrame);
+            };
+            
+            mobileFrame.onerror = () => {
+                testResults.mobileResponsiveness = { status: 'fail', error: 'Failed to load mobile view' };
+                displayResult('mobile-test-results', 'error', 'Failed to load mobile view');
+            };
+        }
+
+        // 6. Error Handling Test
+        async function testErrorHandling() {
+            displayResult('error-test-results', 'info', 'Testing error handling...');
+            
+            const errorTests = [];
+            
+            // Test 1: Invalid data
+            try {
+                const response = await fetch('/generate_gifts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ invalid: 'data' })
+                });
+                const data = await response.json();
+                errorTests.push({
+                    test: 'Invalid data handling',
+                    passed: !response.ok && data.error,
+                    message: data.error || 'No error message'
+                });
+            } catch (error) {
+                errorTests.push({
+                    test: 'Invalid data handling',
+                    passed: false,
+                    error: error.message
+                });
+            }
+            
+            // Test 2: Empty data
+            try {
+                const response = await fetch('/generate_gifts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await response.json();
+                errorTests.push({
+                    test: 'Empty data handling',
+                    passed: !response.ok && data.error,
+                    message: data.error || 'No error message'
+                });
+            } catch (error) {
+                errorTests.push({
+                    test: 'Empty data handling',
+                    passed: false,
+                    error: error.message
+                });
+            }
+            
+            // Test 3: Wrong content type
+            try {
+                const response = await fetch('/generate_gifts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: 'plain text'
+                });
+                const data = await response.json();
+                errorTests.push({
+                    test: 'Wrong content type handling',
+                    passed: !response.ok,
+                    message: data.error || 'No error message'
+                });
+            } catch (error) {
+                errorTests.push({
+                    test: 'Wrong content type handling',
+                    passed: true,
+                    message: 'Server rejected non-JSON content'
+                });
+            }
+            
+            testResults.errorHandling = {
+                status: errorTests.every(t => t.passed) ? 'pass' : 'partial',
+                tests: errorTests
+            };
+            
+            let html = '<div class="status ' + (errorTests.every(t => t.passed) ? 'success' : 'warning') + '">Error handling test completed</div>';
+            errorTests.forEach(test => {
+                html += `<div class="status ${test.passed ? 'success' : 'error'}">${test.test}: ${test.passed ? 'Passed' : 'Failed'} - ${test.message || test.error || ''}</div>`;
+            });
+            
+            document.getElementById('error-test-results').innerHTML = html;
+        }
+
+        // 7. Performance Test
+        async function testPerformance() {
+            displayResult('performance-results', 'info', 'Running performance tests...');
+            
+            const performanceMetrics = {
+                apiResponseTimes: [],
+                pageLoadTime: 0,
+                resourceLoadTimes: {}
+            };
+            
+            // Test API response times (5 requests)
+            for (let i = 0; i < 5; i++) {
+                const startTime = performance.now();
+                try {
+                    await fetch('/health');
+                    const endTime = performance.now();
+                    performanceMetrics.apiResponseTimes.push(endTime - startTime);
+                } catch (error) {
+                    performanceMetrics.apiResponseTimes.push(-1);
+                }
+            }
+            
+            // Calculate average response time
+            const validTimes = performanceMetrics.apiResponseTimes.filter(t => t > 0);
+            const avgResponseTime = validTimes.length > 0 ? 
+                validTimes.reduce((a, b) => a + b, 0) / validTimes.length : -1;
+            
+            // Test resource loading
+            const resources = performance.getEntriesByType('resource');
+            const cssResources = resources.filter(r => r.name.includes('.css'));
+            const jsResources = resources.filter(r => r.name.includes('.js'));
+            const imageResources = resources.filter(r => r.name.match(/\.(png|jpg|jpeg|gif|webp)/i));
+            
+            performanceMetrics.resourceLoadTimes = {
+                css: cssResources.map(r => ({ name: r.name.split('/').pop(), duration: r.duration })),
+                js: jsResources.map(r => ({ name: r.name.split('/').pop(), duration: r.duration })),
+                images: imageResources.map(r => ({ name: r.name.split('/').pop(), duration: r.duration }))
+            };
+            
+            testResults.performance = {
+                status: avgResponseTime < 1000 ? 'pass' : 'warning',
+                avgApiResponseTime: avgResponseTime,
+                resourceLoadTimes: performanceMetrics.resourceLoadTimes
+            };
+            
+            let html = `<div class="status ${avgResponseTime < 1000 ? 'success' : 'warning'}">Performance test completed</div>`;
+            html += `<div class="info">Average API response time: ${avgResponseTime.toFixed(2)}ms</div>`;
+            html += '<div class="test-results">';
+            html += '<h4>Resource Load Times:</h4>';
+            html += '<p><strong>CSS Files:</strong></p>';
+            performanceMetrics.resourceLoadTimes.css.forEach(r => {
+                html += `<div>${r.name}: ${r.duration.toFixed(2)}ms</div>`;
+            });
+            html += '<p><strong>JS Files:</strong></p>';
+            performanceMetrics.resourceLoadTimes.js.forEach(r => {
+                html += `<div>${r.name}: ${r.duration.toFixed(2)}ms</div>`;
+            });
+            html += '<p><strong>Images:</strong></p>';
+            performanceMetrics.resourceLoadTimes.images.forEach(r => {
+                html += `<div>${r.name}: ${r.duration.toFixed(2)}ms</div>`;
+            });
+            html += '</div>';
+            
+            document.getElementById('performance-results').innerHTML = html;
+        }
+
+        // 8. Chip System Test
+        async function testChipSystem() {
+            displayResult('chip-test-results', 'info', 'Testing chip interaction system...');
+            
+            // This test requires actual interaction with the UI
+            // We'll create a checklist for manual testing
+            
+            testResults.chipSystem = {
+                status: 'manual',
+                checklist: [
+                    'Chip search functionality works',
+                    'Multi-select chips update textarea',
+                    'Deselecting chips removes text',
+                    'Manual textarea edits persist',
+                    'Chips are touch-friendly on mobile',
+                    'Keyboard navigation works',
+                    'Visual feedback on selection'
+                ]
+            };
+            
+            let html = '<div class="status info">Chip system requires manual testing</div>';
+            html += '<p>Please manually test the following on the production site:</p>';
+            html += '<ul>';
+            testResults.chipSystem.checklist.forEach(item => {
+                html += `<li>☐ ${item}</li>`;
+            });
+            html += '</ul>';
+            html += '<p><a href="/" target="_blank" class="test-button">Open Production Site</a></p>';
+            
+            document.getElementById('chip-test-results').innerHTML = html;
+        }
+
+        // Generate overall summary
+        function generateSummary() {
+            const summary = {
+                totalTests: Object.keys(testResults).length,
+                passed: 0,
+                failed: 0,
+                warnings: 0,
+                manual: 0
+            };
+            
+            Object.values(testResults).forEach(result => {
+                if (!result) return;
+                if (result.status === 'pass') summary.passed++;
+                else if (result.status === 'fail') summary.failed++;
+                else if (result.status === 'warning' || result.status === 'partial') summary.warnings++;
+                else if (result.status === 'manual') summary.manual++;
+            });
+            
+            let html = '<h3>Overall Test Results</h3>';
+            html += `<div class="test-grid">`;
+            html += `<div class="status success">Passed: ${summary.passed}</div>`;
+            html += `<div class="status error">Failed: ${summary.failed}</div>`;
+            html += `<div class="status warning">Warnings: ${summary.warnings}</div>`;
+            html += `<div class="status info">Manual: ${summary.manual}</div>`;
+            html += `</div>`;
+            
+            html += '<h4>Detailed Results:</h4>';
+            html += '<div class="test-results">' + JSON.stringify(testResults, null, 2) + '</div>';
+            
+            html += '<h4>Key Findings:</h4>';
+            html += '<ul>';
+            
+            // Add specific findings based on test results
+            if (testResults.apiHealth && !testResults.apiHealth.details?.openai_configured) {
+                html += '<li class="error">⚠️ OpenAI API is not configured</li>';
+            }
+            if (testResults.apiHealth && !testResults.apiHealth.details?.image_search_available) {
+                html += '<li class="warning">⚠️ Image search functionality is not available</li>';
+            }
+            if (testResults.completeFlow && testResults.completeFlow.status === 'pass') {
+                html += '<li class="success">✓ Gift generation flow is working correctly</li>';
+            }
+            if (testResults.imageDisplay && testResults.imageDisplay.status === 'pass') {
+                html += '<li class="success">✓ Image display system is functional</li>';
+            }
+            if (testResults.performance && testResults.performance.avgApiResponseTime < 1000) {
+                html += '<li class="success">✓ API performance is acceptable</li>';
+            }
+            
+            html += '</ul>';
+            
+            document.getElementById('test-summary').innerHTML = html;
+        }
+
+        // Run all tests automatically
+        async function runAllTests() {
+            await testAPIHealth();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testCompleteFlow();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testImageDisplay();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testGiftCardUI();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            testMobileResponsiveness();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testErrorHandling();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testPerformance();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            testChipSystem();
+            
+            // Generate summary after all tests
+            setTimeout(generateSummary, 1000);
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Complete Flow - Ruby's Gifts</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css?v=2.0">
+    
+    <style>
+        .test-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border: 2px solid #ff6600;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+        .test-btn {
+            background: #ff6600;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .console-log {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 300px;
+            height: 200px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Test Controls -->
+    <div class="test-controls">
+        <div>Test Controls</div>
+        <button class="test-btn" onclick="testAPICall()">Test API</button>
+        <button class="test-btn" onclick="simulateQuestionnaire()">Simulate Flow</button>
+        <button class="test-btn" onclick="clearConsole()">Clear Log</button>
+    </div>
+    
+    <!-- Console Log -->
+    <div id="console-log" class="console-log"></div>
+
+    <!-- Landing Page -->
+    <div id="landing" class="page active">
+        <div class="stars">
+            <!-- Background stars -->
+            <div class="star" style="top: 15%; left: 80%; animation-delay: 0.5s;"></div>
+            <div class="star" style="top: 60%; left: 85%; animation-delay: 1.5s;"></div>
+            <div class="star" style="top: 80%; left: 75%; animation-delay: 3s;"></div>
+        </div>
+        <div class="container">
+            <div class="landing-content">
+                <h1 class="landing-title">Ruby's Gifts</h1>
+                <p class="landing-subtitle">Discover the perfect gift with AI-powered recommendations</p>
+                <p class="landing-description">
+                    Answer a few fun questions using our interactive chip system, 
+                    and we'll suggest thoughtful gift ideas tailored just for them
+                </p>
+                <div class="landing-buttons">
+                    <button id="start-btn" class="btn btn-primary">
+                        <i class="ph ph-gift"></i>
+                        start discovering
+                    </button>
+                    <button id="test-btn" class="btn btn-secondary">
+                        <i class="ph ph-test-tube"></i>
+                        test gifts
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questionnaire Page -->
+    <div id="questionnaire" class="page">
+        <div class="container">
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="current-question">1</span> of <span id="total-questions">8</span>
+                </div>
+            </div>
+
+            <!-- Question Container -->
+            <div id="question-container" class="question-container">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+
+            <!-- Navigation - Fixed Bottom -->
+            <div class="navigation">
+                <div class="navigation-content">
+                    <button id="prev-btn" class="btn btn-secondary" disabled>
+                        <i class="ph ph-arrow-left"></i>
+                        previous
+                    </button>
+                    <button id="next-btn" class="btn btn-primary" disabled>
+                        next
+                        <i class="ph ph-arrow-right"></i>
+                    </button>
+                    <button id="submit-btn" class="btn btn-primary" style="display: none;" disabled>
+                        <i class="ph ph-sparkle"></i>
+                        get gift ideas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Page -->
+    <div id="results" class="page">
+        <div class="container">
+            <div class="results-header">
+                <h2 class="results-title">Ruby's Gift Suggestions</h2>
+                <p class="results-subtitle">based on what you told us about them</p>
+            </div>
+            
+            <div id="gift-cards" class="gift-cards">
+                <!-- Gift cards will be dynamically inserted here -->
+            </div>
+
+            <!-- Amazon Affiliate Disclosure -->
+            <div class="affiliate-disclosure">
+                <p><small><i class="ph ph-info"></i> As an Amazon Associate, we earn from qualifying purchases when you buy through our links. This helps us keep providing free gift recommendations!</small></p>
+            </div>
+
+            <div class="results-actions">
+                <button id="retry-btn" class="btn btn-secondary">
+                    <i class="ph ph-arrow-counter-clockwise"></i>
+                    try different answers
+                </button>
+                <button id="new-search-btn" class="btn btn-primary">
+                    <i class="ph ph-plus"></i>
+                    new search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-content">
+            <img src="loading.gif" alt="Loading" class="loading-gif" autoplay>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="error-message">
+        <div class="error-content">
+            <i class="ph ph-warning-circle"></i>
+            <h3>oops! something went wrong</h3>
+            <p id="error-text">we couldn't generate gift ideas right now. please try again.</p>
+            <button id="error-retry-btn" class="btn btn-primary">try again</button>
+        </div>
+    </div>
+
+    <script>
+        // Console logging override for testing
+        const consoleDiv = document.getElementById('console-log');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToTestConsole(type, ...args) {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            consoleDiv.innerHTML += `<div style="color: ${type === 'error' ? 'red' : type === 'warn' ? 'yellow' : 'white'}">[${timestamp}] ${type.toUpperCase()}: ${message}</div>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            addToTestConsole('log', ...args);
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            addToTestConsole('error', ...args);
+            originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            addToTestConsole('warn', ...args);
+            originalWarn.apply(console, args);
+        };
+        
+        function clearConsole() {
+            consoleDiv.innerHTML = '';
+        }
+        
+        async function testAPICall() {
+            console.log('Testing API call...');
+            try {
+                const response = await fetch('/generate_gifts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        call_them: 'buddy',
+                        relationship: 'best friend',
+                        previous_gifts: 'books, coffee',
+                        hate: 'loud noises',
+                        complaints: 'work stress',
+                        complain_about_them: 'always late',
+                        budget: '₹500-1500',
+                        limitations: 'eco-friendly'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('API call successful:', data);
+                } else {
+                    console.error('API call failed:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error('API call error:', error);
+            }
+        }
+        
+        function simulateQuestionnaire() {
+            console.log('Simulating questionnaire flow...');
+            // This would trigger the test function in questionnaire.js
+            if (typeof QuestionnaireSystem !== 'undefined') {
+                const qs = new QuestionnaireSystem();
+                if (qs.testGiftGeneration) {
+                    qs.testGiftGeneration();
+                } else {
+                    console.error('testGiftGeneration method not found');
+                }
+            } else {
+                console.error('QuestionnaireSystem not loaded');
+            }
+        }
+        
+        // Catch any global errors
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error || e.message, 'at', e.filename + ':' + e.lineno);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e.reason);
+        });
+        
+        // Test if scripts are loading
+        window.addEventListener('load', function() {
+            console.log('Page loaded');
+            
+            // Test script availability
+            setTimeout(() => {
+                console.log('Testing script availability...');
+                console.log('CHIP_DATA available:', typeof CHIP_DATA !== 'undefined');
+                console.log('giftRevealSystem available:', typeof giftRevealSystem !== 'undefined');
+                console.log('QuestionnaireSystem available:', typeof QuestionnaireSystem !== 'undefined');
+                
+                // Test Phosphor icons
+                const icons = document.querySelectorAll('.ph');
+                console.log('Phosphor icons found:', icons.length);
+            }, 500);
+        });
+    </script>
+
+    <!-- Scripts -->
+    <script src="chip-data.js?v=2.0"></script>
+    <script src="gift-reveal.js?v=2.0"></script>
+    <script src="questionnaire.js?v=2.0"></script>
+</body>
+</html>

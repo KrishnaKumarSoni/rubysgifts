@@ -1,0 +1,443 @@
+{
+  "timestamp": "2025-07-28T20:53:09.050989",
+  "tests": {
+    "health": [
+      {
+        "timestamp": "20:53:09",
+        "message": "Testing API health check..."
+      },
+      {
+        "timestamp": "20:53:09",
+        "message": "\u2705 API Health: healthy"
+      },
+      {
+        "timestamp": "20:53:09",
+        "message": "OpenAI Configured: True"
+      },
+      {
+        "timestamp": "20:53:09",
+        "message": "Image Search: True"
+      },
+      {
+        "timestamp": "20:53:09",
+        "message": "Image Status: Python image search available | Unsplash fallback mode | Pexels fallback mode"
+      },
+      {
+        "timestamp": "20:53:09",
+        "message": "Amazon Tag: kamazon01-21\n"
+      }
+    ],
+    "images": [
+      {
+        "timestamp": "20:53:09",
+        "message": "Testing image search functionality..."
+      },
+      {
+        "timestamp": "20:53:09",
+        "message": "Testing query: MacBook Pro laptop"
+      },
+      {
+        "timestamp": "20:53:09",
+        "message": "Query 'MacBook Pro laptop': 0/3 real images"
+      },
+      {
+        "timestamp": "20:53:09",
+        "message": "Testing query: wireless headphones"
+      },
+      {
+        "timestamp": "20:53:10",
+        "message": "Query 'wireless headphones': 0/3 real images"
+      },
+      {
+        "timestamp": "20:53:10",
+        "message": "Testing query: chocolate gift box"
+      },
+      {
+        "timestamp": "20:53:10",
+        "message": "Query 'chocolate gift box': 0/3 real images"
+      },
+      {
+        "timestamp": "20:53:10",
+        "message": "Testing query: coffee mug ceramic"
+      },
+      {
+        "timestamp": "20:53:12",
+        "message": "Query 'coffee mug ceramic': 0/3 real images"
+      }
+    ],
+    "gifts": [
+      {
+        "timestamp": "20:53:12",
+        "message": "Testing gift generation with images..."
+      },
+      {
+        "timestamp": "20:53:12",
+        "message": "Sending gift generation request..."
+      },
+      {
+        "timestamp": "20:53:18",
+        "message": "Response time: 6.78s"
+      },
+      {
+        "timestamp": "20:53:18",
+        "message": "\u2705 Generated 3 gift ideas"
+      },
+      {
+        "timestamp": "20:53:18",
+        "message": "Gift 1 'Tech Upgrade Experience': 0/3 real images"
+      },
+      {
+        "timestamp": "20:53:18",
+        "message": "Gift 2 'Personalized Work Stress Relief Kit': 0/3 real images"
+      },
+      {
+        "timestamp": "20:53:18",
+        "message": "Gift 3 'Productivity Planner Set': 0/3 real images"
+      },
+      {
+        "timestamp": "20:53:18",
+        "message": "\u274c ISSUE: Only placeholder images found! 9 placeholders"
+      }
+    ],
+    "amazon": [
+      {
+        "timestamp": "20:53:18",
+        "message": "Testing Amazon affiliate links..."
+      },
+      {
+        "timestamp": "20:53:19",
+        "message": "Product 'MacBook Pro 13 inch': Affiliate=True, Terms=True"
+      },
+      {
+        "timestamp": "20:53:19",
+        "message": "Product 'Sony WH-1000XM5 headphones': Affiliate=True, Terms=True"
+      },
+      {
+        "timestamp": "20:53:20",
+        "message": "Product 'Kindle Paperwhite': Affiliate=True, Terms=True"
+      },
+      {
+        "timestamp": "20:53:20",
+        "message": "Product 'Ceramic coffee mug': Affiliate=True, Terms=True"
+      }
+    ]
+  },
+  "image_analysis": {
+    "MacBook Pro laptop": {
+      "total_images": 3,
+      "real_images": 0,
+      "placeholder_images": 3,
+      "source_breakdown": {
+        "Enhanced Placeholder": 3
+      },
+      "images": [
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://via.placeholder.com/200x200/FF6600/FFFFFF?text=MacBook+Pro+laptop",
+          "title": "MacBook Pro laptop - Orange Style 1",
+          "url": "https://via.placeholder.com/400x400/FF6600/FFFFFF?text=MacBook+Pro+laptop",
+          "width": 400
+        },
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://dummyimage.com/200x200/FF8533/FFFFFF&text=MacBook+Pro+laptop",
+          "title": "MacBook Pro laptop - Light Orange Style 2",
+          "url": "https://dummyimage.com/400x400/FF8533/FFFFFF&text=MacBook+Pro+laptop",
+          "width": 400
+        },
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://picsum.photos/seed/363/200/200?grayscale&blur=1",
+          "title": "MacBook Pro laptop - Peach Style 3",
+          "url": "https://picsum.photos/seed/363/400/400?grayscale&blur=1",
+          "width": 400
+        }
+      ],
+      "quality_score": 0.0
+    },
+    "wireless headphones": {
+      "total_images": 3,
+      "real_images": 0,
+      "placeholder_images": 3,
+      "source_breakdown": {
+        "Enhanced Placeholder": 3
+      },
+      "images": [
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://via.placeholder.com/200x200/FF6600/FFFFFF?text=wireless+headphones",
+          "title": "wireless headphones - Orange Style 1",
+          "url": "https://via.placeholder.com/400x400/FF6600/FFFFFF?text=wireless+headphones",
+          "width": 400
+        },
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://dummyimage.com/200x200/FF8533/FFFFFF&text=wireless+headphones",
+          "title": "wireless headphones - Light Orange Style 2",
+          "url": "https://dummyimage.com/400x400/FF8533/FFFFFF&text=wireless+headphones",
+          "width": 400
+        },
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://picsum.photos/seed/716/200/200?grayscale&blur=1",
+          "title": "wireless headphones - Peach Style 3",
+          "url": "https://picsum.photos/seed/716/400/400?grayscale&blur=1",
+          "width": 400
+        }
+      ],
+      "quality_score": 0.0
+    },
+    "chocolate gift box": {
+      "total_images": 3,
+      "real_images": 0,
+      "placeholder_images": 3,
+      "source_breakdown": {
+        "Enhanced Placeholder": 3
+      },
+      "images": [
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://via.placeholder.com/200x200/FF6600/FFFFFF?text=chocolate+gift+box",
+          "title": "chocolate gift box - Orange Style 1",
+          "url": "https://via.placeholder.com/400x400/FF6600/FFFFFF?text=chocolate+gift+box",
+          "width": 400
+        },
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://dummyimage.com/200x200/FF8533/FFFFFF&text=chocolate+gift+box",
+          "title": "chocolate gift box - Light Orange Style 2",
+          "url": "https://dummyimage.com/400x400/FF8533/FFFFFF&text=chocolate+gift+box",
+          "width": 400
+        },
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://picsum.photos/seed/586/200/200?grayscale&blur=1",
+          "title": "chocolate gift box - Peach Style 3",
+          "url": "https://picsum.photos/seed/586/400/400?grayscale&blur=1",
+          "width": 400
+        }
+      ],
+      "quality_score": 0.0
+    },
+    "coffee mug ceramic": {
+      "total_images": 3,
+      "real_images": 0,
+      "placeholder_images": 3,
+      "source_breakdown": {
+        "Enhanced Placeholder": 3
+      },
+      "images": [
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://via.placeholder.com/200x200/FF6600/FFFFFF?text=coffee+mug+ceramic",
+          "title": "coffee mug ceramic - Orange Style 1",
+          "url": "https://via.placeholder.com/400x400/FF6600/FFFFFF?text=coffee+mug+ceramic",
+          "width": 400
+        },
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://dummyimage.com/200x200/FF8533/FFFFFF&text=coffee+mug+ceramic",
+          "title": "coffee mug ceramic - Light Orange Style 2",
+          "url": "https://dummyimage.com/400x400/FF8533/FFFFFF&text=coffee+mug+ceramic",
+          "width": 400
+        },
+        {
+          "aspectRatio": "1.00",
+          "height": 400,
+          "source": "Enhanced Placeholder",
+          "thumbnail": "https://picsum.photos/seed/38/200/200?grayscale&blur=1",
+          "title": "coffee mug ceramic - Peach Style 3",
+          "url": "https://picsum.photos/seed/38/400/400?grayscale&blur=1",
+          "width": 400
+        }
+      ],
+      "quality_score": 0.0
+    }
+  },
+  "performance": {
+    "gift_generation_time": 6.782112121582031
+  },
+  "errors": [],
+  "health_check": {
+    "amazon_affiliate_tag": "kamazon01-21\n",
+    "api_key_present": true,
+    "image_search_available": true,
+    "image_search_status": "Python image search available | Unsplash fallback mode | Pexels fallback mode",
+    "openai_configured": true,
+    "service": "Ruby's Gifts API",
+    "status": "healthy",
+    "timestamp": "2025-07-28T15:23:09.362185",
+    "version": "1.0.0"
+  },
+  "gift_analysis": {
+    "total_gifts": 3,
+    "total_images": 9,
+    "real_images": 0,
+    "placeholder_images": 9,
+    "image_quality_score": 0.0,
+    "gifts": {
+      "gift_1": {
+        "title": "Tech Upgrade Experience",
+        "total_images": 3,
+        "real_images": 0,
+        "images": [
+          {
+            "aspectRatio": "1.00",
+            "height": 400,
+            "source": "Enhanced Placeholder",
+            "thumbnail": "https://via.placeholder.com/200x200/FF6600/FFFFFF?text=Laptop+optimization+service+voucher+Tech+gadget+gift+card",
+            "title": "Laptop optimization service voucher, Tech gadget gift card - Orange Style 1",
+            "url": "https://via.placeholder.com/400x400/FF6600/FFFFFF?text=Laptop+optimization+service+voucher+Tech+gadget+gift+card",
+            "width": 400
+          },
+          {
+            "aspectRatio": "1.00",
+            "height": 400,
+            "source": "Enhanced Placeholder",
+            "thumbnail": "https://dummyimage.com/200x200/FF8533/FFFFFF&text=Laptop+optimization+service+voucher+Tech+gadget+gift+card",
+            "title": "Laptop optimization service voucher, Tech gadget gift card - Light Orange Style 2",
+            "url": "https://dummyimage.com/400x400/FF8533/FFFFFF&text=Laptop+optimization+service+voucher+Tech+gadget+gift+card",
+            "width": 400
+          },
+          {
+            "aspectRatio": "1.00",
+            "height": 400,
+            "source": "Enhanced Placeholder",
+            "thumbnail": "https://picsum.photos/seed/158/200/200?grayscale&blur=1",
+            "title": "Laptop optimization service voucher, Tech gadget gift card - Peach Style 3",
+            "url": "https://picsum.photos/seed/158/400/400?grayscale&blur=1",
+            "width": 400
+          }
+        ],
+        "amazon_link": "https://www.amazon.in/s?k=Tech+gadget+gift+card&tag=kamazon01-21\n&linkCode=ur2&camp=3638&creative=24630",
+        "price_range": "\u20b95,000-7,000",
+        "image_search_terms": "Laptop optimization service voucher, Tech gadget gift card",
+        "amazon_search_query": "Tech gadget gift card"
+      },
+      "gift_2": {
+        "title": "Personalized Work Stress Relief Kit",
+        "total_images": 3,
+        "real_images": 0,
+        "images": [
+          {
+            "aspectRatio": "1.00",
+            "height": 400,
+            "source": "Enhanced Placeholder",
+            "thumbnail": "https://via.placeholder.com/200x200/FF6600/FFFFFF?text=Custom+stress+ball+Aromatherapy+candles+set+Mindfulness+journal",
+            "title": "Custom stress ball, Aromatherapy candles set, Mindfulness journal - Orange Style 1",
+            "url": "https://via.placeholder.com/400x400/FF6600/FFFFFF?text=Custom+stress+ball+Aromatherapy+candles+set+Mindfulness+journal",
+            "width": 400
+          },
+          {
+            "aspectRatio": "1.00",
+            "height": 400,
+            "source": "Enhanced Placeholder",
+            "thumbnail": "https://dummyimage.com/200x200/FF8533/FFFFFF&text=Custom+stress+ball+Aromatherapy+candles+set+Mindfulness+journal",
+            "title": "Custom stress ball, Aromatherapy candles set, Mindfulness journal - Light Orange Style 2",
+            "url": "https://dummyimage.com/400x400/FF8533/FFFFFF&text=Custom+stress+ball+Aromatherapy+candles+set+Mindfulness+journal",
+            "width": 400
+          },
+          {
+            "aspectRatio": "1.00",
+            "height": 400,
+            "source": "Enhanced Placeholder",
+            "thumbnail": "https://picsum.photos/seed/107/200/200?grayscale&blur=1",
+            "title": "Custom stress ball, Aromatherapy candles set, Mindfulness journal - Peach Style 3",
+            "url": "https://picsum.photos/seed/107/400/400?grayscale&blur=1",
+            "width": 400
+          }
+        ],
+        "amazon_link": "https://www.amazon.in/s?k=Personalized+stress+ball,+Aromatherapy+candles+set,+Mindfulness+journal&tag=kamazon01-21\n&linkCode=ur2&camp=3638&creative=24630",
+        "price_range": "\u20b92,000-3,000",
+        "image_search_terms": "Custom stress ball, Aromatherapy candles set, Mindfulness journal",
+        "amazon_search_query": "Personalized stress ball, Aromatherapy candles set, Mindfulness journal"
+      },
+      "gift_3": {
+        "title": "Productivity Planner Set",
+        "total_images": 3,
+        "real_images": 0,
+        "images": [
+          {
+            "aspectRatio": "1.00",
+            "height": 400,
+            "source": "Enhanced Placeholder",
+            "thumbnail": "https://via.placeholder.com/200x200/FF6600/FFFFFF?text=Productivity+planner+set+Motivational+sticky+notes+Stylish+pen",
+            "title": "Productivity planner set, Motivational sticky notes, Stylish pen - Orange Style 1",
+            "url": "https://via.placeholder.com/400x400/FF6600/FFFFFF?text=Productivity+planner+set+Motivational+sticky+notes+Stylish+pen",
+            "width": 400
+          },
+          {
+            "aspectRatio": "1.00",
+            "height": 400,
+            "source": "Enhanced Placeholder",
+            "thumbnail": "https://dummyimage.com/200x200/FF8533/FFFFFF&text=Productivity+planner+set+Motivational+sticky+notes+Stylish+pen",
+            "title": "Productivity planner set, Motivational sticky notes, Stylish pen - Light Orange Style 2",
+            "url": "https://dummyimage.com/400x400/FF8533/FFFFFF&text=Productivity+planner+set+Motivational+sticky+notes+Stylish+pen",
+            "width": 400
+          },
+          {
+            "aspectRatio": "1.00",
+            "height": 400,
+            "source": "Enhanced Placeholder",
+            "thumbnail": "https://picsum.photos/seed/970/200/200?grayscale&blur=1",
+            "title": "Productivity planner set, Motivational sticky notes, Stylish pen - Peach Style 3",
+            "url": "https://picsum.photos/seed/970/400/400?grayscale&blur=1",
+            "width": 400
+          }
+        ],
+        "amazon_link": "https://www.amazon.in/s?k=Productivity+planner+set,+Motivational+sticky+notes,+Stylish+pen&tag=kamazon01-21\n&linkCode=ur2&camp=3638&creative=24630",
+        "price_range": "\u20b93,000-4,000",
+        "image_search_terms": "Productivity planner set, Motivational sticky notes, Stylish pen",
+        "amazon_search_query": "Productivity planner set, Motivational sticky notes, Stylish pen"
+      }
+    }
+  },
+  "amazon_analysis": {
+    "MacBook Pro 13 inch": {
+      "link": "https://www.amazon.in/s?k=MacBook+Pro+13+inch&tag=kamazon01-21\n&linkCode=ur2&camp=3638&creative=24630",
+      "has_affiliate_tag": true,
+      "has_product_terms": true,
+      "quality_score": 1.0
+    },
+    "Sony WH-1000XM5 headphones": {
+      "link": "https://www.amazon.in/s?k=Sony+WH-1000XM5+headphones&tag=kamazon01-21\n&linkCode=ur2&camp=3638&creative=24630",
+      "has_affiliate_tag": true,
+      "has_product_terms": true,
+      "quality_score": 1.0
+    },
+    "Kindle Paperwhite": {
+      "link": "https://www.amazon.in/s?k=Kindle+Paperwhite&tag=kamazon01-21\n&linkCode=ur2&camp=3638&creative=24630",
+      "has_affiliate_tag": true,
+      "has_product_terms": true,
+      "quality_score": 1.0
+    },
+    "Ceramic coffee mug": {
+      "link": "https://www.amazon.in/s?k=Ceramic+coffee+mug&tag=kamazon01-21\n&linkCode=ur2&camp=3638&creative=24630",
+      "has_affiliate_tag": true,
+      "has_product_terms": true,
+      "quality_score": 1.0
+    }
+  }
+}

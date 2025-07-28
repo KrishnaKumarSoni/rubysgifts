@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruby's Gifts - Overflow Fixes Test</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        body {
+            padding: 2rem;
+            background: linear-gradient(135deg, #fff5f0 0%, #fed7aa 100%);
+        }
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .test-title {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            color: #ff6600;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+        .test-section {
+            margin-bottom: 3rem;
+        }
+        .test-section h2 {
+            font-family: 'Playfair Display', serif;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        .test-note {
+            background: rgba(255, 102, 0, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #ff6600;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Gift Card Overflow Fixes - Test Cases</h1>
+        
+        <div class="test-note">
+            <strong>Testing Scenarios:</strong>
+            <ul>
+                <li>Long titles that exceed 2 lines</li>
+                <li>Extensive descriptions that exceed 4 lines</li>
+                <li>Very long price ranges</li>
+                <li>Lengthy starter and reaction text</li>
+                <li>Broken/missing images</li>
+                <li>Different screen sizes (resize browser to test)</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Case 1: Extremely Long Content</h2>
+            <div id="gift-cards" class="gift-cards">
+                <div class="gift-box-container" data-gift-index="0">
+                    <div class="gift-box revealed">
+                        <div class="gift-content visible">
+                            <div class="gift-image-container">
+                                <img src="https://source.unsplash.com/300x200/?luxury,watch&sig=999" 
+                                     alt="Premium Swiss-Made Luxury Timepiece" 
+                                     class="gift-image loaded">
+                            </div>
+                            <h3 class="gift-title">Premium Swiss-Made Luxury Timepiece with Complicated Mechanical Movement and Sapphire Crystal Display Case</h3>
+                            <p class="gift-description">This is an extraordinarily detailed and comprehensive description that goes on for multiple paragraphs to test the overflow handling. The watch features intricate mechanical movements, premium materials, and exceptional craftsmanship that has been perfected over generations of Swiss watchmaking expertise. It includes features like moon phase indicators, perpetual calendars, and minute repeaters that showcase the pinnacle of horological achievement.</p>
+                            <div class="gift-price">₹250,000-500,000 (Premium Swiss Luxury Timepiece Range)</div>
+                            <div class="gift-starter"><strong>How to present it:</strong> "I know you've always appreciated fine craftsmanship and attention to detail, so I thought this masterpiece of Swiss engineering would be perfect for someone who values precision, heritage, and timeless elegance in everything they do."</div>
+                            <div class="gift-reaction"><strong>Expected reaction:</strong> Complete amazement and perhaps some concern about the expense, followed by deep appreciation for the thoughtfulness and understanding of their taste for luxury items and fine craftsmanship.</div>
+                            <div class="gift-actions">
+                                <a href="https://www.amazon.in/s?k=luxury+swiss+watch" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="amazon-btn">
+                                    <i class="ph ph-shopping-cart"></i>
+                                    <span>Find on Amazon</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gift-box-container" data-gift-index="1">
+                    <div class="gift-box revealed">
+                        <div class="gift-content visible">
+                            <div class="gift-image-container error">
+                                <img src="https://broken-url-that-does-not-exist.com/image.jpg" 
+                                     alt="Broken Image Test" 
+                                     class="gift-image"
+                                     style="display: none;">
+                            </div>
+                            <h3 class="gift-title">Short Title</h3>
+                            <p class="gift-description">Short description to test minimal content scenarios.</p>
+                            <div class="gift-price">₹50</div>
+                            <div class="gift-starter"><strong>How to present it:</strong> Simple presentation.</div>
+                            <div class="gift-reaction"><strong>Expected reaction:</strong> Positive response.</div>
+                            <div class="gift-actions">
+                                <a href="https://www.amazon.in/s?k=test" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="amazon-btn">
+                                    <i class="ph ph-shopping-cart"></i>
+                                    <span>Find on Amazon</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gift-box-container" data-gift-index="2">
+                    <div class="gift-box revealed">
+                        <div class="gift-content visible">
+                            <div class="gift-image-container">
+                                <img src="https://source.unsplash.com/300x200/?books,reading&sig=111" 
+                                     alt="Comprehensive Book Collection" 
+                                     class="gift-image loaded">
+                            </div>
+                            <h3 class="gift-title">Complete Collector's Edition Book Series</h3>
+                            <p class="gift-description">A curated collection of first-edition books from renowned authors, featuring leather-bound covers, gold leaf detailing, and original illustrations. Perfect for the avid reader who appreciates literary classics and fine book craftsmanship.</p>
+                            <div class="gift-price">₹15,000-25,000</div>
+                            <div class="gift-starter"><strong>How to present it:</strong> "I know how much you love losing yourself in a good book, so I put together this special collection."</div>
+                            <div class="gift-reaction"><strong>Expected reaction:</strong> Excitement about having beautiful editions to display and read, probably followed by immediate browsing through the collection.</div>
+                            <div class="gift-actions">
+                                <a href="https://www.amazon.in/s?k=book+collection+leather+bound" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="amazon-btn">
+                                    <i class="ph ph-shopping-cart"></i>
+                                    <span>Find on Amazon</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Responsive Test Instructions</h2>
+            <div class="test-note">
+                <strong>Resize your browser window to test:</strong>
+                <ul>
+                    <li><strong>Desktop (>1024px):</strong> Cards should display with larger fonts and spacing</li>
+                    <li><strong>Tablet (768-1024px):</strong> Cards should adapt with medium sizing</li>
+                    <li><strong>Mobile (480-768px):</strong> Cards should stack and use compact spacing</li>
+                    <li><strong>Small Mobile (<480px):</strong> Cards should use minimal spacing and smaller fonts</li>
+                </ul>
+                
+                <strong>Check for:</strong>
+                <ul>
+                    <li>✅ Text overflow handled with ellipsis</li>
+                    <li>✅ Images maintain aspect ratio</li>
+                    <li>✅ Cards don't break layout</li>
+                    <li>✅ Consistent spacing across elements</li>
+                    <li>✅ Touch-friendly button sizes on mobile</li>
+                    <li>✅ Broken images show placeholder icon</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactivity for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Overflow fixes test page loaded');
+            
+            // Test window resize responsiveness
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    console.log('Window resized to:', window.innerWidth + 'x' + window.innerHeight);
+                }, 250);
+            });
+            
+            // Log initial viewport size
+            console.log('Initial viewport:', window.innerWidth + 'x' + window.innerHeight);
+        });
+    </script>
+</body>
+</html>

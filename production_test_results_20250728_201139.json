@@ -1,0 +1,163 @@
+{
+  "timestamp": "2025-07-28T20:11:20.830999",
+  "url": "https://rubysgifts.kks.im",
+  "tests": {
+    "api_health": {
+      "passed": true,
+      "status_code": 200,
+      "data": {
+        "amazon_affiliate_tag": "kamazon01-21\n",
+        "api_key_present": true,
+        "image_search_available": false,
+        "image_search_status": "Node.js not found in PATH",
+        "openai_configured": true,
+        "service": "Ruby's Gifts API",
+        "status": "healthy",
+        "timestamp": "2025-07-28T14:41:22.518909",
+        "version": "1.0.0"
+      }
+    },
+    "complete_flow": {
+      "passed": true,
+      "status_code": 200,
+      "response_time_ms": 9517.29702949524,
+      "gift_count": 3
+    },
+    "image_search": {
+      "passed": false,
+      "status_code": 503,
+      "images_found": 0
+    },
+    "error_handling": {
+      "passed": true,
+      "individual_tests": [
+        {
+          "test": "Invalid data handling",
+          "passed": true,
+          "status_code": 400,
+          "error_message": "Missing or empty responses for: call_them, relationship, previous_gifts, hate, complaints, complain_about_them, budget, limitations"
+        },
+        {
+          "test": "Empty data handling",
+          "passed": true,
+          "status_code": 400,
+          "error_message": "Missing or empty responses for: call_them, relationship, previous_gifts, hate, complaints, complain_about_them, budget, limitations"
+        },
+        {
+          "test": "Missing content type handling",
+          "passed": true,
+          "status_code": 400
+        }
+      ]
+    },
+    "performance": {
+      "passed": true,
+      "average_response_ms": 331.53233528137207,
+      "response_times": [
+        327.2671699523926,
+        340.44623374938965,
+        315.55628776550293,
+        350.8269786834717,
+        323.5650062561035
+      ]
+    },
+    "static_resources": {
+      "passed": true,
+      "resources": [
+        {
+          "resource": "Homepage",
+          "path": "/",
+          "passed": true,
+          "status_code": 200,
+          "content_type": "text/html; charset=utf-8"
+        },
+        {
+          "resource": "Stylesheet",
+          "path": "/styles.css",
+          "passed": true,
+          "status_code": 200,
+          "content_type": "text/css; charset=utf-8"
+        },
+        {
+          "resource": "Questionnaire JS",
+          "path": "/questionnaire.js",
+          "passed": true,
+          "status_code": 200,
+          "content_type": "application/javascript; charset=utf-8"
+        },
+        {
+          "resource": "Chip Data JS",
+          "path": "/chip-data.js",
+          "passed": true,
+          "status_code": 200,
+          "content_type": "application/javascript; charset=utf-8"
+        },
+        {
+          "resource": "Gift Reveal JS",
+          "path": "/gift-reveal.js",
+          "passed": true,
+          "status_code": 200,
+          "content_type": "application/javascript; charset=utf-8"
+        },
+        {
+          "resource": "Favicon",
+          "path": "/favicon.png",
+          "passed": true,
+          "status_code": 200,
+          "content_type": "image/png"
+        },
+        {
+          "resource": "Loading Animation",
+          "path": "/loading.gif",
+          "passed": true,
+          "status_code": 200,
+          "content_type": "image/gif"
+        }
+      ]
+    }
+  },
+  "issues": [
+    {
+      "severity": "medium",
+      "issue": "Image search not available",
+      "details": "Gift recommendations will show placeholder images",
+      "timestamp": "2025-07-28T20:11:22.557691"
+    },
+    {
+      "severity": "medium",
+      "issue": "Gift 1 has no images",
+      "details": "Zen Garden Kit",
+      "timestamp": "2025-07-28T20:11:32.580611"
+    },
+    {
+      "severity": "medium",
+      "issue": "Gift 2 has no images",
+      "details": "Personalized Leather Journal",
+      "timestamp": "2025-07-28T20:11:32.580680"
+    },
+    {
+      "severity": "medium",
+      "issue": "Gift 3 has no images",
+      "details": "Escape Room Experience",
+      "timestamp": "2025-07-28T20:11:32.580707"
+    },
+    {
+      "severity": "high",
+      "issue": "Image search test failed",
+      "details": "Image search not available",
+      "timestamp": "2025-07-28T20:11:33.433367"
+    }
+  ],
+  "summary": {
+    "total_tests": 6,
+    "passed": 5,
+    "failed": 1,
+    "issues": {
+      "total": 5,
+      "critical": 0,
+      "high": 1,
+      "medium": 4,
+      "low": 0
+    }
+  }
+}

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruby's Gifts - Test Gift Cards with Images</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        body {
+            padding: 2rem;
+            background: linear-gradient(135deg, #fff5f0 0%, #fed7aa 100%);
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-title {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            color: #ff6600;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">Test: Gift Cards with Images & Amazon Links</h1>
+        
+        <div id="gift-cards" class="gift-cards">
+            <!-- Test Gift Card 1 -->
+            <div class="gift-box-container" data-gift-index="0">
+                <div class="gift-box revealed">
+                    <div class="gift-content visible">
+                        <div class="gift-image-container">
+                            <img src="https://source.unsplash.com/300x200/?wireless,headphones&sig=123" 
+                                 alt="Wireless Noise-Canceling Headphones" 
+                                 class="gift-image loaded">
+                        </div>
+                        <h3 class="gift-title">Wireless Noise-Canceling Headphones</h3>
+                        <p class="gift-description">Perfect for someone who complains about noise and distractions. These premium headphones will give them the peace and quiet they crave, whether they're working, traveling, or just relaxing at home.</p>
+                        <div class="gift-price">₹8,000-15,000</div>
+                        <div class="gift-starter"><strong>How to present it:</strong> "I noticed you've been stressed about all the noise around here, so I thought these might help you find some peace and quiet."</div>
+                        <div class="gift-reaction"><strong>Expected reaction:</strong> Relief and gratitude, followed by immediate testing and probably a big smile when they experience the noise cancellation.</div>
+                        <div class="gift-actions">
+                            <a href="https://www.amazon.in/s?k=wireless+noise+canceling+headphones" 
+                               target="_blank" 
+                               rel="noopener noreferrer" 
+                               class="amazon-btn">
+                                <i class="ph ph-shopping-cart"></i>
+                                <span>Find on Amazon</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Gift Card 2 -->
+            <div class="gift-box-container" data-gift-index="1">
+                <div class="gift-box revealed">
+                    <div class="gift-content visible">
+                        <div class="gift-image-container">
+                            <img src="https://source.unsplash.com/300x200/?coffee,subscription&sig=456" 
+                                 alt="Premium Coffee Subscription" 
+                                 class="gift-image loaded">
+                        </div>
+                        <h3 class="gift-title">Premium Coffee Subscription Service</h3>
+                        <p class="gift-description">For the coffee lover who's always complaining about bad coffee at work. A monthly subscription to premium, freshly roasted beans from around the world will turn their morning routine into a delightful experience.</p>
+                        <div class="gift-price">₹2,000-4,000/month</div>
+                        <div class="gift-starter"><strong>How to present it:</strong> "Since you're always talking about how terrible the office coffee is, I thought you deserved something truly special for your mornings."</div>
+                        <div class="gift-reaction"><strong>Expected reaction:</strong> Excitement about trying new flavors, and probably some coffee snobbery as they become a true connoisseur.</div>
+                        <div class="gift-actions">
+                            <a href="https://www.amazon.in/s?k=coffee+subscription+premium+beans" 
+                               target="_blank" 
+                               rel="noopener noreferrer" 
+                               class="amazon-btn">
+                                <i class="ph ph-shopping-cart"></i>
+                                <span>Find on Amazon</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Gift Card 3 -->
+            <div class="gift-box-container" data-gift-index="2">
+                <div class="gift-box revealed">
+                    <div class="gift-content visible">
+                        <div class="gift-image-container">
+                            <img src="https://source.unsplash.com/300x200/?plants,succulent&sig=789" 
+                                 alt="Low-Maintenance Plant Collection" 
+                                 class="gift-image loaded">
+                        </div>
+                        <h3 class="gift-title">Low-Maintenance Plant Collection</h3>
+                        <p class="gift-description">Perfect for someone who loves the idea of plants but always kills them. These hardy succulents and air plants require minimal care while bringing life and freshness to their space.</p>
+                        <div class="gift-price">₹1,500-3,000</div>
+                        <div class="gift-starter"><strong>How to present it:</strong> "I know you love plants but worry about keeping them alive, so I picked ones that are basically impossible to kill!"</div>
+                        <div class="gift-reaction"><strong>Expected reaction:</strong> Laughing acknowledgment of their plant-killing reputation, followed by genuine excitement about trying again with "unkillable" plants.</div>
+                        <div class="gift-actions">
+                            <a href="https://www.amazon.in/s?k=succulent+plants+collection+low+maintenance" 
+                               target="_blank" 
+                               rel="noopener noreferrer" 
+                               class="amazon-btn">
+                                <i class="ph ph-shopping-cart"></i>
+                                <span>Find on Amazon</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Test image loading functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test page loaded - gift cards with images and Amazon links are displayed');
+            
+            // Add some interactivity for testing
+            const amazonBtns = document.querySelectorAll('.amazon-btn');
+            amazonBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    console.log('Amazon button clicked:', this.href);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
