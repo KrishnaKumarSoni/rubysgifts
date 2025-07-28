@@ -70,25 +70,34 @@ class GiftRevealSystem {
         if (!giftCardsContainer) return;
 
         const giftBoxesHTML = this.giftData.map((gift, index) => `
-            <div class="gift-card" data-gift-index="${index}">
-                <div class="gift-image-container">
+            <div class="gift-card" data-gift-index="${index}" style="flex: 0 0 278px; height: 544px; position: relative; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); border: 1px solid rgba(255, 102, 0, 0.1);">
+                <div style="width: 278px; height: 234px; background: #D9D9D9; display: flex; align-items: center; justify-content: center;">
                     <img src="${this.getGiftImageUrl(gift)}" 
                          alt="${gift.title}" 
-                         class="gift-image" 
+                         style="width: 100%; height: 100%; object-fit: cover;"
                          onerror="giftRevealSystem.handleImageError(this)"
                          onload="this.classList.add('loaded')">
                 </div>
-                <h3 class="gift-title">${gift.title}</h3>
-                <p class="gift-description">${gift.description}</p>
-                ${gift.starter ? `<div class="gift-starter"><strong>How to present it:</strong> ${gift.starter}</div>` : ''}
-                ${gift.reaction ? `<div class="gift-reaction"><strong>Expected reaction:</strong> ${gift.reaction}</div>` : ''}
-                <div class="gift-actions">
+                <h3 style="position: absolute; left: 22px; top: 256px; color: #ff6600; font-size: 14px; font-family: 'Playfair Display', serif; font-weight: 600; text-transform: lowercase; line-height: 1.2; width: calc(100% - 44px); display: flex; align-items: center; gap: 6px;">
+                    <i class="ph ph-gift"></i>
+                    ${gift.title}
+                </h3>
+                <div style="position: absolute; left: 22px; top: 287px; color: black; font-size: 10px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4; width: calc(100% - 44px); height: 48px; overflow: hidden;">
+                    <i class="ph ph-info"></i> <strong>Description</strong><br/>${gift.description}
+                </div>
+                ${gift.reaction ? `<div style="position: absolute; left: 22px; top: 361px; color: black; font-size: 10px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4; width: calc(100% - 44px); height: 40px; overflow: hidden;">
+                    <i class="ph ph-smiley"></i> <strong>Reaction</strong><br/>${gift.reaction}
+                </div>` : ''}
+                ${gift.starter ? `<div style="position: absolute; left: 22px; top: 426px; color: black; font-size: 10px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4; width: calc(100% - 44px); height: 48px; overflow: hidden;">
+                    <i class="ph ph-gift"></i> <strong>How to give</strong><br/>${gift.starter}
+                </div>` : ''}
+                <div style="position: absolute; left: 11px; top: 502px; width: 256px; height: 30px;">
                     <a href="${gift.amazon_link || `https://www.amazon.in/s?k=${encodeURIComponent(gift.amazon_search_query || gift.title)}`}" 
                        target="_blank" 
                        rel="noopener noreferrer" 
-                       class="amazon-btn">
-                        <i class="ph-bold ph-shopping-cart"></i>
-                        <span>Get products</span>
+                       style="width: 256px; height: 30px; background: linear-gradient(135deg, #ff6600, #ff8533); border-radius: 100px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.3s ease; gap: 6px;">
+                        <i class="ph ph-shopping-cart" style="color: white; font-size: 12px;"></i>
+                        <span style="color: white; font-size: 11px; font-family: 'Inter', sans-serif; font-weight: 500;">get products</span>
                     </a>
                 </div>
             </div>

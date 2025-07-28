@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruby's Gifts - Final UI Test</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fef7f0 0%, #f7fafc 100%);
+            color: #2d3748;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Results Page */
+        #results {
+            padding: 1rem 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            color: #ff6600;
+            margin-bottom: 0.25rem;
+            text-transform: lowercase;
+        }
+
+        .results-subtitle {
+            font-size: 0.9rem;
+            color: #4a5568;
+            text-transform: lowercase;
+        }
+
+        .gift-cards {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            align-items: stretch;
+            height: calc(100vh - 100px);
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 102, 0, 0.3) transparent;
+            padding: 0 1rem;
+        }
+
+        .gift-card {
+            flex: 0 0 278px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            height: 544px;
+            max-height: calc(100vh - 120px);
+            border: 1px solid rgba(255, 102, 0, 0.1);
+            position: relative;
+        }
+
+        .gift-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .gift-image-container {
+            width: 278px;
+            height: 234px;
+            background: #D9D9D9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .gift-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .gift-title {
+            position: absolute;
+            left: 22px;
+            top: 256px;
+            color: #ff6600;
+            font-size: 14px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            text-transform: lowercase;
+            line-height: 1.2;
+            width: calc(100% - 44px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .gift-description {
+            position: absolute;
+            left: 22px;
+            top: 287px;
+            color: black;
+            font-size: 10px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            line-height: 1.4;
+            width: calc(100% - 44px);
+            height: 48px;
+            overflow: hidden;
+        }
+
+        .gift-reaction {
+            position: absolute;
+            left: 22px;
+            top: 361px;
+            color: black;
+            font-size: 10px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            line-height: 1.4;
+            width: calc(100% - 44px);
+            height: 40px;
+            overflow: hidden;
+        }
+
+        .gift-starter {
+            position: absolute;
+            left: 22px;
+            top: 426px;
+            color: black;
+            font-size: 10px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            line-height: 1.4;
+            width: calc(100% - 44px);
+            height: 48px;
+            overflow: hidden;
+        }
+
+        .gift-actions {
+            position: absolute;
+            left: 11px;
+            top: 502px;
+            width: 256px;
+            height: 30px;
+        }
+
+        .amazon-btn {
+            width: 256px;
+            height: 30px;
+            background: linear-gradient(135deg, #ff6600, #ff8533);
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            gap: 6px;
+        }
+
+        .amazon-btn:hover {
+            background: linear-gradient(135deg, #e55a00, #ff6600);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.25);
+        }
+
+        .amazon-btn span {
+            color: white;
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .amazon-btn i {
+            color: white;
+            font-size: 12px;
+        }
+
+        /* Scrollbar styling */
+        .gift-cards::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .gift-cards::-webkit-scrollbar-track {
+            background: rgba(255, 102, 0, 0.05);
+            border-radius: 2px;
+        }
+
+        .gift-cards::-webkit-scrollbar-thumb {
+            background: rgba(255, 102, 0, 0.3);
+            border-radius: 2px;
+        }
+
+        .gift-cards::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 102, 0, 0.5);
+        }
+
+        /* Show that this fits in viewport */
+        .viewport-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 102, 0, 0.9);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="viewport-indicator">
+        Viewport Height: <span id="viewport-height"></span>px
+    </div>
+
+    <div id="results">
+        <div class="container">
+            <div class="results-header">
+                <h2 class="results-title">Ruby's Gift Suggestions</h2>
+                <p class="results-subtitle">based on what you told us about them</p>
+            </div>
+            
+            <div class="gift-cards">
+                <!-- Gift Card 1 -->
+                <div class="gift-card">
+                    <div class="gift-image-container">
+                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop" 
+                             alt="Mindful meditation set" 
+                             class="gift-image">
+                    </div>
+                    <h3 class="gift-title">
+                        <i class="ph ph-lotus"></i>
+                        mindful meditation set
+                    </h3>
+                    <div class="gift-description">
+                        <i class="ph ph-info"></i> <strong>Description</strong><br/>Given their dislike for loud noises and complaints about work stress, this meditation set offers a peaceful retreat for daily mindfulness practice.
+                    </div>
+                    <div class="gift-reaction">
+                        <i class="ph ph-smiley"></i> <strong>Reaction</strong><br/>The recipient will feel grateful for your thoughtfulness in addressing their stress and providing a tool for relaxation and mental wellness.
+                    </div>
+                    <div class="gift-starter">
+                        <i class="ph ph-gift"></i> <strong>How to give</strong><br/>Present the gift as a unique mindfulness experience that shows you understand their need for peace and quiet in their busy life.
+                    </div>
+                    <div class="gift-actions">
+                        <button class="amazon-btn">
+                            <i class="ph ph-shopping-cart"></i>
+                            <span>get products</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gift Card 2 -->
+                <div class="gift-card">
+                    <div class="gift-image-container">
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop" 
+                             alt="Personalized weather station" 
+                             class="gift-image">
+                    </div>
+                    <h3 class="gift-title">
+                        <i class="ph ph-cloud-sun"></i>
+                        personalized weather station
+                    </h3>
+                    <div class="gift-description">
+                        <i class="ph ph-info"></i> <strong>Description</strong><br/>Considering their complaints about bad weather, this smart device helps them plan ahead and stay informed about weather conditions.
+                    </div>
+                    <div class="gift-reaction">
+                        <i class="ph ph-smiley"></i> <strong>Reaction</strong><br/>They'll appreciate the practical innovation you've chosen and how it addresses their daily weather concerns with modern technology.
+                    </div>
+                    <div class="gift-starter">
+                        <i class="ph ph-gift"></i> <strong>How to give</strong><br/>Introduce the gift as a smart solution for weather planning that shows you listen to their daily frustrations and care about their comfort.
+                    </div>
+                    <div class="gift-actions">
+                        <button class="amazon-btn">
+                            <i class="ph ph-shopping-cart"></i>
+                            <span>get products</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gift Card 3 -->
+                <div class="gift-card">
+                    <div class="gift-image-container">
+                        <img src="https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop" 
+                             alt="Noise-cancelling headphones" 
+                             class="gift-image">
+                    </div>
+                    <h3 class="gift-title">
+                        <i class="ph ph-headphones"></i>
+                        noise-cancelling headphones
+                    </h3>
+                    <div class="gift-description">
+                        <i class="ph ph-info"></i> <strong>Description</strong><br/>To address their aversion to loud noises and create a peaceful environment anywhere they go, providing instant quiet space.
+                    </div>
+                    <div class="gift-reaction">
+                        <i class="ph ph-smiley"></i> <strong>Reaction</strong><br/>Given their dislike for loud noises, they'll love this thoughtful solution that gives them control over their audio environment.
+                    </div>
+                    <div class="gift-starter">
+                        <i class="ph ph-gift"></i> <strong>How to give</strong><br/>Present the gift as a way to create personal quiet space wherever they are, showing you understand their sensitivity to noise.
+                    </div>
+                    <div class="gift-actions">
+                        <button class="amazon-btn">
+                            <i class="ph ph-shopping-cart"></i>
+                            <span>get products</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show viewport height for testing
+        function updateViewportHeight() {
+            document.getElementById('viewport-height').textContent = window.innerHeight;
+        }
+
+        updateViewportHeight();
+        window.addEventListener('resize', updateViewportHeight);
+
+        // Test smooth scrolling
+        document.querySelector('.gift-cards').addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                e.currentTarget.scrollLeft += e.deltaY;
+            }
+        });
+    </script>
+</body>
+</html>
