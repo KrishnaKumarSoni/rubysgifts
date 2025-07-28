@@ -51,8 +51,19 @@ class GiftRevealSystem {
         console.log('Image preloading skipped - using backend-provided images');
     }
 
-    // Legacy methods removed - using backend-provided images now
-    // These methods are no longer needed since the backend provides processed images
+    handleImageError(imgElement) {
+        // Mark the container as having an error
+        const container = imgElement.closest('.gift-image-container');
+        if (container) {
+            container.classList.add('error');
+        }
+        
+        // Hide the broken image
+        imgElement.style.display = 'none';
+        
+        // Log the error for debugging
+        console.warn('Gift image failed to load:', imgElement.src);
+    }
 
     renderGiftBoxes() {
         const giftCardsContainer = document.getElementById('gift-cards');
@@ -72,7 +83,8 @@ class GiftRevealSystem {
                             <img src="${this.getGiftImageUrl(gift)}" 
                                  alt="${gift.title}" 
                                  class="gift-image" 
-                                 onerror="this.src='https://via.placeholder.com/200x150/e2e8f0/4a5568?text=No+Image'">
+                                 onerror="giftRevealSystem.handleImageError(this)"
+                                 onload="this.classList.add('loaded')">
                         </div>
                         <h3 class="gift-title">${gift.title}</h3>
                         <p class="gift-description">${gift.description}</p>

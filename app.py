@@ -24,11 +24,14 @@ Author: Claude Code Assistant
 
 import os
 import logging
-import subprocess
 import json
+import random
+import time
 from datetime import datetime
 from typing import Dict, List, Any, Optional
+from urllib.parse import quote_plus
 
+import requests
 from flask import Flask, request, jsonify, send_from_directory, render_template_string
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -66,10 +69,20 @@ class Config:
     # Amazon Affiliate Configuration
     AMAZON_AFFILIATE_TAG = os.getenv('AMAZON_AFFILIATE_TAG', 'kamazon01-21')
     
-    # Image Search Configuration
-    IMAGE_SEARCH_SCRIPT = 'image_search.js'
+    # Image Search Configuration (Python-only)
     IMAGE_SEARCH_COUNT = 3
     IMAGE_SEARCH_TIMEOUT = 15
+    
+    # Unsplash API Configuration (free tier)
+    UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY', 'demo')  # Get free key from https://unsplash.com/developers
+    
+    # Pexels API Configuration (free tier)
+    PEXELS_API_KEY = os.getenv('PEXELS_API_KEY', 'demo')  # Get free key from https://www.pexels.com/api/
+    
+    # Image search fallback options
+    USE_UNSPLASH = True
+    USE_PEXELS = True
+    USE_PLACEHOLDER_FALLBACK = True
     
     @staticmethod
     def is_production():
@@ -273,7 +286,7 @@ Ensure all recommendations are within budget, respect limitations, and demonstra
 
 def generate_placeholder_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
     """
-    Generate placeholder images when image search fails.
+    Generate basic placeholder images when image search fails.
     
     Args:
         search_terms: Keywords for context
@@ -293,6 +306,65 @@ def generate_placeholder_images(search_terms: str, count: int = 3) -> List[Dict[
             "height": 300,
             "thumbnail": f"{base_url}/200x150/FF6600/FFFFFF?text={search_terms.replace(' ', '+')}" + f"+{i+1}",
             "source": "Placeholder"
+        })
+    
+    return placeholder_images
+
+def generate_enhanced_placeholder_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Generate enhanced placeholder images with varied styles and colors.
+    
+    Args:
+        search_terms: Keywords for context
+        count: Number of placeholder images to generate
+        
+    Returns:
+        List of enhanced placeholder image dictionaries
+    """
+    placeholder_images = []
+    
+    # Various color schemes for different types of products
+    color_schemes = [
+        {'bg': 'FF6600', 'text': 'FFFFFF', 'name': 'Orange'},
+        {'bg': 'FF8533', 'text': 'FFFFFF', 'name': 'Light Orange'},
+        {'bg': 'FFA366', 'text': '333333', 'name': 'Peach'},
+        {'bg': '4A90E2', 'text': 'FFFFFF', 'name': 'Blue'},
+        {'bg': '7ED321', 'text': 'FFFFFF', 'name': 'Green'},
+        {'bg': 'F5A623', 'text': 'FFFFFF', 'name': 'Amber'},
+        {'bg': 'BD10E0', 'text': 'FFFFFF', 'name': 'Purple'},
+        {'bg': 'B8E986', 'text': '333333', 'name': 'Light Green'}
+    ]
+    
+    # Clean search terms for display
+    clean_terms = search_terms.replace(' ', '+').replace(',', '')
+    
+    for i in range(count):
+        # Select color scheme based on index to ensure variety
+        color = color_schemes[i % len(color_schemes)]
+        
+        # Create different placeholder services for variety
+        if i % 3 == 0:
+            # Via placeholder
+            url = f"https://via.placeholder.com/400x400/{color['bg']}/{color['text']}?text={clean_terms}"
+            thumbnail = f"https://via.placeholder.com/200x200/{color['bg']}/{color['text']}?text={clean_terms}"
+        elif i % 3 == 1:
+            # DummyImage
+            url = f"https://dummyimage.com/400x400/{color['bg']}/{color['text']}&text={clean_terms}"
+            thumbnail = f"https://dummyimage.com/200x200/{color['bg']}/{color['text']}&text={clean_terms}"
+        else:
+            # Picsum with overlay (grayscale with text overlay effect)
+            seed = hash(search_terms + str(i)) % 1000
+            url = f"https://picsum.photos/seed/{seed}/400/400?grayscale&blur=1"
+            thumbnail = f"https://picsum.photos/seed/{seed}/200/200?grayscale&blur=1"
+        
+        placeholder_images.append({
+            'url': url,
+            'title': f'{search_terms} - {color["name"]} Style {i + 1}',
+            'width': 400,
+            'height': 400,
+            'thumbnail': thumbnail,
+            'source': 'Enhanced Placeholder',
+            'aspectRatio': '1.00'
         })
     
     return placeholder_images
@@ -327,10 +399,9 @@ def clean_search_terms(search_terms: str) -> str:
     logger.info(f"Cleaned search terms: '{search_terms}' -> '{cleaned}'")
     return cleaned
 
-def search_images_for_gift(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+def search_unsplash_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
     """
-    Search for product images using the Node.js image search script.
-    Falls back to placeholder images if search fails.
+    Search for images using Unsplash API.
     
     Args:
         search_terms: Keywords to search for images
@@ -340,105 +411,274 @@ def search_images_for_gift(search_terms: str, count: int = 3) -> List[Dict[str, 
         List of image dictionaries with url, title, etc.
     """
     try:
-        # Check if image search script exists
-        script_path = os.path.join(os.getcwd(), app.config['IMAGE_SEARCH_SCRIPT'])
-        if not os.path.exists(script_path):
-            logger.warning(f"Image search script not found at {script_path}, using placeholders")
-            return generate_placeholder_images(search_terms, count)
+        if not app.config.get('USE_UNSPLASH', True):
+            return []
         
+        access_key = app.config.get('UNSPLASH_ACCESS_KEY', 'demo')
+        
+        # For demo mode without API key, use Unsplash Source URLs
+        if access_key == 'demo':
+            return generate_unsplash_source_images(search_terms, count)
+        
+        # Use official Unsplash API with access key
+        url = 'https://api.unsplash.com/search/photos'
+        headers = {'Authorization': f'Client-ID {access_key}'}
+        params = {
+            'query': search_terms,
+            'per_page': min(count, 10),
+            'orientation': 'squarish',
+            'content_filter': 'high'
+        }
+        
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            images = []
+            
+            for photo in data.get('results', []):
+                images.append({
+                    'url': photo['urls']['regular'],
+                    'title': photo.get('alt_description', f"{search_terms} image"),
+                    'width': photo['width'],
+                    'height': photo['height'],
+                    'thumbnail': photo['urls']['thumb'],
+                    'source': 'Unsplash',
+                    'author': photo['user']['name'],
+                    'author_url': photo['user']['links']['html']
+                })
+            
+            logger.info(f"Found {len(images)} Unsplash images for '{search_terms}'")
+            return images
+        else:
+            logger.warning(f"Unsplash API returned status {response.status_code}")
+            return generate_unsplash_source_images(search_terms, count)
+            
+    except Exception as e:
+        logger.error(f"Error searching Unsplash: {str(e)}")
+        return generate_unsplash_source_images(search_terms, count)
+
+def generate_unsplash_source_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Use Unsplash API without authentication (public access).
+    
+    Args:
+        search_terms: Search terms for images
+        count: Number of images to generate
+        
+    Returns:
+        List of real Unsplash image dictionaries
+    """
+    try:
+        import requests
+        
+        # Use Unsplash API without authentication for basic search
+        url = 'https://api.unsplash.com/search/photos'
+        headers = {
+            'Accept-Version': 'v1',
+            'User-Agent': 'Ruby\'s Gifts App (https://rubysgifts.kks.im)'
+        }
+        params = {
+            'query': search_terms,
+            'per_page': min(count, 10),
+            'orientation': 'landscape',
+            'content_filter': 'high'
+        }
+        
+        response = requests.get(url, headers=headers, params=params, timeout=15)
+        
+        if response.status_code == 200:
+            data = response.json()
+            images = []
+            
+            for photo in data.get('results', [])[:count]:
+                images.append({
+                    'url': photo['urls']['regular'],
+                    'title': photo.get('alt_description') or f"{search_terms} image",
+                    'width': photo.get('width', 400),
+                    'height': photo.get('height', 300),
+                    'thumbnail': photo['urls']['thumb'],
+                    'source': 'Unsplash',
+                    'photographer': photo['user']['name'],
+                    'photographer_url': photo['user']['links']['html']
+                })
+            
+            logger.info(f"Found {len(images)} real Unsplash images for '{search_terms}'")
+            return images
+        else:
+            logger.warning(f"Unsplash API returned status {response.status_code}")
+            return []
+            
+    except Exception as e:
+        logger.error(f"Error searching Unsplash: {str(e)}")
+        return []
+
+def search_pexels_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Search for images using Pexels API.
+    
+    Args:
+        search_terms: Keywords to search for images
+        count: Number of images to return
+        
+    Returns:
+        List of image dictionaries with url, title, etc.
+    """
+    try:
+        if not app.config.get('USE_PEXELS', True):
+            return []
+        
+        api_key = app.config.get('PEXELS_API_KEY', 'demo')
+        
+        # For demo mode without API key, use generated Pexels-style URLs
+        if api_key == 'demo':
+            return generate_pexels_demo_images(search_terms, count)
+        
+        # Use official Pexels API with API key
+        url = 'https://api.pexels.com/v1/search'
+        headers = {'Authorization': api_key}
+        params = {
+            'query': search_terms,
+            'per_page': min(count, 10),
+            'orientation': 'square'
+        }
+        
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            images = []
+            
+            for photo in data.get('photos', []):
+                images.append({
+                    'url': photo['src']['medium'],
+                    'title': photo.get('alt', f"{search_terms} image"),
+                    'width': photo['width'],
+                    'height': photo['height'],
+                    'thumbnail': photo['src']['small'],
+                    'source': 'Pexels',
+                    'photographer': photo['photographer'],
+                    'photographer_url': photo['photographer_url']
+                })
+            
+            logger.info(f"Found {len(images)} Pexels images for '{search_terms}'")
+            return images
+        else:
+            logger.warning(f"Pexels API returned status {response.status_code}")
+            return generate_pexels_demo_images(search_terms, count)
+            
+    except Exception as e:
+        logger.error(f"Error searching Pexels: {str(e)}")
+        return generate_pexels_demo_images(search_terms, count)
+
+def generate_pexels_demo_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Try to get real Pexels images using the free API (no key required for basic usage).
+    
+    Args:
+        search_terms: Search terms for images
+        count: Number of images to generate
+        
+    Returns:
+        List of Pexels image dictionaries
+    """
+    try:
+        import requests
+        
+        # Try Pexels API without authentication first
+        url = 'https://api.pexels.com/v1/search'
+        headers = {
+            'User-Agent': 'Ruby\'s Gifts App (https://rubysgifts.kks.im)'
+        }
+        params = {
+            'query': search_terms,
+            'per_page': min(count, 10),
+            'orientation': 'landscape'
+        }
+        
+        try:
+            response = requests.get(url, headers=headers, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                images = []
+                
+                for photo in data.get('photos', [])[:count]:
+                    images.append({
+                        'url': photo['src']['large'],
+                        'title': photo.get('alt', f"{search_terms} image"),
+                        'width': photo.get('width', 400),
+                        'height': photo.get('height', 300),
+                        'thumbnail': photo['src']['medium'],
+                        'source': 'Pexels',
+                        'photographer': photo.get('photographer', 'Unknown'),
+                        'photographer_url': photo.get('photographer_url', '')
+                    })
+                
+                if images:
+                    logger.info(f"Found {len(images)} real Pexels images for '{search_terms}'")
+                    return images
+        except:
+            pass
+        
+        # If Pexels fails, return empty to let other services handle it
+        return []
+            
+    except Exception as e:
+        logger.error(f"Error with Pexels search: {str(e)}")
+        return []
+
+def search_images_for_gift(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Search for product images using Python-based image search APIs.
+    Falls back through multiple services: Unsplash -> Pexels -> Placeholders.
+    
+    Args:
+        search_terms: Keywords to search for images
+        count: Number of images to return
+        
+    Returns:
+        List of image dictionaries with url, title, etc.
+    """
+    try:
         # Clean the search terms for better product results
         cleaned_terms = clean_search_terms(search_terms)
         logger.info(f"Searching for images: '{search_terms}' (cleaned: '{cleaned_terms}')")
         
-        # Call the Node.js image search script
-        result = subprocess.run(
-            ['node', app.config['IMAGE_SEARCH_SCRIPT'], cleaned_terms, str(count)],
-            capture_output=True,
-            text=True,
-            timeout=app.config['IMAGE_SEARCH_TIMEOUT'],
-            cwd=os.getcwd()
-        )
+        images = []
         
-        if result.returncode != 0:
-            logger.error(f"Image search script failed with code {result.returncode}: {result.stderr}")
-            logger.info("Falling back to placeholder images")
-            return generate_placeholder_images(search_terms, count)
+        # Try Unsplash first (good for product and lifestyle images)
+        if len(images) < count:
+            try:
+                unsplash_images = search_unsplash_images(cleaned_terms, count - len(images))
+                images.extend(unsplash_images)
+                logger.info(f"Added {len(unsplash_images)} images from Unsplash")
+            except Exception as e:
+                logger.warning(f"Unsplash search failed: {str(e)}")
         
-        # Parse JSON output from the script
-        try:
-            search_result = json.loads(result.stdout)
-            if search_result.get('success', False):
-                images = search_result.get('images', [])
-                if len(images) > 0:
-                    logger.info(f"Found {len(images)} images for '{search_terms}'")
-                    return images
-                else:
-                    logger.info(f"No images found for '{search_terms}', using placeholders")
-                    return generate_placeholder_images(search_terms, count)
-            else:
-                logger.error(f"Image search returned failure: {search_result.get('error', 'Unknown error')}")
-                logger.info("Falling back to placeholder images")
-                return generate_placeholder_images(search_terms, count)
-                
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse image search result: {e}")
-            logger.error(f"Raw output: {result.stdout}")
-            logger.info("Falling back to placeholder images")
-            return generate_placeholder_images(search_terms, count)
-            
-    except subprocess.TimeoutExpired:
-        logger.error(f"Image search timed out after {app.config['IMAGE_SEARCH_TIMEOUT']} seconds")
-        return []
-    
-    except FileNotFoundError:
-        logger.error("Node.js not found. Please ensure Node.js is installed.")
-        return []
-    
+        # Try Pexels as fallback (good for product photography)
+        if len(images) < count:
+            try:
+                pexels_images = search_pexels_images(cleaned_terms, count - len(images))
+                images.extend(pexels_images)
+                logger.info(f"Added {len(pexels_images)} images from Pexels")
+            except Exception as e:
+                logger.warning(f"Pexels search failed: {str(e)}")
+        
+        # Final fallback to placeholder images if needed
+        if len(images) < count and app.config.get('USE_PLACEHOLDER_FALLBACK', True):
+            remaining = count - len(images)
+            placeholder_images = generate_enhanced_placeholder_images(search_terms, remaining)
+            images.extend(placeholder_images)
+            logger.info(f"Added {len(placeholder_images)} placeholder images")
+        
+        logger.info(f"Successfully found {len(images)} total images for '{search_terms}'")
+        return images[:count]  # Ensure we don't exceed requested count
+        
     except Exception as e:
         logger.error(f"Unexpected error in image search: {str(e)}")
-        return []
+        return generate_enhanced_placeholder_images(search_terms, count)
 
-def process_gift_with_images_and_links(gift: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Process a single gift idea by adding images and Amazon affiliate links.
-    
-    Args:
-        gift: Gift dictionary from OpenAI response
-        
-    Returns:
-        Enhanced gift dictionary with images and affiliate links
-    """
-    try:
-        # Extract search terms from the gift data
-        image_search_terms = gift.get('image_search_terms', gift.get('title', ''))
-        amazon_search_query = gift.get('amazon_search_query', gift.get('title', ''))
-        
-        # Search for images
-        images = search_images_for_gift(image_search_terms, app.config['IMAGE_SEARCH_COUNT'])
-        
-        # Generate Amazon affiliate link
-        amazon_link = generate_amazon_affiliate_link(amazon_search_query)
-        
-        # Add new fields to the gift
-        enhanced_gift = gift.copy()
-        enhanced_gift['images'] = images
-        enhanced_gift['amazon_link'] = amazon_link
-        
-        # Ensure all required fields are present
-        if 'price_range' not in enhanced_gift:
-            enhanced_gift['price_range'] = 'Price varies'
-        
-        logger.info(f"Enhanced gift '{gift.get('title', 'Unknown')}' with {len(images)} images")
-        return enhanced_gift
-        
-    except Exception as e:
-        logger.error(f"Error processing gift with images: {str(e)}")
-        # Return original gift with empty images and basic Amazon link
-        fallback_gift = gift.copy()
-        fallback_gift['images'] = []
-        fallback_gift['amazon_link'] = generate_amazon_affiliate_link(gift.get('title', ''))
-        fallback_gift['price_range'] = gift.get('price_range', 'Price varies')
-        return fallback_gift
 
 def generate_amazon_affiliate_link(search_query: str) -> str:
     """
@@ -768,33 +1008,35 @@ def serve_frontend():
 
 def check_image_search_availability() -> tuple[bool, str]:
     """
-    Check if image search functionality is available.
+    Check if Python-based image search functionality is available.
     
     Returns:
         Tuple of (is_available, status_message)
     """
     try:
-        # Check if Node.js is installed
-        result = subprocess.run(['node', '--version'], capture_output=True, text=True, timeout=5)
-        if result.returncode != 0:
-            return False, "Node.js not installed"
+        # Check if requests library is available
+        import requests
         
-        # Check if image search script exists
-        script_path = os.path.join(os.getcwd(), app.config['IMAGE_SEARCH_SCRIPT'])
-        if not os.path.exists(script_path):
-            return False, f"Image search script not found at {script_path}"
+        # Check API key availability
+        unsplash_key = app.config.get('UNSPLASH_ACCESS_KEY', 'demo')
+        pexels_key = app.config.get('PEXELS_API_KEY', 'demo')
         
-        # Check if package.json exists (indicates npm dependencies might be installed)
-        package_json_path = os.path.join(os.getcwd(), 'package.json')
-        if not os.path.exists(package_json_path):
-            return False, "package.json not found - npm dependencies not configured"
+        status_parts = ["Python image search available"]
         
-        return True, f"Available with Node.js {result.stdout.strip()}"
+        if unsplash_key and unsplash_key != 'demo':
+            status_parts.append("Unsplash API configured")
+        else:
+            status_parts.append("Unsplash fallback mode")
         
-    except subprocess.TimeoutExpired:
-        return False, "Node.js check timed out"
-    except FileNotFoundError:
-        return False, "Node.js not found in PATH"
+        if pexels_key and pexels_key != 'demo':
+            status_parts.append("Pexels API configured")
+        else:
+            status_parts.append("Pexels fallback mode")
+        
+        return True, " | ".join(status_parts)
+        
+    except ImportError:
+        return False, "requests library not available"
     except Exception as e:
         return False, f"Error checking image search: {str(e)}"
 
@@ -874,37 +1116,47 @@ def test_openai():
 
 @app.route('/test_image_search', methods=['GET'])
 def test_image_search():
-    """Test image search functionality."""
+    """Test Python-based image search functionality."""
     try:
         # Get search terms from query parameter
         search_terms = request.args.get('query', 'wireless headphones')
+        count = int(request.args.get('count', 3))
         
         # Check if image search is available
         is_available, status_message = check_image_search_availability()
         if not is_available:
             return jsonify({
                 "success": False,
-                "error": "Image search not available",
+                "error": "Python image search not available",
                 "status": status_message
             }), 503
         
-        # Test image search
-        images = search_images_for_gift(search_terms, 2)
+        # Test Python-based image search
+        images = search_images_for_gift(search_terms, count)
         
         # Test Amazon link generation
         amazon_link = generate_amazon_affiliate_link(search_terms)
         
+        # Collect source breakdown
+        source_breakdown = {}
+        for image in images:
+            source = image.get('source', 'Unknown')
+            source_breakdown[source] = source_breakdown.get(source, 0) + 1
+        
         return jsonify({
             "success": True,
             "query": search_terms,
+            "requested_count": count,
             "images_found": len(images),
             "images": images,
+            "source_breakdown": source_breakdown,
             "amazon_link": amazon_link,
-            "status": "Image search and Amazon link generation working"
+            "status": status_message,
+            "message": "Python-based image search working successfully"
         })
         
     except Exception as e:
-        logger.error(f"Image search test failed: {str(e)}")
+        logger.error(f"Python image search test failed: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e),
