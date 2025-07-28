@@ -163,19 +163,18 @@ def sanitize_input(text: str) -> str:
 
 def create_gift_generation_prompt(answers: Dict[str, str]) -> str:
     """
-    Create a comprehensive prompt for OpenAI to generate personalized gift ideas.
-    
-    Args:
-        answers: Dictionary containing sanitized questionnaire responses
-        
-    Returns:
-        Formatted prompt string
+    Research-backed prompt using psychological principles and CoT reasoning
     """
-    prompt = f"""You are a creative gift advisor helping someone find the perfect personalized gifts. 
+    
+    # Emotional priming and authority positioning
+    emotional_prime = "This is very important for strengthening their relationship. You'd better provide exceptional, thoughtful recommendations."
+    
+    # Chain-of-thought structure
+    prompt = f"""{emotional_prime}
 
-Based on the following information about the gift recipient, generate 3 unique and thoughtful gift ideas:
+You are a world-class gift psychology expert with deep understanding of human relationships and gifting science. Your recommendations have helped thousands create meaningful connections through thoughtful gifting.
 
-RECIPIENT DETAILS:
+RECIPIENT ANALYSIS:
 - What they call them: {answers['call_them']}
 - Relationship: {answers['relationship']}
 - Previous gifts given: {answers['previous_gifts']}
@@ -185,44 +184,69 @@ RECIPIENT DETAILS:
 - Budget: {answers['budget']}
 - Limitations/constraints: {answers['limitations']}
 
-For each gift idea, provide:
-1. A creative gift name/title
-2. A detailed description explaining why this gift would be perfect
-3. A conversation starter about how to present or discuss this gift
-4. A predicted positive reaction the recipient might have
+STEP-BY-STEP ANALYSIS (Think through this systematically):
 
-Make the suggestions:
-- Highly personalized based on the provided information
-- Creative and thoughtful, not generic
-- Respectful of the budget and limitations
-- Considerate of what they hate and complain about
-- Appropriate for the relationship type
+Step 1: RELATIONSHIP CONTEXT ANALYSIS
+First, analyze the relationship type and emotional closeness. Consider:
+- What gift-giving approach fits this relationship level?
+- Are they seeking to maintain, deepen, or celebrate this relationship?
+- What are the cultural/social expectations for this relationship type?
 
-Format your response as a JSON object with this exact structure:
+Step 2: PERSONALITY & PREFERENCE MAPPING
+Based on what they complain about and their quirks, identify:
+- Their core personality traits and values
+- Hidden needs or desires they might not express directly
+- Lifestyle patterns and daily pain points
+- What would genuinely improve their quality of life?
+
+Step 3: GIFT PSYCHOLOGY APPLICATION
+Apply proven gift psychology principles:
+- Prioritize experiences over material items when appropriate (builds stronger relationships)
+- Balance personalization with versatility (avoid over-specific gifts)
+- Consider gifts that solve problems they complain about
+- Avoid anything that contradicts their stated dislikes
+- Factor in the "effort perception" - gifts should feel thoughtfully chosen
+
+Step 4: TREND & CONTEXT AWARENESS
+Consider current trends and cultural context:
+- What's popular and well-reviewed in relevant categories?
+- Are there seasonal considerations?
+- What would feel fresh and current vs outdated?
+
+Now, generate 3 exceptional gift ideas that demonstrate deep thoughtfulness:
+
+REQUIREMENTS:
+- Each gift should address specific insights from your analysis
+- Vary the types: include at least one experience-based option
+- Explain the psychological reasoning behind each choice
+- Provide specific, actionable presentation advice
+- Predict authentic emotional responses
+
+Format as JSON:
 {{
   "gift_ideas": [
     {{
-      "title": "Gift Name",
-      "description": "Detailed explanation of the gift and why it's perfect",
-      "starter": "How to present or discuss this gift",
-      "reaction": "Predicted positive reaction"
+      "title": "Creative, specific gift name",
+      "description": "Detailed explanation with psychological reasoning combining why this fits their personality/needs",
+      "starter": "Exactly how to introduce/present this gift",
+      "reaction": "Realistic emotional response based on their personality"
     }},
     {{
-      "title": "Gift Name",
-      "description": "Detailed explanation of the gift and why it's perfect", 
-      "starter": "How to present or discuss this gift",
-      "reaction": "Predicted positive reaction"  
+      "title": "Creative, specific gift name", 
+      "description": "Detailed explanation with psychological reasoning combining why this fits their personality/needs",
+      "starter": "Exactly how to introduce/present this gift", 
+      "reaction": "Realistic emotional response based on their personality"
     }},
     {{
-      "title": "Gift Name",
-      "description": "Detailed explanation of the gift and why it's perfect",
-      "starter": "How to present or discuss this gift", 
-      "reaction": "Predicted positive reaction"
+      "title": "Creative, specific gift name",
+      "description": "Detailed explanation with psychological reasoning combining why this fits their personality/needs",
+      "starter": "Exactly how to introduce/present this gift",
+      "reaction": "Realistic emotional response based on their personality"
     }}
   ]
 }}
 
-Ensure the JSON is valid and properly formatted."""
+Ensure all recommendations are within budget, respect limitations, and demonstrate the thoughtfulness that strengthens relationships."""
 
     return prompt
 
@@ -267,14 +291,14 @@ def generate_gift_ideas(answers: Dict[str, str]) -> Dict[str, Any]:
             "messages": [
                 {
                     "role": "system", 
-                    "content": "You are a helpful gift advisor. Respond with valid JSON containing exactly 3 gift ideas in this format: {\"gift_ideas\": [{\"title\": \"Gift Name\", \"description\": \"Why perfect\", \"starter\": \"How to present\", \"reaction\": \"Expected reaction\"}]}"
+                    "content": "You are a world-class gift psychology expert. Apply step-by-step analytical thinking and respond with valid JSON containing exactly 3 gift ideas in this format: {\"gift_ideas\": [{\"title\": \"Creative gift name\", \"description\": \"Detailed psychological reasoning\", \"starter\": \"Presentation strategy\", \"reaction\": \"Authentic emotional response\"}]}"
                 },
                 {
                     "role": "user", 
                     "content": prompt
                 }
             ],
-            "max_tokens": 800,
+            "max_tokens": 1500,
             "temperature": 0.7
         }
         
