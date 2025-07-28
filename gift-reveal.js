@@ -70,37 +70,26 @@ class GiftRevealSystem {
         if (!giftCardsContainer) return;
 
         const giftBoxesHTML = this.giftData.map((gift, index) => `
-            <div class="gift-box-container" data-gift-index="${index}">
-                <div class="gift-box ${this.revealedGifts.has(index) ? 'revealed' : ''}" 
-                     onclick="giftRevealSystem.revealGift(${index})">
-                    <div class="gift-box-image">
-                        <img src="giftbox-image.png" 
-                             alt="Gift Box" 
-                             class="gift-box-img ${this.revealedGifts.has(index) ? 'hidden' : ''}">
-                    </div>
-                    <div class="gift-content ${this.revealedGifts.has(index) ? 'visible' : ''}">
-                        <div class="gift-image-container">
-                            <img src="${this.getGiftImageUrl(gift)}" 
-                                 alt="${gift.title}" 
-                                 class="gift-image" 
-                                 onerror="giftRevealSystem.handleImageError(this)"
-                                 onload="this.classList.add('loaded')">
-                        </div>
-                        <h3 class="gift-title">${gift.title}</h3>
-                        <p class="gift-description">${gift.description}</p>
-                        ${gift.price_range ? `<div class="gift-price">${gift.price_range}</div>` : ''}
-                        ${gift.starter ? `<div class="gift-starter"><strong>How to present it:</strong> ${gift.starter}</div>` : ''}
-                        ${gift.reaction ? `<div class="gift-reaction"><strong>Expected reaction:</strong> ${gift.reaction}</div>` : ''}
-                        <div class="gift-actions">
-                            <a href="${gift.amazon_link || `https://www.amazon.in/s?k=${encodeURIComponent(gift.amazon_search_query || gift.title)}`}" 
-                               target="_blank" 
-                               rel="noopener noreferrer" 
-                               class="amazon-btn">
-                                <i class="ph ph-shopping-cart"></i>
-                                <span>Find on Amazon</span>
-                            </a>
-                        </div>
-                    </div>
+            <div class="gift-card" data-gift-index="${index}">
+                <div class="gift-image-container">
+                    <img src="${this.getGiftImageUrl(gift)}" 
+                         alt="${gift.title}" 
+                         class="gift-image" 
+                         onerror="giftRevealSystem.handleImageError(this)"
+                         onload="this.classList.add('loaded')">
+                </div>
+                <h3 class="gift-title">${gift.title}</h3>
+                <p class="gift-description">${gift.description}</p>
+                ${gift.starter ? `<div class="gift-starter"><strong>How to present it:</strong> ${gift.starter}</div>` : ''}
+                ${gift.reaction ? `<div class="gift-reaction"><strong>Expected reaction:</strong> ${gift.reaction}</div>` : ''}
+                <div class="gift-actions">
+                    <a href="${gift.amazon_link || `https://www.amazon.in/s?k=${encodeURIComponent(gift.amazon_search_query || gift.title)}`}" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="amazon-btn">
+                        <i class="ph ph-shopping-cart"></i>
+                        <span>Get products</span>
+                    </a>
                 </div>
             </div>
         `).join('');
