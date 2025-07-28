@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Test - Ruby's Gifts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-results {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .success { border-left-color: #28a745 !important; background: #d4edda; }
+        .error { border-left-color: #dc3545 !important; background: #f8d7da; }
+        .warning { border-left-color: #ffc107 !important; background: #fff3cd; }
+        
+        button {
+            background: #ff6600;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #e55a00; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .gift-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+        }
+        .gift-image {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .api-endpoint {
+            font-family: monospace;
+            background: #f1f1f1;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Ruby's Gifts Production Testing Suite</h1>
+    <p>Comprehensive testing of the production app at <strong>rubysgifts.kks.im</strong></p>
+
+    <!-- API Health Check -->
+    <div class="test-section">
+        <h2>1. API Health Check</h2>
+        <p>Testing backend availability and configuration</p>
+        <button onclick="testHealthEndpoint()">Test Health Endpoint</button>
+        <div id="health-results" class="test-results"></div>
+    </div>
+
+    <!-- Image Search Testing -->
+    <div class="test-section">
+        <h2>2. Image Search Testing</h2>
+        <p>Testing DuckDuckGo image search functionality</p>
+        <label>Search Terms: <input type="text" id="search-terms" value="wireless headphones" placeholder="Enter product search terms"></label>
+        <button onclick="testImageSearch()">Test Image Search</button>
+        <div id="image-results" class="test-results"></div>
+    </div>
+
+    <!-- Gift Generation Testing -->
+    <div class="test-section">
+        <h2>3. Full Gift Generation Flow</h2>
+        <p>Testing complete questionnaire → API → image search → results flow</p>
+        <button onclick="testGiftGeneration()">Test Complete Flow</button>
+        <div id="gift-results" class="test-results"></div>
+    </div>
+
+    <!-- DuckDuckGo Direct Test -->
+    <div class="test-section">
+        <h2>4. DuckDuckGo Library Test</h2>
+        <p>Testing if DuckDuckGo search library is available and functional</p>
+        <button onclick="testDuckDuckGoLibrary()">Test DuckDuckGo Library</button>
+        <div id="ddg-results" class="test-results"></div>
+    </div>
+
+    <!-- Performance Testing -->
+    <div class="test-section">
+        <h2>5. Performance & Error Testing</h2>
+        <p>Testing multiple rapid requests and error handling</p>
+        <button onclick="testPerformance()">Test Performance</button>
+        <button onclick="testErrorHandling()">Test Error Handling</button>
+        <div id="performance-results" class="test-results"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://rubysgifts.kks.im';
+        
+        // Utility function to make API calls with timeout
+        async function makeRequest(url, options = {}, timeout = 30000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
+
+        // Test 1: Health endpoint
+        async function testHealthEndpoint() {
+            const resultsDiv = document.getElementById('health-results');
+            resultsDiv.innerHTML = '<p>Testing health endpoint...</p>';
+            
+            try {
+                const response = await makeRequest(`${BASE_URL}/health`);
+                const data = await response.json();
+                
+                let status = 'success';
+                let message = `
+                    <h4>✅ Health Check Results:</h4>
+                    <ul>
+                        <li><strong>Status:</strong> ${data.status}</li>
+                        <li><strong>Service:</strong> ${data.service}</li>
+                        <li><strong>OpenAI Configured:</strong> ${data.openai_configured ? '✅' : '❌'}</li>
+                        <li><strong>Image Search Available:</strong> ${data.image_search_available ? '✅' : '❌'}</li>
+                        <li><strong>Image Search Status:</strong> ${data.image_search_status}</li>
+                        <li><strong>Amazon Affiliate Tag:</strong> ${data.amazon_affiliate_tag}</li>
+                    </ul>
+                `;
+                
+                if (!data.openai_configured) {
+                    status = 'warning';
+                    message += '<p>⚠️ OpenAI API not configured - this will cause gift generation to fail</p>';
+                }
+                
+                if (!data.image_search_available) {
+                    status = 'warning';
+                    message += '<p>⚠️ Image search not available - images may not load</p>';
+                }
+                
+                resultsDiv.className = `test-results ${status}`;
+                resultsDiv.innerHTML = message;
+                
+            } catch (error) {
+                resultsDiv.className = 'test-results error';
+                resultsDiv.innerHTML = `<h4>❌ Health Check Failed:</h4><p>${error.message}</p>`;
+            }
+        }
+
+        // Test 2: Image search
+        async function testImageSearch() {
+            const resultsDiv = document.getElementById('image-results');
+            const searchTerms = document.getElementById('search-terms').value;
+            
+            resultsDiv.innerHTML = '<p>Testing image search...</p>';
+            
+            try {
+                const response = await makeRequest(`${BASE_URL}/test_image_search?query=${encodeURIComponent(searchTerms)}&count=3`);
+                const data = await response.json();
+                
+                if (data.success && data.images) {
+                    let imageHtml = `
+                        <h4>✅ Image Search Results (${data.images.length} images found):</h4>
+                        <p><strong>Search Method:</strong> ${data.search_method}</p>
+                        <p><strong>Total Time:</strong> ${data.total_time_ms}ms</p>
+                    `;
+                    
+                    data.images.forEach((image, index) => {
+                        imageHtml += `
+                            <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                                <h5>Image ${index + 1}:</h5>
+                                <img src="${image.url}" alt="${image.title}" style="max-width: 200px; max-height: 150px; border-radius: 5px;" 
+                                     onerror="this.style.border='2px solid red'; this.alt='Failed to load: ' + this.src;">
+                                <p><strong>Title:</strong> ${image.title}</p>
+                                <p><strong>Source:</strong> ${image.source}</p>
+                                <p><strong>URL:</strong> <a href="${image.url}" target="_blank" style="word-break: break-all;">${image.url}</a></p>
+                            </div>
+                        `;
+                    });
+                    
+                    resultsDiv.className = 'test-results success';
+                    resultsDiv.innerHTML = imageHtml;
+                } else {
+                    resultsDiv.className = 'test-results warning';
+                    resultsDiv.innerHTML = `
+                        <h4>⚠️ Image Search Issues:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+                
+            } catch (error) {
+                resultsDiv.className = 'test-results error';
+                resultsDiv.innerHTML = `<h4>❌ Image Search Failed:</h4><p>${error.message}</p>`;
+            }
+        }
+
+        // Test 3: Complete gift generation flow
+        async function testGiftGeneration() {
+            const resultsDiv = document.getElementById('gift-results');
+            resultsDiv.innerHTML = '<p>Testing complete gift generation flow...</p>';
+            
+            // Sample questionnaire data
+            const testData = {
+                call_them: "buddy",
+                relationship: "best friend",
+                previous_gifts: "books, coffee mug, funny t-shirt",
+                hate: "loud noises, spicy food, horror movies",
+                complaints: "traffic, work stress, bad weather",
+                complain_about_them: "always running late, too many meetings",
+                budget: "₹1000-3000",
+                limitations: "eco-friendly preferred, no allergies"
+            };
+            
+            try {
+                const startTime = Date.now();
+                const response = await makeRequest(`${BASE_URL}/generate_gifts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                }, 45000); // 45 second timeout for gift generation
+                
+                const responseTime = Date.now() - startTime;
+                const data = await response.json();
+                
+                if (data.success && data.gift_ideas) {
+                    let giftHtml = `
+                        <h4>✅ Gift Generation Successful!</h4>
+                        <p><strong>Response Time:</strong> ${responseTime}ms</p>
+                        <p><strong>Gifts Generated:</strong> ${data.gift_ideas.length}</p>
+                    `;
+                    
+                    data.gift_ideas.forEach((gift, index) => {
+                        giftHtml += `
+                            <div class="gift-card">
+                                <h5>Gift ${index + 1}: ${gift.title}</h5>
+                                <p><strong>Description:</strong> ${gift.description}</p>
+                                <p><strong>Price Range:</strong> ${gift.price_range || 'Not specified'}</p>
+                                <p><strong>Image Search Terms:</strong> ${gift.image_search_terms || 'Not specified'}</p>
+                                
+                                ${gift.images && gift.images.length > 0 ? `
+                                    <div>
+                                        <strong>Images:</strong><br>
+                                        ${gift.images.map(img => `
+                                            <img src="${img.url}" alt="${gift.title}" class="gift-image" 
+                                                 onerror="this.style.border='2px solid red'; this.alt='Failed: ' + this.src;">
+                                        `).join('')}
+                                    </div>
+                                ` : '<p style="color: orange;">No images found</p>'}
+                                
+                                <p><strong>Amazon Link:</strong> 
+                                   <a href="${gift.amazon_link}" target="_blank">View on Amazon</a>
+                                </p>
+                            </div>
+                        `;
+                    });
+                    
+                    resultsDiv.className = 'test-results success';
+                    resultsDiv.innerHTML = giftHtml;
+                } else {
+                    resultsDiv.className = 'test-results error';
+                    resultsDiv.innerHTML = `
+                        <h4>❌ Gift Generation Failed:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+                
+            } catch (error) {
+                resultsDiv.className = 'test-results error';
+                resultsDiv.innerHTML = `<h4>❌ Gift Generation Error:</h4><p>${error.message}</p>`;
+            }
+        }
+
+        // Test 4: DuckDuckGo library availability
+        async function testDuckDuckGoLibrary() {
+            const resultsDiv = document.getElementById('ddg-results');
+            resultsDiv.innerHTML = '<p>Testing DuckDuckGo library availability...</p>';
+            
+            try {
+                // Test with various search terms to see which methods work
+                const testTerms = ['wireless headphones', 'coffee mug', 'laptop'];
+                let allResults = [];
+                
+                for (const term of testTerms) {
+                    const response = await makeRequest(`${BASE_URL}/test_image_search?query=${encodeURIComponent(term)}&count=2`);
+                    const data = await response.json();
+                    allResults.push({
+                        term: term,
+                        success: data.success,
+                        method: data.search_method,
+                        imageCount: data.images ? data.images.length : 0,
+                        time: data.total_time_ms
+                    });
+                }
+                
+                let resultHtml = '<h4>🔍 DuckDuckGo Method Testing:</h4>';
+                allResults.forEach(result => {
+                    const status = result.success && result.imageCount > 0 ? '✅' : result.success ? '⚠️' : '❌';
+                    resultHtml += `
+                        <p><strong>${status} "${result.term}":</strong> 
+                           Method: ${result.method}, 
+                           Images: ${result.imageCount}, 
+                           Time: ${result.time}ms</p>
+                    `;
+                });
+                
+                const overallSuccess = allResults.every(r => r.success && r.imageCount > 0);
+                resultsDiv.className = `test-results ${overallSuccess ? 'success' : 'warning'}`;
+                resultsDiv.innerHTML = resultHtml;
+                
+            } catch (error) {
+                resultsDiv.className = 'test-results error';
+                resultsDiv.innerHTML = `<h4>❌ DuckDuckGo Test Failed:</h4><p>${error.message}</p>`;
+            }
+        }
+
+        // Test 5: Performance testing
+        async function testPerformance() {
+            const resultsDiv = document.getElementById('performance-results');
+            resultsDiv.innerHTML = '<p>Running performance tests...</p>';
+            
+            try {
+                // Test multiple concurrent image searches
+                const searches = ['headphones', 'coffee', 'book', 'laptop', 'phone'];
+                const startTime = Date.now();
+                
+                const promises = searches.map(term => 
+                    makeRequest(`${BASE_URL}/test_image_search?query=${term}&count=1`)
+                        .then(r => r.json())
+                        .catch(e => ({ error: e.message, term }))
+                );
+                
+                const results = await Promise.all(promises);
+                const totalTime = Date.now() - startTime;
+                
+                const successful = results.filter(r => r.success).length;
+                const failed = results.filter(r => r.error).length;
+                
+                let perfHtml = `
+                    <h4>⚡ Performance Test Results:</h4>
+                    <ul>
+                        <li><strong>Total Concurrent Requests:</strong> ${searches.length}</li>
+                        <li><strong>Successful:</strong> ${successful}</li>
+                        <li><strong>Failed:</strong> ${failed}</li>
+                        <li><strong>Total Time:</strong> ${totalTime}ms</li>
+                        <li><strong>Average Time per Request:</strong> ${Math.round(totalTime / searches.length)}ms</li>
+                    </ul>
+                `;
+                
+                results.forEach((result, index) => {
+                    if (result.error) {
+                        perfHtml += `<p>❌ ${searches[index]}: ${result.error}</p>`;
+                    } else {
+                        perfHtml += `<p>✅ ${searches[index]}: ${result.images?.length || 0} images in ${result.total_time_ms}ms</p>`;
+                    }
+                });
+                
+                resultsDiv.className = `test-results ${successful > failed ? 'success' : 'warning'}`;
+                resultsDiv.innerHTML = perfHtml;
+                
+            } catch (error) {
+                resultsDiv.className = 'test-results error';
+                resultsDiv.innerHTML = `<h4>❌ Performance Test Failed:</h4><p>${error.message}</p>`;
+            }
+        }
+
+        // Test error handling
+        async function testErrorHandling() {
+            const resultsDiv = document.getElementById('performance-results');
+            resultsDiv.innerHTML = '<p>Testing error handling...</p>';
+            
+            try {
+                // Test invalid endpoints and data
+                const tests = [
+                    { name: 'Invalid endpoint', url: `${BASE_URL}/invalid_endpoint` },
+                    { name: 'Empty gift generation', url: `${BASE_URL}/generate_gifts`, method: 'POST', body: '{}' },
+                    { name: 'Malformed image search', url: `${BASE_URL}/test_image_search?query=&count=abc` }
+                ];
+                
+                let errorResults = '<h4>🛡️ Error Handling Test Results:</h4>';
+                
+                for (const test of tests) {
+                    try {
+                        const response = await makeRequest(test.url, {
+                            method: test.method || 'GET',
+                            headers: test.method === 'POST' ? { 'Content-Type': 'application/json' } : {},
+                            body: test.body
+                        });
+                        
+                        errorResults += `<p>✅ ${test.name}: HTTP ${response.status} (handled gracefully)</p>`;
+                    } catch (error) {
+                        errorResults += `<p>⚠️ ${test.name}: ${error.message}</p>`;
+                    }
+                }
+                
+                resultsDiv.className = 'test-results success';
+                resultsDiv.innerHTML = errorResults;
+                
+            } catch (error) {
+                resultsDiv.className = 'test-results error';
+                resultsDiv.innerHTML = `<h4>❌ Error Test Failed:</h4><p>${error.message}</p>`;
+            }
+        }
+
+        // Auto-run basic tests on page load
+        window.addEventListener('load', () => {
+            console.log('🚀 Ruby\'s Gifts Production Test Suite loaded');
+            // Automatically run health check
+            setTimeout(() => {
+                testHealthEndpoint();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

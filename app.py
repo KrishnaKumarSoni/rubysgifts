@@ -514,88 +514,307 @@ def search_pixabay_public(search_terms: str, count: int = 3) -> List[Dict[str, A
     """Try public Pixabay endpoints."""
     return []  # Placeholder for now
 
-def get_curated_product_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+def search_google_custom_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
     """
-    Get curated real product images from Unsplash using direct photo IDs.
-    This bypasses the API and uses known good product photos.
+    Search for images using Google Custom Search API (free tier: 100 queries/day).
+    
+    Args:
+        search_terms: Search terms for images
+        count: Number of images to return
+        
+    Returns:
+        List of real product image dictionaries from Google
     """
-    # Map search terms to specific Unsplash photo IDs for real products
-    product_photo_ids = {
+    try:
+        import requests
+        
+        # Check if API keys are configured
+        google_api_key = app.config.get('GOOGLE_API_KEY')
+        google_cx = app.config.get('GOOGLE_CUSTOM_SEARCH_ENGINE_ID')
+        
+        if not google_api_key or not google_cx:
+            logger.info("Google Custom Search not configured (missing API key or CX ID)")
+            return []
+        
+        # Google Custom Search API endpoint
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {
+            'key': google_api_key,
+            'cx': google_cx,
+            'q': f"{search_terms} product buy",
+            'searchType': 'image',
+            'num': min(count, 10),  # Max 10 per request
+            'imgSize': 'medium',
+            'imgType': 'photo',
+            'safe': 'active',
+            'fields': 'items(title,link,image)'
+        }
+        
+        response = requests.get(url, params=params, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            images = []
+            
+            for item in data.get('items', []):
+                if 'link' in item and 'image' in item:
+                    # Filter out low-quality sources
+                    image_url = item['link']
+                    if not any(bad in image_url.lower() for bad in ['pinterest.com', 'blogspot.com']):
+                        images.append({
+                            'url': image_url,
+                            'title': item.get('title', f'{search_terms} - Product {len(images) + 1}'),
+                            'width': item['image'].get('width', 600),
+                            'height': item['image'].get('height', 400),
+                            'thumbnail': item['image'].get('thumbnailLink', image_url),
+                            'source': 'Google Custom Search',
+                            'photographer': 'Web Search Result'
+                        })
+                        
+                        if len(images) >= count:
+                            break
+            
+            logger.info(f"Google Custom Search found {len(images)} images for '{search_terms}'")
+            return images
+        else:
+            logger.warning(f"Google Custom Search returned status {response.status_code}")
+            return []
+            
+    except Exception as e:
+        logger.error(f"Error in Google Custom Search: {str(e)}")
+        return []
+
+def get_improved_curated_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Get improved curated images using real product photo URLs from multiple sources.
+    
+    Args:
+        search_terms: Search terms for context
+        count: Number of images to return
+        
+    Returns:
+        List of improved curated image dictionaries with real product photos
+    """
+    # Extended database of real product images from reliable sources
+    product_image_database = {
         'headphones': [
-            'photo-1505740420928-5e560c06d30e',  # Black headphones
-            'photo-1546435770-a3e426bf472b',    # White headphones  
-            'photo-1583394838336-acd977736f90',  # Gaming headphones
-            'photo-1484704849700-f032a568e944',  # Studio headphones
-            'photo-1545127398-14699f92334b'     # Wireless earbuds
+            # Sony headphones
+            'https://images-na.ssl-images-amazon.com/images/I/61KYRD8B3KL._AC_SL1500_.jpg',
+            'https://images-na.ssl-images-amazon.com/images/I/71pGIBjnpbL._AC_SL1500_.jpg',
+            # Bose headphones
+            'https://assets.bose.com/content/dam/Bose_DAM/Web/consumer_electronics/global/products/headphones/quietcomfort_earbuds/product_silo_images/qc_earbuds_black_EC_hero.jpg',
+            # Apple AirPods
+            'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MQD83?wid=1144&hei=1144&fmt=jpeg&qlt=90&.v=1660803972361',
+            # JBL headphones
+            'https://in.jbl.com/dw/image/v2/BFND_PRD/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw6f8c6c4f/JBL_LIVE_660NC_Product%20Image_Hero_White.png'
         ],
         'watch': [
-            'photo-1523275335684-37898b6baf30',  # Apple Watch
-            'photo-1434493789847-2f02dc6ad3ba',  # Classic watch
-            'photo-1524805444758-089113d48a6d',  # Luxury watch
-            'photo-1508685096489-7aacd43bd3b1',  # Smart watch
-            'photo-1522312346375-d1a52e2b99b3'   # Vintage watch
+            # Apple Watch
+            'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/watch-s9-45mm-aluminum-midnight-nc-s9?wid=1000&hei=1000&fmt=p-jpg&qlt=95&.v=1692925775950',
+            # Samsung Galaxy Watch
+            'https://images.samsung.com/is/image/samsung/p6pim/in/2208/gallery/in-galaxy-watch5-r900-sm-r900nzsainu-532632081?$650_519_PNG$',
+            # Fitbit
+            'https://www.fitbit.com/global/content/dam/fitbit/global/products/devices/versa-4/hero/fitbit-versa-4-black-aluminum-black-sport-band-front-three-quarter.png',
+            # Fossil watch
+            'https://fossil.scene7.com/is/image/FossilPartners/FS5657_main?$sfcc_fos_large$',
+            # Casio G-Shock
+            'https://gshock.casio.com/content/casio/locales/intl/en/brands/gshock/products/timepieces/dw-5600e-1v/_jcr_content/root/responsivegrid/teaser_copy/image.casiocoreimg.jpeg/1659435669457/dw-5600e-1v-b1.jpeg'
         ],
         'coffee': [
-            'photo-1495474472287-4d71bcdd2085',  # Coffee beans
-            'photo-1509042239860-f550ce710b93',  # Coffee cup
-            'photo-1447933601403-0c6688de566e',  # Coffee machine
-            'photo-1514432324607-a09d9b4aefdd',  # Coffee shop
-            'photo-1501339847302-ac426a4a7cbb'   # Coffee mug
+            # Coffee beans
+            'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=800',
+            'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800',
+            # Coffee machines
+            'https://www.nespresso.com/ecom/medias/sys_master/public/27100848398366/C-D30-WH-W-coffee-machine-WEB.png',
+            'https://images-na.ssl-images-amazon.com/images/I/81h-2jC5wKL._AC_SL1500_.jpg',
+            # Coffee mugs
+            'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800'
         ],
         'book': [
-            'photo-1507003211169-0a1dd7228f2d',  # Stack of books
-            'photo-1481627834876-b7833e8f5570',  # Open book
-            'photo-1544716278-ca5e3f4abd8c',    # Library books
-            'photo-1512820790803-83ca734da794',  # Book collection
-            'photo-1495640388908-05fa85288e61'   # Reading book
+            # Popular books
+            'https://images-na.ssl-images-amazon.com/images/I/51Zymoq7UnL._SX325_BO1,204,203,200_.jpg',
+            'https://images-na.ssl-images-amazon.com/images/I/41VSSVNyLYL._SX325_BO1,204,203,200_.jpg',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800',
+            'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800',
+            'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800'
         ],
         'wallet': [
-            'photo-1553062407-98eeb64c6a62',  # Leather wallet
-            'photo-1627123424574-724758594e93',  # Men's wallet
-            'photo-1609961354195-3a8ed83d9a13',  # Credit cards
-            'photo-1556909114-f6e7ad7d3136',    # Money wallet
-            'photo-1604671801908-6f0c6b4dae81'   # Business wallet
+            # Leather wallets
+            'https://images-na.ssl-images-amazon.com/images/I/81hCsEuFQaL._AC_UL1500_.jpg',
+            'https://images-na.ssl-images-amazon.com/images/I/71XhOUE4k2L._AC_UL1500_.jpg',
+            'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800',
+            'https://images.unsplash.com/photo-1627123424574-724758594e93?w=800',
+            'https://images.unsplash.com/photo-1609961354195-3a8ed83d9a13?w=800'
         ],
-        'perfume': [
-            'photo-1541643600914-78b084683601',  # Perfume bottle
-            'photo-1588405748880-12d1d2a59d75',  # Luxury perfume
-            'photo-1515377905703-c4788e51af15',  # Fragrance collection
-            'photo-1571019513827-3c2f95e10bb4',  # Designer perfume
-            'photo-1591035897819-f4bdf739f446'   # Perfume spray
-        ],
-        'plants': [
-            'photo-1416879595882-3373a0480b5b',  # Indoor plant
-            'photo-1485955900006-10f4d324d411',  # Succulent plants
-            'photo-1463320726281-696a485928c7',  # Plant collection
-            'photo-1441974231531-c6227db76b6e',  # Green plants
-            'photo-1558618666-fcd25c85cd64'     # Plant pot
-        ],
-        'candle': [
-            'photo-1602874801070-94c0af3e3759',  # Scented candle
-            'photo-1572726729207-a78d6feb18d7',  # Luxury candles
-            'photo-1608571423902-eed4a5ad8108',  # Candle collection
-            'photo-1513475382585-d06e58bcb0e0',  # Aromatherapy candle
-            'photo-1506905925346-21bda4d32df4'   # Decorative candles
+        'phone': [
+            # iPhone
+            'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-7inch-bluetitanium?wid=1280&hei=492&fmt=p-jpg&qlt=80&.v=1692895706095',
+            # Samsung Galaxy
+            'https://images.samsung.com/is/image/samsung/p6pim/in/2202/gallery/in-galaxy-s22-s901-410318-sm-s901bzabins-530847445?$650_519_PNG$',
+            # Google Pixel
+            'https://lh3.googleusercontent.com/Nu3a6F80WfixUqf_ec_vgXy_c0-0r4VLJRXjjff6OEFvOHONQb8cALdw=w526-h296-l80-e365',
+            'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800'
         ]
     }
     
     # Find matching category
     search_lower = search_terms.lower()
-    matched_ids = []
+    matched_urls = []
     
-    for category, photo_ids in product_photo_ids.items():
+    for category, urls in product_image_database.items():
         if category in search_lower or any(word in search_lower for word in category.split()):
-            matched_ids = photo_ids
+            matched_urls = urls
             break
     
-    # If no specific match, use general product photos
+    # If no specific match, use a general mix
+    if not matched_urls:
+        all_urls = []
+        for urls in product_image_database.values():
+            all_urls.extend(urls[:2])  # Take 2 from each category
+        matched_urls = all_urls[:10]  # Limit to 10
+    
+    # Create image objects
+    images = []
+    for i, url in enumerate(matched_urls[:count]):
+        images.append({
+            'url': url,
+            'title': f'{search_terms} - Premium Product {i + 1}',
+            'width': 800,
+            'height': 600,
+            'thumbnail': url + '?w=300&h=200&fit=crop' if 'unsplash.com' in url else url,
+            'source': 'Improved Curated Collection',
+            'photographer': 'Professional Product Photography'
+        })
+    
+    logger.info(f"Generated {len(images)} improved curated images for '{search_terms}'")
+    return images
+
+def get_curated_product_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Get curated real product images from Unsplash using direct photo IDs.
+    This bypasses the API and uses known good product photos with comprehensive keyword matching.
+    """
+    # Comprehensive map of search terms to specific Unsplash photo IDs for real products
+    product_photo_mapping = {
+        # Audio & Electronics
+        'headphones': ['photo-1505740420928-5e560c06d30e', 'photo-1546435770-a3e426bf472b', 'photo-1583394838336-acd977736f90'],
+        'earbuds': ['photo-1545127398-14699f92334b', 'photo-1484704849700-f032a568e944', 'photo-1572569511254-d8f925fe2cbb'],
+        'speakers': ['photo-1608043152269-423dbba4e7e1', 'photo-1608043152269-642ea140fc76', 'photo-1593508512255-86ab42a8e620'],
+        
+        # Tech & Gadgets
+        'laptop': ['photo-1496181133206-80ce9b88a853', 'photo-1515378791036-0648a814e3e8', 'photo-1498050108023-c5249f4df085'],
+        'phone': ['photo-1511707171634-5f897ff02aa9', 'photo-1592750475338-74b7b21085ab', 'photo-1580910051074-3eb694886505'],
+        'tablet': ['photo-1544244015-0df4b3ffc6b0', 'photo-1561154464-82e9adf32764', 'photo-1606813907291-d86efa9b94db'],
+        
+        # Fashion & Accessories
+        'watch': ['photo-1523275335684-37898b6baf30', 'photo-1434493789847-2f02dc6ad3ba', 'photo-1524805444758-089113d48a6d'],
+        'wallet': ['photo-1553062407-98eeb64c6a62', 'photo-1627123424574-724758594e93', 'photo-1609961354195-3a8ed83d9a13'],
+        'bag': ['photo-1553062407-98eeb64c6a62', 'photo-1549298916-b41d501d3772', 'photo-1584917865442-de89df76afd3'],
+        
+        # Home & Lifestyle
+        'coffee': ['photo-1495474472287-4d71bcdd2085', 'photo-1509042239860-f550ce710b93', 'photo-1447933601403-0c6688de566e'],
+        'mug': ['photo-1501339847302-ac426a4a7cbb', 'photo-1544787219-7f47ccb76574', 'photo-1571091718767-18b5b1457add'],
+        'tea': ['photo-1544787219-7f47ccb76574', 'photo-1571091718767-18b5b1457add', 'photo-1558618666-fcd25c85cd64'],
+        
+        # Books & Reading
+        'book': ['photo-1507003211169-0a1dd7228f2d', 'photo-1481627834876-b7833e8f5570', 'photo-1544716278-ca5e3f4abd8c'],
+        'journal': ['photo-1517971129774-39b2c2334c58', 'photo-1544947950-fa07a98d237f', 'photo-1506905925346-21bda4d32df4'],
+        'planner': ['photo-1517971129774-39b2c2334c58', 'photo-1544947950-fa07a98d237f', 'photo-1587614382346-4ec70e388b28'],
+        'notebook': ['photo-1517971129774-39b2c2334c58', 'photo-1544947950-fa07a98d237f', 'photo-1587614382346-4ec70e388b28'],
+        
+        # Beauty & Wellness
+        'perfume': ['photo-1541643600914-78b084683601', 'photo-1588405748880-12d1d2a59d75', 'photo-1515377905703-c4788e51af15'],
+        'skincare': ['photo-1556228453-efd6c1ff04f6', 'photo-1570554886111-e80fcca6a029', 'photo-1612817288484-6f916006741a'],
+        'makeup': ['photo-1596462502278-27bfdc403348', 'photo-1522335789203-aabd1fc54bc9', 'photo-1487236985954-4d4d7e8e53ea'],
+        
+        # Plants & Garden
+        'plant': ['photo-1416879595882-3373a0480b5b', 'photo-1485955900006-10f4d324d411', 'photo-1463320726281-696a485928c7'],
+        'succulent': ['photo-1485955900006-10f4d324d411', 'photo-1416879595882-3373a0480b5b', 'photo-1558618666-fcd25c85cd64'],
+        'flowers': ['photo-1490750967868-88aa4486c946', 'photo-1463320726281-696a485928c7', 'photo-1558618666-fcd25c85cd64'],
+        
+        # Candles & Aromatherapy
+        'candle': ['photo-1602874801070-94c0af3e3759', 'photo-1572726729207-a78d6feb18d7', 'photo-1608571423902-eed4a5ad8108'],
+        'aromatherapy': ['photo-1513475382585-d06e58bcb0e0', 'photo-1602874801070-94c0af3e3759', 'photo-1572726729207-a78d6feb18d7'],
+        'essential oil': ['photo-1513475382585-d06e58bcb0e0', 'photo-1602874801070-94c0af3e3759', 'photo-1588405748880-12d1d2a59d75'],
+        
+        # Wellness & Health
+        'meditation': ['photo-1506905925346-21bda4d32df4', 'photo-1571019613454-1cb2f99b2d8b', 'photo-1447452001602-7090c7ab2db3'],
+        'yoga': ['photo-1544367567-0f2fcb009e0b', 'photo-1571019613454-1cb2f99b2d8b', 'photo-1506905925346-21bda4d32df4'],
+        'fitness': ['photo-1571019613454-1cb2f99b2d8b', 'photo-1544367567-0f2fcb009e0b', 'photo-1434596922112-19c563067271'],
+        
+        # Art & Creativity
+        'art': ['photo-1541961017774-22349e4a1262', 'photo-1578662996442-48f60103fc96', 'photo-1513475382585-d06e58bcb0e0'],
+        'painting': ['photo-1541961017774-22349e4a1262', 'photo-1578662996442-48f60103fc96', 'photo-1506905925346-21bda4d32df4'],
+        'craft': ['photo-1541961017774-22349e4a1262', 'photo-1578662996442-48f60103fc96', 'photo-1513475382585-d06e58bcb0e0'],
+        
+        # Kitchen & Cooking
+        'kitchen': ['photo-1556724340-8e6ca2ed0ca9', 'photo-1556909114-f6e7ad7d3136', 'photo-1571019613454-1cb2f99b2d8b'],
+        'cooking': ['photo-1556724340-8e6ca2ed0ca9', 'photo-1585238341710-4d3ee08618d9', 'photo-1571019613454-1cb2f99b2d8b'],
+        'utensils': ['photo-1556724340-8e6ca2ed0ca9', 'photo-1585238341710-4d3ee08618d9', 'photo-1544947950-fa07a98d237f'],
+        
+        # Generic product categories with better variety
+        'gift': ['photo-1549298916-b41d501d3772', 'photo-1513475382585-d06e58bcb0e0', 'photo-1544947950-fa07a98d237f'],
+        'luxury': ['photo-1571019613454-1cb2f99b2d8b', 'photo-1588405748880-12d1d2a59d75', 'photo-1523275335684-37898b6baf30'],
+        'eco friendly': ['photo-1416879595882-3373a0480b5b', 'photo-1485955900006-10f4d324d411', 'photo-1517971129774-39b2c2334c58']
+    }
+    
+    # Advanced keyword matching - check for any keyword in search terms
+    search_lower = search_terms.lower()
+    matched_ids = []
+    
+    # First pass: exact category match
+    for category, photo_ids in product_photo_mapping.items():
+        if category in search_lower:
+            matched_ids = photo_ids
+            logger.info(f"Exact match found for category '{category}' in search terms '{search_terms}'")
+            break
+    
+    # Second pass: partial keyword matching 
     if not matched_ids:
+        for category, photo_ids in product_photo_mapping.items():
+            category_words = category.split()
+            search_words = search_lower.split()
+            
+            # Check if any category word appears in search terms
+            if any(cat_word in search_lower for cat_word in category_words):
+                matched_ids = photo_ids
+                logger.info(f"Partial match found for category '{category}' in search terms '{search_terms}'")
+                break
+            
+            # Check if any search word appears in category  
+            if any(search_word in category for search_word in search_words):
+                matched_ids = photo_ids
+                logger.info(f"Reverse partial match found for category '{category}' in search terms '{search_terms}'")
+                break
+    
+    # Third pass: fuzzy matching for common variations
+    if not matched_ids:
+        # Map common variations and synonyms
+        variations = {
+            'zen': 'meditation', 'mindfulness': 'meditation', 'relaxation': 'meditation',
+            'indoor': 'plant', 'outdoor': 'plant', 'garden': 'plant', 'succulent': 'plant',
+            'organizer': 'planner', 'diary': 'journal', 'schedule': 'planner',
+            'wireless': 'headphones', 'bluetooth': 'headphones', 'audio': 'headphones',
+            'fragrance': 'perfume', 'cologne': 'perfume', 'scent': 'perfume',
+            'personalized': 'gift', 'custom': 'gift', 'handmade': 'craft'
+        }
+        
+        for variation, category in variations.items():
+            if variation in search_lower and category in product_photo_mapping:
+                matched_ids = product_photo_mapping[category]
+                logger.info(f"Fuzzy match found: '{variation}' -> '{category}' for search terms '{search_terms}'")
+                break
+    
+    # Final fallback: use diverse general product photos (NOT the same 3 meditation images)
+    if not matched_ids:
+        logger.warning(f"No match found for search terms '{search_terms}', using diverse fallback images")
         matched_ids = [
-            'photo-1556909114-f6e7ad7d3136',  # Shopping
-            'photo-1445205170230-053b83016050',  # Gift box
-            'photo-1513475382585-d06e58bcb0e0',  # Product display
-            'photo-1472851294608-062f824d29cc',  # Technology
-            'photo-1526170375885-4d8ecf77b99f'   # Lifestyle products
+            'photo-1549298916-b41d501d3772',  # Shopping bag
+            'photo-1472851294608-062f824d29cc',  # Technology gadget
+            'photo-1526170375885-4d8ecf77b99f',  # Lifestyle product
+            'photo-1585238341710-4d3ee08618d9',  # Kitchen item
+            'photo-1544947950-fa07a98d237f',   # Stationery
+            'photo-1571019613454-1cb2f99b2d8b'   # Wellness product
         ]
     
     # Generate image URLs from photo IDs
@@ -621,7 +840,8 @@ def search_jsonbin_products(search_terms: str, count: int = 3) -> List[Dict[str,
 
 def search_duckduckgo_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
     """
-    Search for real product images using DuckDuckGo image search (no API key required).
+    Search for real product images using DuckDuckGo image search with multiple robust methods.
+    Implements various approaches including library-based search and direct scraping.
     
     Args:
         search_terms: Search terms for images
@@ -631,78 +851,562 @@ def search_duckduckgo_images(search_terms: str, count: int = 3) -> List[Dict[str
         List of real product image dictionaries from DuckDuckGo
     """
     try:
+        # Method 1: Try using duckduckgo-search library if available
+        try:
+            logger.info(f"Attempting DuckDuckGo library search for: '{search_terms}'")
+            images = _search_with_ddg_library(search_terms, count)
+            if images:
+                logger.info(f"✓ Found {len(images)} images using DDG library")
+                return images
+        except ImportError:
+            logger.info("duckduckgo-search library not available, trying manual methods")
+        except Exception as e:
+            logger.warning(f"DDG library search failed: {str(e)}")
+        
+        # Method 2: Enhanced manual search with better product targeting
+        try:
+            logger.info(f"Attempting enhanced manual DDG search for: '{search_terms}'")
+            images = _search_ddg_manual_enhanced(search_terms, count)
+            if images:
+                logger.info(f"✓ Found {len(images)} images using enhanced manual search")
+                return images
+        except Exception as e:
+            logger.warning(f"Enhanced manual search failed: {str(e)}")
+        
+        # Method 3: Simplified web scraping approach
+        try:
+            logger.info(f"Attempting simplified web scraping for: '{search_terms}'")
+            images = _search_ddg_web_scraping(search_terms, count)
+            if images:
+                logger.info(f"✓ Found {len(images)} images using web scraping")
+                return images
+        except Exception as e:
+            logger.warning(f"Web scraping search failed: {str(e)}")
+        
+        logger.warning(f"All DuckDuckGo methods failed for '{search_terms}'")
+        return []
+            
+    except Exception as e:
+        logger.error(f"Critical error in DuckDuckGo search: {str(e)}")
+        return []
+
+def _search_with_ddg_library(search_terms: str, count: int) -> List[Dict[str, Any]]:
+    """Try using the duckduckgo-search library for more reliable results."""
+    try:
+        from duckduckgo_search import DDGS
+        
+        # Create specific product search query
+        product_query = f"{search_terms} product buy shopping"
+        
+        images = []
+        with DDGS() as ddgs:
+            ddg_images = ddgs.images(
+                keywords=product_query,
+                region="us-en",
+                safesearch="moderate",
+                size="medium",
+                max_results=count * 2  # Get extra to filter
+            )
+            
+            for i, img in enumerate(ddg_images[:count]):
+                if img.get('image') and img.get('thumbnail'):
+                    # Basic quality filtering
+                    image_url = img['image']
+                    if not any(bad in image_url.lower() for bad in ['pinterest.com', 'blogspot.com']):
+                        images.append({
+                            'url': image_url,
+                            'title': img.get('title', f'{search_terms} - Product {i + 1}'),
+                            'width': img.get('width', 600),
+                            'height': img.get('height', 400),
+                            'thumbnail': img.get('thumbnail', image_url),
+                            'source': 'DuckDuckGo Library',
+                            'source_url': img.get('url', ''),
+                            'photographer': 'Web Search Result'
+                        })
+                        
+                        if len(images) >= count:
+                            break
+        
+        return images
+        
+    except ImportError:
+        # Library not installed
+        raise ImportError("duckduckgo-search library not available")
+    except Exception as e:
+        logger.error(f"DDG library error: {str(e)}")
+        return []
+
+def _search_ddg_manual_enhanced(search_terms: str, count: int) -> List[Dict[str, Any]]:
+    """Enhanced manual search with better targeting and retry logic."""
+    import requests
+    import re
+    import time
+    import random
+    from urllib.parse import quote_plus
+    
+    # Create multiple search variations for better results
+    search_variations = [
+        f"{search_terms} product",
+        f"{search_terms} buy online",
+        f"{search_terms} shop",
+        f"buy {search_terms}",
+        search_terms  # Original as fallback
+    ]
+    
+    for variation in search_variations:
+        try:
+            logger.info(f"Trying search variation: '{variation}'")
+            
+            session = requests.Session()
+            session.headers.update({
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'DNT': '1'
+            })
+            
+            # Use DuckDuckGo instant answers API approach
+            search_url = "https://api.duckduckgo.com/"
+            params = {
+                'q': variation,
+                'format': 'json',
+                'no_html': '1',
+                'skip_disambig': '1'
+            }
+            
+            response = session.get(search_url, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                # Look for image data in the response
+                if 'Image' in data and data['Image']:
+                    images = []
+                    images.append({
+                        'url': data['Image'],
+                        'title': data.get('Heading', f'{search_terms} - Product 1'),
+                        'width': 600,
+                        'height': 400,
+                        'thumbnail': data['Image'],
+                        'source': 'DuckDuckGo API',
+                        'source_url': data.get('FirstURL', ''),
+                        'photographer': 'Web Search Result'
+                    })
+                    return images
+            
+            # Small delay between attempts
+            time.sleep(random.uniform(0.5, 1.0))
+            
+        except Exception as e:
+            logger.debug(f"Search variation '{variation}' failed: {str(e)}")
+            continue
+    
+    return []
+
+def _search_ddg_web_scraping(search_terms: str, count: int) -> List[Dict[str, Any]]:
+    """Simplified web scraping approach targeting specific e-commerce sites."""
+    import requests
+    import re
+    from urllib.parse import quote_plus
+    
+    # Target e-commerce sites that are likely to have product images
+    ecommerce_sites = [
+        f"site:amazon.com {search_terms}",
+        f"site:ebay.com {search_terms}",
+        f"site:etsy.com {search_terms}",
+        f"site:alibaba.com {search_terms}",
+        f"site:shopify.com {search_terms}"
+    ]
+    
+    session = requests.Session()
+    session.headers.update({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+    })
+    
+    images = []
+    
+    for site_query in ecommerce_sites:
+        try:
+            # Use DuckDuckGo HTML search
+            search_url = f"https://html.duckduckgo.com/html/?q={quote_plus(site_query)}"
+            
+            response = session.get(search_url, timeout=10)
+            
+            if response.status_code == 200:
+                # Look for image URLs in the HTML response
+                image_patterns = [
+                    r'data-src="([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+                    r'src="([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+                    r'url\(["\']([^"\']+\.(?:jpg|jpeg|png|webp)[^"\']*)["\']?\)',
+                ]
+                
+                found_urls = set()
+                
+                for pattern in image_patterns:
+                    matches = re.findall(pattern, response.text, re.IGNORECASE)
+                    for match in matches:
+                        clean_url = match.replace('\\/', '/').strip()
+                        if (clean_url.startswith('http') and 
+                            len(clean_url) > 30 and 
+                            not any(bad in clean_url.lower() for bad in ['icon', 'logo', 'avatar', 'thumb'])):
+                            found_urls.add(clean_url)
+                
+                # Convert found URLs to our format
+                for i, url in enumerate(list(found_urls)[:count - len(images)]):
+                    images.append({
+                        'url': url,
+                        'title': f'{search_terms} - Product {len(images) + 1}',
+                        'width': 600,
+                        'height': 400,
+                        'thumbnail': url,
+                        'source': 'DuckDuckGo Scraping',
+                        'photographer': 'Web Search Result'
+                    })
+                    
+                    if len(images) >= count:
+                        break
+                
+                if len(images) >= count:
+                    break
+                    
+        except Exception as e:
+            logger.debug(f"Site query '{site_query}' failed: {str(e)}")
+            continue
+    
+    return images
+
+def _extract_vqd_token_traditional(session: requests.Session, search_terms: str) -> str:
+    """Extract vqd token using traditional method."""
+    import re
+    from urllib.parse import quote_plus
+    
+    search_query = quote_plus(search_terms)
+    search_url = f"https://duckduckgo.com/?q={search_query}&iar=images&iax=images&ia=images"
+    
+    response = session.get(search_url, timeout=15)
+    
+    if response.status_code != 200:
+        return None
+    
+    # Enhanced vqd token patterns - more comprehensive search
+    vqd_patterns = [
+        r'vqd["\']?\s*[=:]\s*["\']([^"\']+)["\']',
+        r'vqd["\']\s*:\s*["\']([^"\']+)["\']',
+        r'"vqd"\s*:\s*"([^"]+)"',
+        r"'vqd'\s*:\s*'([^']+)'",
+        r'vqd=([a-zA-Z0-9\-_]+)',
+        r'&vqd=([a-zA-Z0-9\-_]+)',
+        r'data-vqd["\']?\s*=\s*["\']([^"\']+)["\']',
+        r'vqd["\']\s*,\s*["\']([^"\']+)["\']'
+    ]
+    
+    for pattern in vqd_patterns:
+        matches = re.findall(pattern, response.text, re.IGNORECASE)
+        if matches:
+            # Return the first valid-looking token
+            for match in matches:
+                if len(match) > 10 and '-' in match:  # vqd tokens typically have dashes and are long
+                    return match
+    
+    return None
+
+def _fetch_images_with_vqd(session: requests.Session, search_terms: str, vqd_token: str, count: int, original_terms: str) -> List[Dict[str, Any]]:
+    """Fetch images using vqd token."""
+    api_url = "https://duckduckgo.com/i.js"
+    params = {
+        'l': 'us-en',
+        'o': 'json',
+        'q': search_terms,
+        'vqd': vqd_token,
+        'f': ',,,,,1,',
+        'p': '1',
+        's': '0',
+        'u': 'bing'
+    }
+    
+    # Add delay to avoid rate limiting
+    time.sleep(random.uniform(0.5, 1.5))
+    
+    response = session.get(api_url, params=params, timeout=15)
+    
+    if response.status_code == 200:
+        try:
+            data = response.json()
+            return _process_ddg_results(data, count, original_terms)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse vqd response: {str(e)}")
+    
+    return []
+
+def _fetch_images_alternative_api(session: requests.Session, search_terms: str, count: int, original_terms: str) -> List[Dict[str, Any]]:
+    """Try alternative DuckDuckGo API endpoints."""
+    import time
+    import json
+    from urllib.parse import quote_plus
+    
+    # Try the newer API endpoint
+    try:
+        search_url = "https://duckduckgo.com/i.js"
+        params = {
+            'q': search_terms,
+            'o': 'json',
+            'p': '1',
+            's': '0',
+            'u': 'bing',
+            'f': ',,,,,1,'
+        }
+        
+        # First get a basic page to establish session
+        base_url = f"https://duckduckgo.com/?q={quote_plus(search_terms)}&iar=images"
+        session.get(base_url, timeout=10)
+        
+        time.sleep(1)
+        
+        response = session.get(search_url, params=params, timeout=15)
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                return _process_ddg_results(data, count, original_terms)
+            except json.JSONDecodeError:
+                pass
+    except:
+        pass
+    
+    return []
+
+def _fetch_images_html_parsing(session: requests.Session, search_terms: str, count: int, original_terms: str) -> List[Dict[str, Any]]:
+    """Parse HTML directly for image results."""
+    import re
+    from urllib.parse import quote_plus
+    
+    search_url = f"https://duckduckgo.com/?q={quote_plus(search_terms)}&iar=images&iax=images&ia=images"
+    
+    response = session.get(search_url, timeout=15)
+    
+    if response.status_code != 200:
+        return []
+    
+    # Look for image URLs in the HTML
+    image_patterns = [
+        r'"image":"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+        r'"thumbnail":"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+        r'data-src="([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+        r'src="([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"'
+    ]
+    
+    found_images = set()
+    
+    for pattern in image_patterns:
+        urls = re.findall(pattern, response.text, re.IGNORECASE)
+        for url in urls:
+            # Clean and validate URL
+            clean_url = url.replace('\\/', '/').replace('\\', '')
+            if clean_url.startswith('http') and len(clean_url) > 20:
+                found_images.add(clean_url)
+    
+    # Convert to our format
+    images = []
+    for i, url in enumerate(list(found_images)[:count]):
+        images.append({
+            'url': url,
+            'title': f"{original_terms} - Product {i + 1}",
+            'width': 600,
+            'height': 400,
+            'thumbnail': url,  # Use same URL for thumbnail
+            'source': 'DuckDuckGo HTML',
+            'photographer': 'Web Search Result'
+        })
+    
+    return images
+
+def _process_ddg_results(data: dict, count: int, original_terms: str) -> List[Dict[str, Any]]:
+    """Process DuckDuckGo API results into our format."""
+    images = []
+    results = data.get('results', [])
+    
+    logger.info(f"Processing {len(results)} DuckDuckGo results")
+    
+    for i, result in enumerate(results[:count * 2]):  # Get extra to filter
+        try:
+            if 'image' in result:
+                image_url = result['image']
+                thumbnail_url = result.get('thumbnail', image_url)
+                title = result.get('title', f"{original_terms} - Product {i + 1}")
+                source_url = result.get('url', '')
+                
+                # Quality filters - exclude low-quality sources
+                bad_domains = ['pinterest.com', 'blogspot.com', 'tumblr.com', 'reddit.com']
+                good_extensions = ['.jpg', '.jpeg', '.png', '.webp']
+                
+                if (image_url and thumbnail_url and
+                    not any(bad in image_url.lower() for bad in bad_domains) and
+                    any(ext in image_url.lower() for ext in good_extensions) and
+                    len(image_url) > 20):
+                    
+                    images.append({
+                        'url': image_url,
+                        'title': title,
+                        'width': result.get('width', 600),
+                        'height': result.get('height', 400),
+                        'thumbnail': thumbnail_url,
+                        'source': 'DuckDuckGo Images',
+                        'source_url': source_url,
+                        'photographer': 'Web Search Result'
+                    })
+                    
+                    if len(images) >= count:
+                        break
+        except Exception as e:
+            logger.debug(f"Error processing result {i}: {str(e)}")
+            continue
+    
+    logger.info(f"Successfully processed {len(images)} DuckDuckGo images")
+    return images
+
+def search_bing_images_enhanced(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Enhanced Bing image search with better product targeting and multiple strategies.
+    
+    Args:
+        search_terms: Search terms for images
+        count: Number of images to return
+        
+    Returns:
+        List of real product image dictionaries from Bing
+    """
+    try:
         import requests
         from urllib.parse import quote_plus
         import re
+        import json
+        import time
+        import random
         
-        # DuckDuckGo image search endpoint
-        search_query = quote_plus(f"{search_terms} product")
+        # Create product-focused search variations
+        search_variations = [
+            f"{search_terms} product buy",
+            f"{search_terms} shopping online",
+            f"buy {search_terms} online",
+            f"{search_terms} store",
+            search_terms  # Original as fallback
+        ]
         
-        # First get the search page to extract the vqd token
-        search_url = f"https://duckduckgo.com/?q={search_query}&t=h_&iar=images"
+        images = []
         
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+        for variation in search_variations:
+            if len(images) >= count:
+                break
+                
+            try:
+                logger.info(f"Trying Bing search variation: '{variation}'")
+                
+                # Enhanced search query with product focus
+                search_query = quote_plus(f"{variation} -pinterest -tumblr")
+                search_url = f"https://www.bing.com/images/search?q={search_query}&FORM=HDRSC2&first=1&count=35"
+                
+                headers = {
+                    'User-Agent': random.choice([
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0'
+                    ]),
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                    'DNT': '1'
+                }
+                
+                response = requests.get(search_url, headers=headers, timeout=15)
+                
+                if response.status_code == 200:
+                    # Enhanced pattern matching for better image extraction
+                    image_patterns = [
+                        r'"murl":"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+                        r'"imgurl":"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+                        r'"turl":"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+                        r'data-src="([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+                        r'src="([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"',
+                        r'mediaurl&quot;:&quot;([^&]+\.(?:jpg|jpeg|png|webp)[^&]*)',
+                        r'"mediaUrl":"([^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"'
+                    ]
+                    
+                    thumbnail_patterns = [
+                        r'"turl":"([^"]+)"',
+                        r'"thumburl":"([^"]+)"',
+                        r'thumbnail["\']?\s*:\s*["\']([^"\']+)["\']'
+                    ]
+                    
+                    found_images = set()
+                    found_thumbnails = set()
+                    
+                    # Extract main image URLs
+                    for pattern in image_patterns:
+                        urls = re.findall(pattern, response.text)
+                        for url in urls:
+                            # Clean and decode URL
+                            clean_url = url.replace('\\u002f', '/').replace('\\/', '/').replace('&amp;', '&')
+                            if (clean_url.startswith('http') and 
+                                len(clean_url) > 20 and
+                                any(ext in clean_url.lower() for ext in ['.jpg', '.jpeg', '.png', '.webp']) and
+                                not any(bad in clean_url.lower() for bad in ['favicon', 'icon', 'logo', 'avatar', 'pinterest.com', 'blogspot.com'])):
+                                found_images.add(clean_url)
+                    
+                    # Extract thumbnails
+                    for pattern in thumbnail_patterns:
+                        urls = re.findall(pattern, response.text)
+                        for url in urls:
+                            clean_url = url.replace('\\u002f', '/').replace('\\/', '/').replace('&amp;', '&')
+                            if clean_url.startswith('http'):
+                                found_thumbnails.add(clean_url)
+                    
+                    # Create image objects with quality filtering
+                    thumbnail_list = list(found_thumbnails)
+                    for i, image_url in enumerate(list(found_images)[:count * 2]):  # Get extras to filter
+                        # Quality check - prefer images from known good domains
+                        good_domains = ['amazon.com', 'ebay.com', 'aliexpress.com', 'shopify.com', 'etsy.com', 'walmart.com', 'target.com']
+                        is_good_domain = any(domain in image_url.lower() for domain in good_domains)
+                        
+                        # Basic size check (avoid tiny images)
+                        if len(image_url) > 40 or is_good_domain:
+                            thumbnail = thumbnail_list[i] if i < len(thumbnail_list) else image_url
+                            
+                            images.append({
+                                'url': image_url,
+                                'title': f"{search_terms} - Product {len(images) + 1}",
+                                'width': 600,
+                                'height': 400,
+                                'thumbnail': thumbnail,
+                                'source': 'Bing Images Enhanced',
+                                'photographer': 'Web Search Result',
+                                'quality_score': 2 if is_good_domain else 1
+                            })
+                            
+                            if len(images) >= count:
+                                break
+                
+                # Add delay between search variations
+                time.sleep(random.uniform(0.5, 1.5))
+                
+            except Exception as e:
+                logger.debug(f"Bing search variation '{variation}' failed: {str(e)}")
+                continue
         
-        # Get initial search page
-        response = requests.get(search_url, headers=headers, timeout=10)
+        # Sort by quality score (good domains first)
+        images.sort(key=lambda x: x.get('quality_score', 0), reverse=True)
         
-        if response.status_code != 200:
-            logger.warning(f"DuckDuckGo search page failed: {response.status_code}")
-            return []
-        
-        # Extract vqd token from the page
-        vqd_match = re.search(r'vqd="([^"]+)"', response.text)
-        if not vqd_match:
-            logger.warning("Could not extract vqd token from DuckDuckGo")
-            return []
-        
-        vqd = vqd_match.group(1)
-        
-        # Now make the actual image search API call
-        api_url = "https://duckduckgo.com/i.js"
-        params = {
-            'l': 'us-en',
-            'o': 'json',
-            'q': f"{search_terms} product",
-            'vqd': vqd,
-            'f': ',,,',
-            'p': '1'
-        }
-        
-        response = requests.get(api_url, headers=headers, params=params, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            images = []
+        if images:
+            logger.info(f"Enhanced Bing search found {len(images)} real product images for '{search_terms}'")
             
-            results = data.get('results', [])
-            for i, result in enumerate(results[:count]):
-                if 'image' in result and 'thumbnail' in result:
-                    images.append({
-                        'url': result['image'],
-                        'title': result.get('title', f"{search_terms} - Product {i + 1}"),
-                        'width': result.get('width', 400),
-                        'height': result.get('height', 300),
-                        'thumbnail': result['thumbnail'],
-                        'source': 'DuckDuckGo',
-                        'source_url': result.get('url', ''),
-                        'photographer': 'Web Search Result'
-                    })
-            
-            if images:
-                logger.info(f"Found {len(images)} real product images from DuckDuckGo for '{search_terms}'")
-                return images
-            else:
-                logger.warning(f"No image results found in DuckDuckGo response for '{search_terms}'")
-                return []
-        else:
-            logger.warning(f"DuckDuckGo API returned status {response.status_code}")
-            return []
-            
+        return images[:count]
+        
     except Exception as e:
-        logger.error(f"Error searching DuckDuckGo images: {str(e)}")
+        logger.error(f"Error in enhanced Bing search: {str(e)}")
         return []
 
 def search_bing_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
@@ -1008,8 +1712,8 @@ def generate_pexels_demo_images(search_terms: str, count: int = 3) -> List[Dict[
 
 def search_images_for_gift(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
     """
-    Search for product images using Python-based image search APIs.
-    Falls back through multiple services: Unsplash -> Pexels -> Placeholders.
+    Search for real product images prioritizing DuckDuckGo image search.
+    Falls back through multiple services: DuckDuckGo -> Bing -> Pixabay -> Placeholders.
     
     Args:
         search_terms: Keywords to search for images
@@ -1021,36 +1725,111 @@ def search_images_for_gift(search_terms: str, count: int = 3) -> List[Dict[str, 
     try:
         # Clean the search terms for better product results
         cleaned_terms = clean_search_terms(search_terms)
-        logger.info(f"Searching for images: '{search_terms}' (cleaned: '{cleaned_terms}')")
+        logger.info(f"Searching for real product images: '{search_terms}' (cleaned: '{cleaned_terms}')")
         
         images = []
         
-        # Try real product images from multiple free sources
+        # PRIMARY: Try enhanced Bing image search for real products (most reliable)
         if len(images) < count:
             try:
-                real_images = search_real_product_images(cleaned_terms, count - len(images))
-                images.extend(real_images)
-                logger.info(f"Added {len(real_images)} real product images")
+                logger.info(f"Attempting enhanced Bing image search for '{cleaned_terms}'")
+                bing_images = search_bing_images_enhanced(cleaned_terms, count - len(images))
+                if bing_images:
+                    images.extend(bing_images)
+                    logger.info(f"✓ Added {len(bing_images)} real product images from Bing")
+                else:
+                    logger.warning("Enhanced Bing returned no images")
             except Exception as e:
-                logger.warning(f"Real product image search failed: {str(e)}")
+                logger.warning(f"Enhanced Bing image search failed: {str(e)}")
         
-        # Try Lorem Picsum as reliable fallback (always works)
+        # SECONDARY: Try DuckDuckGo image search for real products
         if len(images) < count:
             try:
-                picsum_images = generate_unsplash_source_images(cleaned_terms, count - len(images))
-                images.extend(picsum_images)
-                logger.info(f"Added {len(picsum_images)} generic images from Lorem Picsum")
+                logger.info(f"Attempting DuckDuckGo image search for '{cleaned_terms}'")
+                duckduckgo_images = search_duckduckgo_images(cleaned_terms, count - len(images))
+                if duckduckgo_images:
+                    images.extend(duckduckgo_images)
+                    logger.info(f"✓ Added {len(duckduckgo_images)} real product images from DuckDuckGo")
+                else:
+                    logger.warning("DuckDuckGo returned no images")
             except Exception as e:
-                logger.warning(f"Lorem Picsum failed: {str(e)}")
+                logger.warning(f"DuckDuckGo image search failed: {str(e)}")
         
-        # Final fallback to placeholder images if needed
+        # TERTIARY: Try original Bing search as backup
+        if len(images) < count:
+            try:
+                logger.info(f"Attempting original Bing image search for '{cleaned_terms}'")
+                bing_images = search_bing_images(cleaned_terms, count - len(images))
+                if bing_images:
+                    images.extend(bing_images)
+                    logger.info(f"✓ Added {len(bing_images)} real product images from Bing (backup)")
+                else:
+                    logger.warning("Original Bing returned no images")
+            except Exception as e:
+                logger.warning(f"Original Bing image search failed: {str(e)}")
+        
+        # TERTIARY: Try Pixabay for real product photos
+        if len(images) < count:
+            try:
+                logger.info(f"Attempting Pixabay search for '{cleaned_terms}'")
+                pixabay_images = generate_pixabay_images(cleaned_terms, count - len(images))
+                if pixabay_images:
+                    images.extend(pixabay_images)
+                    logger.info(f"✓ Added {len(pixabay_images)} product images from Pixabay")
+                else:
+                    logger.warning("Pixabay returned no images")
+            except Exception as e:
+                logger.warning(f"Pixabay search failed: {str(e)}")
+        
+        # FALLBACK 1: Try Google Custom Search if configured
+        if len(images) < count:
+            try:
+                logger.info(f"Attempting Google Custom Search for '{cleaned_terms}'")
+                google_images = search_google_custom_images(cleaned_terms, count - len(images))
+                if google_images:
+                    images.extend(google_images)
+                    logger.info(f"✓ Added {len(google_images)} real product images from Google")
+                else:
+                    logger.warning("Google Custom Search returned no images")
+            except Exception as e:
+                logger.warning(f"Google Custom Search failed: {str(e)}")
+        
+        # FALLBACK 2: Use improved curated product images with real URLs
+        if len(images) < count:
+            try:
+                logger.info(f"Using improved curated product images for '{cleaned_terms}'")
+                curated_images = get_improved_curated_images(cleaned_terms, count - len(images))
+                if curated_images:
+                    images.extend(curated_images)
+                    logger.info(f"Added {len(curated_images)} improved curated images")
+            except Exception as e:
+                logger.warning(f"Improved curated images failed: {str(e)}")
+        
+        # FALLBACK 3: Traditional curated images as last resort
+        if len(images) < count:
+            try:
+                logger.info(f"Using traditional curated images as final fallback for '{cleaned_terms}'")
+                curated_images = get_curated_product_images(cleaned_terms, count - len(images))
+                if curated_images:
+                    images.extend(curated_images)
+                    logger.info(f"Added {len(curated_images)} traditional curated images")
+            except Exception as e:
+                logger.warning(f"Traditional curated images failed: {str(e)}")
+        
+        # FINAL FALLBACK: Enhanced placeholder images
         if len(images) < count and app.config.get('USE_PLACEHOLDER_FALLBACK', True):
             remaining = count - len(images)
             placeholder_images = generate_enhanced_placeholder_images(search_terms, remaining)
             images.extend(placeholder_images)
-            logger.info(f"Added {len(placeholder_images)} placeholder images")
+            logger.info(f"Added {len(placeholder_images)} placeholder images as final fallback")
         
-        logger.info(f"Successfully found {len(images)} total images for '{search_terms}'")
+        # Log final results
+        source_breakdown = {}
+        for img in images:
+            source = img.get('source', 'Unknown')
+            source_breakdown[source] = source_breakdown.get(source, 0) + 1
+        
+        logger.info(f"✓ Successfully found {len(images)} total images for '{search_terms}' | Sources: {source_breakdown}")
         return images[:count]  # Ensure we don't exceed requested count
         
     except Exception as e:
