@@ -25,7 +25,34 @@ class GiftRevealSystem {
     setGiftData(gifts) {
         this.giftData = gifts;
         this.revealedGifts.clear();
+        // No need to preload images separately since backend provides them
+        console.log('Gift data set:', gifts);
     }
+
+    getGiftImageUrl(gift) {
+        // Use backend-provided images if available
+        if (gift.images && gift.images.length > 0) {
+            return gift.images[0].url;
+        }
+        
+        // Fallback to search terms-based image
+        if (gift.image_search_terms) {
+            const cleanTerms = gift.image_search_terms.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+            const keywords = cleanTerms.split(' ').slice(0, 2).join(',');
+            return `https://source.unsplash.com/300x200/?${keywords}&sig=${Date.now()}`;
+        }
+        
+        // Final fallback placeholder
+        return `https://via.placeholder.com/300x200/e2e8f0/4a5568?text=${encodeURIComponent(gift.title || 'Gift')}`;
+    }
+
+    // Legacy method - no longer needed since backend provides images
+    preloadImages() {
+        console.log('Image preloading skipped - using backend-provided images');
+    }
+
+    // Legacy methods removed - using backend-provided images now
+    // These methods are no longer needed since the backend provides processed images
 
     renderGiftBoxes() {
         const giftCardsContainer = document.getElementById('gift-cards');
@@ -41,10 +68,26 @@ class GiftRevealSystem {
                              class="gift-box-img ${this.revealedGifts.has(index) ? 'hidden' : ''}">
                     </div>
                     <div class="gift-content ${this.revealedGifts.has(index) ? 'visible' : ''}">
+                        <div class="gift-image-container">
+                            <img src="${this.getGiftImageUrl(gift)}" 
+                                 alt="${gift.title}" 
+                                 class="gift-image" 
+                                 onerror="this.src='https://via.placeholder.com/200x150/e2e8f0/4a5568?text=No+Image'">
+                        </div>
                         <h3 class="gift-title">${gift.title}</h3>
                         <p class="gift-description">${gift.description}</p>
+                        ${gift.price_range ? `<div class="gift-price">${gift.price_range}</div>` : ''}
                         ${gift.starter ? `<div class="gift-starter"><strong>How to present it:</strong> ${gift.starter}</div>` : ''}
                         ${gift.reaction ? `<div class="gift-reaction"><strong>Expected reaction:</strong> ${gift.reaction}</div>` : ''}
+                        <div class="gift-actions">
+                            <a href="${gift.amazon_link || `https://www.amazon.in/s?k=${encodeURIComponent(gift.amazon_search_query || gift.title)}`}" 
+                               target="_blank" 
+                               rel="noopener noreferrer" 
+                               class="amazon-btn">
+                                <i class="ph ph-shopping-cart"></i>
+                                <span>Find on Amazon</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

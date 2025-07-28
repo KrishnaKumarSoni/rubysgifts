@@ -631,6 +631,130 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1.5rem;
 }
 
+/* Gift Image Styles */
+.gift-image-container {
+    width: 100%;
+    height: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    background: #f7fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gift-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+    border-radius: 6px;
+}
+
+.gift-image.loaded {
+    opacity: 1;
+}
+
+.gift-image:hover {
+    transform: scale(1.02);
+}
+
+/* Loading animation for images */
+.gift-image:not(.loaded) {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Gift Price Styling */
+.gift-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ff6600;
+    margin: 0.75rem 0;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 102, 0, 0.08);
+    border-radius: 6px;
+    text-align: center;
+    border-left: 3px solid #ff6600;
+}
+
+/* Gift Actions */
+.gift-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 102, 0, 0.1);
+}
+
+/* Amazon Button */
+.amazon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.25rem;
+    background: linear-gradient(135deg, #ff6600, #ff8533);
+    color: white;
+    text-decoration: none;
+    border-radius: 24px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: lowercase;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(255, 102, 0, 0.2);
+    min-height: 44px;
+    border: none;
+    cursor: pointer;
+}
+
+.amazon-btn:hover {
+    background: linear-gradient(135deg, #e55a00, #ff6600);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(255, 102, 0, 0.3);
+    text-decoration: none;
+    color: white;
+}
+
+.amazon-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(255, 102, 0, 0.2);
+}
+
+.amazon-btn:focus {
+    outline: 2px solid #ff6600;
+    outline-offset: 2px;
+}
+
+.amazon-btn:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.amazon-btn i {
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.amazon-btn:hover i {
+    transform: translateX(2px);
+}
+
+/* Amazon Affiliate Disclosure - Hidden */
+.affiliate-disclosure {
+    display: none;
+}
+
 .gift-box {
     background: transparent;
     border: none;
@@ -640,8 +764,8 @@ h1, h2, h3, h4, h5, h6 {
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    height: clamp(200px, 25vh, 280px);
-    max-height: 320px;
+    height: clamp(600px, 80vh, 800px);
+    max-height: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -683,7 +807,7 @@ h1, h2, h3, h4, h5, h6 {
     transition: all 0.5s ease;
     width: 100%;
     height: 100%;
-    overflow-y: auto;
+    overflow-y: visible;
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
@@ -692,6 +816,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    min-height: 600px; /* Increased height to show all content */
 }
 
 .gift-content.visible {
@@ -743,8 +868,12 @@ h1, h2, h3, h4, h5, h6 {
 /* Desktop enhancements */
 @media (min-width: 768px) {
     .gift-box {
-        height: clamp(700px, 45vh, 500px);
+        height: clamp(700px, 80vh, 900px);
         padding: 2rem;
+    }
+    
+    .gift-content {
+        min-height: 700px;
     }
     
     .gift-box-img {
@@ -797,8 +926,8 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 768px) {
     .gift-box {
         padding: 1rem;
-        height: clamp(160px, 20vh, 200px);
-        min-height: 160px;
+        height: auto;
+        min-height: 500px; /* Increased for all content */
     }
     
     .gift-box-img {
@@ -808,11 +937,36 @@ h1, h2, h3, h4, h5, h6 {
     .gift-cards {
         gap: 1rem;
         margin-bottom: 2rem;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
     
     .gift-content {
         padding: 1rem;
+        min-height: 500px;
+        overflow-y: visible;
+    }
+    
+    .gift-image-container {
+        height: 120px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .gift-price {
+        font-size: 1rem;
+        margin: 0.5rem 0;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .gift-actions {
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+    }
+    
+    .amazon-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        min-height: 40px;
     }
     
     .gift-starter, .gift-reaction {
@@ -1086,11 +1240,12 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 480px) {
     .gift-cards {
         gap: 0.75rem;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: 1fr;
     }
     
     .gift-box {
-        height: clamp(140px, 18vh, 180px);
+        height: auto;
+        min-height: 280px;
     }
     
     .gift-box-img {
@@ -1099,6 +1254,13 @@ h1, h2, h3, h4, h5, h6 {
     
     .gift-content {
         padding: 0.75rem;
+        min-height: 450px;
+        overflow-y: visible;
+    }
+    
+    .gift-image-container {
+        height: 100px;
+        margin-bottom: 0.5rem;
     }
     
     .gift-title {
@@ -1108,7 +1270,25 @@ h1, h2, h3, h4, h5, h6 {
     
     .gift-description {
         font-size: clamp(0.8rem, 3vw, 0.9rem);
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .gift-price {
+        font-size: 0.9rem;
+        margin: 0.4rem 0;
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .gift-actions {
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+    }
+    
+    .amazon-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+        min-height: 36px;
     }
     
     .gift-starter, .gift-reaction {
@@ -1116,6 +1296,7 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 0.75rem;
         margin-bottom: 0.5rem;
     }
+    
     .landing-content {
         padding: 1.5rem 1rem;
         margin: 0.5rem;

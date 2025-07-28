@@ -9,30 +9,35 @@ class QuestionnaireSystem {
         this.questions = this.initializeQuestions();
         this.totalQuestions = this.questions.length;
         
-        // Performance optimization: cache DOM elements
-        this.elements = {
-            landing: document.getElementById('landing'),
-            questionnaire: document.getElementById('questionnaire'),
-            results: document.getElementById('results'),
-            loading: document.getElementById('loading'),
-            errorMessage: document.getElementById('error-message'),
-            questionContainer: document.getElementById('question-container'),
-            progressFill: document.getElementById('progress-fill'),
-            currentQuestion: document.getElementById('current-question'),
-            totalQuestions: document.getElementById('total-questions'),
-            prevBtn: document.getElementById('prev-btn'),
-            nextBtn: document.getElementById('next-btn'),
-            submitBtn: document.getElementById('submit-btn'),
-            startBtn: document.getElementById('start-btn'),
-            testBtn: document.getElementById('test-btn'),
-            retryBtn: document.getElementById('retry-btn'),
-            newSearchBtn: document.getElementById('new-search-btn'),
-            errorRetryBtn: document.getElementById('error-retry-btn'),
-            giftCards: document.getElementById('gift-cards')
-        };
+        // Performance optimization: cache DOM elements with error handling
+        this.elements = this.cacheElements();
         
         this.debounceTimeout = null;
         this.init();
+    }
+
+    cacheElements() {
+        const elements = {};
+        const elementIds = [
+            'landing', 'questionnaire', 'results', 'loading', 'error-message',
+            'question-container', 'progress-fill', 'current-question', 'total-questions',
+            'prev-btn', 'next-btn', 'submit-btn', 'start-btn', 'test-btn',
+            'retry-btn', 'new-search-btn', 'error-retry-btn', 'gift-cards'
+        ];
+        
+        elementIds.forEach(id => {
+            const element = document.getElementById(id);
+            if (!element) {
+                console.warn(`DOM element with id '${id}' not found`);
+            }
+            elements[this.toCamelCase(id)] = element;
+        });
+        
+        return elements;
+    }
+
+    toCamelCase(str) {
+        return str.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
     }
 
     initializeQuestions() {
@@ -567,14 +572,14 @@ class QuestionnaireSystem {
 
     async generateGiftIdeas() {
         try {
-            // Prepare API request data
+            // Prepare API request data with correct field mapping
             const requestData = {
-                call_them: this.answers.call_them || this.answers.nicknames || '',
-                relationship: this.answers.relationship || this.answers.relationships || '',
-                previous_gifts: this.answers.previous_gifts || this.answers.previousGifts || '',
-                hate: this.answers.hate || this.answers.dislikes || '',
+                call_them: this.answers.nicknames || '',
+                relationship: this.answers.relationships || '',
+                previous_gifts: this.answers.previousGifts || '',
+                hate: this.answers.dislikes || '',
                 complaints: this.answers.complaints || '',
-                complain_about_them: this.answers.complain_about_them || this.answers.quirks || '',
+                complain_about_them: this.answers.quirks || '',
                 budget: this.answers.budget || '',
                 limitations: this.answers.limitations || ''
             };
@@ -613,19 +618,28 @@ class QuestionnaireSystem {
                     title: 'personalized photo album',
                     description: 'A custom photo book filled with your favorite memories together. Perfect for someone who appreciates sentimental gifts and personal touches.',
                     starter: 'You could say: "I made this photo album of our favorite memories together."',
-                    reaction: 'They might smile and flip through it immediately, pointing out their favorite photos.'
+                    reaction: 'They might smile and flip through it immediately, pointing out their favorite photos.',
+                    image_search_terms: 'photo album personalized custom',
+                    amazon_search_query: 'personalized photo album custom book',
+                    price_range: '₹800-2,500'
                 },
                 {
                     title: 'premium coffee subscription',
                     description: 'Monthly delivery of specialty coffee beans from around the world. Great for coffee lovers who enjoy trying new flavors.',
                     starter: 'You could mention: "I got you a coffee subscription so you can try beans from different countries."',
-                    reaction: 'They might get excited about trying new flavors and ask which countries are included.'
+                    reaction: 'They might get excited about trying new flavors and ask which countries are included.',
+                    image_search_terms: 'coffee beans subscription premium',
+                    amazon_search_query: 'coffee subscription premium beans delivery',
+                    price_range: '₹1,500-4,000/month'
                 },
                 {
                     title: 'wireless noise-canceling headphones',
                     description: 'High-quality headphones perfect for music lovers or anyone who needs to focus in noisy environments.',
                     starter: 'You could say: "These headphones should help you focus better when things get noisy."',
-                    reaction: 'They might immediately want to test them out and ask about the noise-canceling features.'
+                    reaction: 'They might immediately want to test them out and ask about the noise-canceling features.',
+                    image_search_terms: 'wireless headphones noise canceling',
+                    amazon_search_query: 'wireless noise canceling headphones',
+                    price_range: '₹5,000-15,000'
                 }
             ];
             
@@ -642,11 +656,27 @@ class QuestionnaireSystem {
             // Fallback to direct rendering if gift reveal system is not available
             const cardsHTML = gifts.map(gift => `
                 <div class="gift-card">
+                    <div class="gift-image-container">
+                        <img src="https://via.placeholder.com/200x150/ff6600/ffffff?text=Loading..." 
+                             alt="${gift.title}" 
+                             class="gift-image" 
+                             data-search-terms="${gift.image_search_terms || ''}" 
+                             onerror="this.src='https://via.placeholder.com/200x150/e2e8f0/4a5568?text=No+Image'">
+                    </div>
                     <h3 class="gift-card-title">${gift.title}</h3>
                     <p class="gift-card-description">${gift.description}</p>
+                    ${gift.price_range ? `<div class="gift-price">${gift.price_range}</div>` : ''}
                     ${gift.starter ? `<div class="gift-card-starter"><strong>How to present it:</strong> ${gift.starter}</div>` : ''}
                     ${gift.reaction ? `<div class="gift-card-reaction"><strong>Expected reaction:</strong> ${gift.reaction}</div>` : ''}
-                    ${gift.price ? `<div class="gift-card-price">${gift.price}</div>` : ''}
+                    <div class="gift-actions">
+                        <a href="https://www.amazon.in/s?k=${encodeURIComponent(gift.amazon_search_query || gift.title)}" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="amazon-btn">
+                            <i class="ph ph-shopping-cart"></i>
+                            <span>Find on Amazon</span>
+                        </a>
+                    </div>
                 </div>
             `).join('');
             

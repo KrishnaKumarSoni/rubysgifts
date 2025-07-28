@@ -24,6 +24,8 @@ Author: Claude Code Assistant
 
 import os
 import logging
+import subprocess
+import json
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
@@ -60,6 +62,14 @@ class Config:
     OPENAI_MODEL = 'gpt-4o-mini'
     OPENAI_MAX_TOKENS = 1500
     OPENAI_TEMPERATURE = 0.7
+    
+    # Amazon Affiliate Configuration
+    AMAZON_AFFILIATE_TAG = os.getenv('AMAZON_AFFILIATE_TAG', 'kamazon01-21')
+    
+    # Image Search Configuration
+    IMAGE_SEARCH_SCRIPT = 'image_search.js'
+    IMAGE_SEARCH_COUNT = 3
+    IMAGE_SEARCH_TIMEOUT = 15
     
     @staticmethod
     def is_production():
@@ -221,6 +231,8 @@ REQUIREMENTS:
 - Explain the psychological reasoning behind each choice
 - Provide specific, actionable presentation advice
 - Predict authentic emotional responses
+- For image_search_terms: Use ONLY the most specific product name/brand/type (e.g., "MacBook Pro 13", "Nike Air Force 1", "Kindle Paperwhite") - avoid generic words like "gift", "present", "item"
+- For amazon_search_query: Use exact product names that would appear on Amazon (e.g., "Apple MacBook Pro 13 inch", "Sony WH-1000XM4 Headphones")
 
 Format as JSON:
 {{
@@ -229,19 +241,28 @@ Format as JSON:
       "title": "Creative, specific gift name",
       "description": "Detailed explanation with psychological reasoning combining why this fits their personality/needs",
       "starter": "Exactly how to introduce/present this gift",
-      "reaction": "Realistic emotional response based on their personality"
+      "reaction": "Realistic emotional response based on their personality",
+      "image_search_terms": "Very specific product keywords for image search (e.g., 'Sony WH-1000XM4 wireless headphones', 'handmade ceramic mug set', 'leather wallet brown')",
+      "amazon_search_query": "Exact search term for Amazon affiliate link (e.g., 'Sony WH-1000XM4 headphones', 'personalized photo frame')",
+      "price_range": "Estimated price range in INR (e.g., '₹2,000-5,000', '₹500-1,500')"
     }},
     {{
       "title": "Creative, specific gift name", 
       "description": "Detailed explanation with psychological reasoning combining why this fits their personality/needs",
       "starter": "Exactly how to introduce/present this gift", 
-      "reaction": "Realistic emotional response based on their personality"
+      "reaction": "Realistic emotional response based on their personality",
+      "image_search_terms": "Very specific product keywords for image search",
+      "amazon_search_query": "Exact search term for Amazon affiliate link",
+      "price_range": "Estimated price range in INR"
     }},
     {{
       "title": "Creative, specific gift name",
       "description": "Detailed explanation with psychological reasoning combining why this fits their personality/needs",
       "starter": "Exactly how to introduce/present this gift",
-      "reaction": "Realistic emotional response based on their personality"
+      "reaction": "Realistic emotional response based on their personality",
+      "image_search_terms": "Very specific product keywords for image search",
+      "amazon_search_query": "Exact search term for Amazon affiliate link",
+      "price_range": "Estimated price range in INR"
     }}
   ]
 }}
@@ -249,6 +270,401 @@ Format as JSON:
 Ensure all recommendations are within budget, respect limitations, and demonstrate the thoughtfulness that strengthens relationships."""
 
     return prompt
+
+def generate_placeholder_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Generate placeholder images when image search fails.
+    
+    Args:
+        search_terms: Keywords for context
+        count: Number of placeholder images to generate
+        
+    Returns:
+        List of placeholder image dictionaries
+    """
+    placeholder_images = []
+    base_url = "https://via.placeholder.com"
+    
+    for i in range(count):
+        placeholder_images.append({
+            "url": f"{base_url}/400x300/FF6600/FFFFFF?text={search_terms.replace(' ', '+')}" + f"+{i+1}",
+            "title": f"Gift Idea: {search_terms}",
+            "width": 400,
+            "height": 300,
+            "thumbnail": f"{base_url}/200x150/FF6600/FFFFFF?text={search_terms.replace(' ', '+')}" + f"+{i+1}",
+            "source": "Placeholder"
+        })
+    
+    return placeholder_images
+
+def clean_search_terms(search_terms: str) -> str:
+    """
+    Clean and optimize search terms for better product image results.
+    
+    Args:
+        search_terms: Raw search terms from AI
+        
+    Returns:
+        Cleaned search terms optimized for product search
+    """
+    if not search_terms:
+        return ""
+    
+    # Remove common non-product words
+    stop_words = ['gift', 'present', 'item', 'thing', 'for', 'the', 'a', 'an', 'product']
+    
+    # Split and clean
+    words = search_terms.lower().strip().split()
+    cleaned_words = [word for word in words if word not in stop_words and len(word) > 1]
+    
+    # Rejoin
+    cleaned = ' '.join(cleaned_words).strip()
+    
+    # If we cleaned too much, use original
+    if len(cleaned) < 3:
+        cleaned = search_terms.strip()
+    
+    logger.info(f"Cleaned search terms: '{search_terms}' -> '{cleaned}'")
+    return cleaned
+
+def search_images_for_gift(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Search for product images using the Node.js image search script.
+    Falls back to placeholder images if search fails.
+    
+    Args:
+        search_terms: Keywords to search for images
+        count: Number of images to return
+        
+    Returns:
+        List of image dictionaries with url, title, etc.
+    """
+    try:
+        # Check if image search script exists
+        script_path = os.path.join(os.getcwd(), app.config['IMAGE_SEARCH_SCRIPT'])
+        if not os.path.exists(script_path):
+            logger.warning(f"Image search script not found at {script_path}, using placeholders")
+            return generate_placeholder_images(search_terms, count)
+        
+        # Clean the search terms for better product results
+        cleaned_terms = clean_search_terms(search_terms)
+        logger.info(f"Searching for images: '{search_terms}' (cleaned: '{cleaned_terms}')")
+        
+        # Call the Node.js image search script
+        result = subprocess.run(
+            ['node', app.config['IMAGE_SEARCH_SCRIPT'], cleaned_terms, str(count)],
+            capture_output=True,
+            text=True,
+            timeout=app.config['IMAGE_SEARCH_TIMEOUT'],
+            cwd=os.getcwd()
+        )
+        
+        if result.returncode != 0:
+            logger.error(f"Image search script failed with code {result.returncode}: {result.stderr}")
+            logger.info("Falling back to placeholder images")
+            return generate_placeholder_images(search_terms, count)
+        
+        # Parse JSON output from the script
+        try:
+            search_result = json.loads(result.stdout)
+            if search_result.get('success', False):
+                images = search_result.get('images', [])
+                if len(images) > 0:
+                    logger.info(f"Found {len(images)} images for '{search_terms}'")
+                    return images
+                else:
+                    logger.info(f"No images found for '{search_terms}', using placeholders")
+                    return generate_placeholder_images(search_terms, count)
+            else:
+                logger.error(f"Image search returned failure: {search_result.get('error', 'Unknown error')}")
+                logger.info("Falling back to placeholder images")
+                return generate_placeholder_images(search_terms, count)
+                
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse image search result: {e}")
+            logger.error(f"Raw output: {result.stdout}")
+            logger.info("Falling back to placeholder images")
+            return generate_placeholder_images(search_terms, count)
+            
+    except subprocess.TimeoutExpired:
+        logger.error(f"Image search timed out after {app.config['IMAGE_SEARCH_TIMEOUT']} seconds")
+        return []
+    
+    except FileNotFoundError:
+        logger.error("Node.js not found. Please ensure Node.js is installed.")
+        return []
+    
+    except Exception as e:
+        logger.error(f"Unexpected error in image search: {str(e)}")
+        return []
+
+def process_gift_with_images_and_links(gift: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Process a single gift idea by adding images and Amazon affiliate links.
+    
+    Args:
+        gift: Gift dictionary from OpenAI response
+        
+    Returns:
+        Enhanced gift dictionary with images and affiliate links
+    """
+    try:
+        # Extract search terms from the gift data
+        image_search_terms = gift.get('image_search_terms', gift.get('title', ''))
+        amazon_search_query = gift.get('amazon_search_query', gift.get('title', ''))
+        
+        # Search for images
+        images = search_images_for_gift(image_search_terms, app.config['IMAGE_SEARCH_COUNT'])
+        
+        # Generate Amazon affiliate link
+        amazon_link = generate_amazon_affiliate_link(amazon_search_query)
+        
+        # Add new fields to the gift
+        enhanced_gift = gift.copy()
+        enhanced_gift['images'] = images
+        enhanced_gift['amazon_link'] = amazon_link
+        
+        # Ensure all required fields are present
+        if 'price_range' not in enhanced_gift:
+            enhanced_gift['price_range'] = 'Price varies'
+        
+        logger.info(f"Enhanced gift '{gift.get('title', 'Unknown')}' with {len(images)} images")
+        return enhanced_gift
+        
+    except Exception as e:
+        logger.error(f"Error processing gift with images: {str(e)}")
+        # Return original gift with empty images and basic Amazon link
+        fallback_gift = gift.copy()
+        fallback_gift['images'] = []
+        fallback_gift['amazon_link'] = generate_amazon_affiliate_link(gift.get('title', ''))
+        fallback_gift['price_range'] = gift.get('price_range', 'Price varies')
+        return fallback_gift
+
+def generate_amazon_affiliate_link(search_query: str) -> str:
+    """
+    Generate Amazon affiliate link for a search query.
+    
+    Args:
+        search_query: Product search terms for Amazon
+        
+    Returns:
+        Amazon affiliate URL
+    """
+    try:
+        affiliate_tag = app.config['AMAZON_AFFILIATE_TAG']
+        
+        # Use the exact search query provided by the AI (more specific)
+        encoded_query = search_query.replace(' ', '+')
+        
+        # Create Amazon search URL with affiliate parameters
+        amazon_url = (
+            f"https://www.amazon.in/s?"
+            f"k={encoded_query}&"
+            f"tag={affiliate_tag}&"
+            f"linkCode=ur2&"
+            f"camp=3638&"
+            f"creative=24630"
+        )
+        
+        logger.info(f"Generated Amazon link for: '{search_query}'")
+        
+        return amazon_url
+        
+    except Exception as e:
+        logger.error(f"Error generating Amazon link: {str(e)}")
+        # Fallback to basic Amazon search with affiliate tag
+        encoded_query = search_query.replace(' ', '+')
+        return f"https://www.amazon.in/s?k={encoded_query}&tag={app.config['AMAZON_AFFILIATE_TAG']}"
+
+def generate_specific_product_link(product_name: str, brand: str = None, model: str = None) -> str:
+    """
+    Generate more specific Amazon product links when brand/model information is available.
+    
+    Args:
+        product_name: General product name
+        brand: Brand name if available
+        model: Model/variant if available
+        
+    Returns:
+        More specific Amazon affiliate URL
+    """
+    try:
+        affiliate_tag = app.config['AMAZON_AFFILIATE_TAG']
+        
+        # Build specific search query
+        search_parts = [product_name]
+        if brand:
+            search_parts.append(brand)
+        if model:
+            search_parts.append(model)
+        
+        specific_query = ' '.join(search_parts)
+        encoded_query = specific_query.replace(' ', '+')
+        
+        # Create specific product search URL
+        amazon_url = (
+            f"https://www.amazon.in/s?"
+            f"k={encoded_query}&"
+            f"tag={affiliate_tag}&"
+            f"linkCode=ur2&"
+            f"camp=3638&"
+            f"creative=24630&"
+            f"sort=review-rank"  # Sort by customer reviews for better results
+        )
+        
+        logger.info(f"Generated specific product link for: '{specific_query}'")
+        return amazon_url
+        
+    except Exception as e:
+        logger.error(f"Error generating specific product link: {str(e)}")
+        return generate_amazon_affiliate_link(product_name)
+
+def get_popular_product_asins() -> Dict[str, Dict[str, str]]:
+    """
+    Get a mapping of popular products to their ASINs for direct product links.
+    This creates the most specific affiliate links possible.
+    
+    Returns:
+        Dictionary mapping product keywords to ASIN and product info
+    """
+    # Popular product ASINs (these would be updated regularly in a real system)
+    popular_asins = {
+        'wireless headphones': {
+            'asin': 'B08C7KG5LP',
+            'title': 'Sony WH-CH720N Wireless Noise Canceling Headphones',
+            'brand': 'Sony'
+        },
+        'bluetooth speaker': {
+            'asin': 'B077ZDZBGR',
+            'title': 'JBL Go 2 Portable Bluetooth Speaker',
+            'brand': 'JBL'
+        },
+        'smartwatch': {
+            'asin': 'B0B2FQSD2G',
+            'title': 'Fire-Boltt Phoenix Pro 1.39 Bluetooth Calling Smartwatch',
+            'brand': 'Fire-Boltt'
+        },
+        'power bank': {
+            'asin': 'B07HBTY3Z2',
+            'title': 'Mi Power Bank 3i 20000mAh',
+            'brand': 'Mi'
+        },
+        'coffee mug': {
+            'asin': 'B08FDDJRG3',
+            'title': 'Borosil Vision Glass Mug Set',
+            'brand': 'Borosil'
+        },
+        'water bottle': {
+            'asin': 'B07DJ1FXGF',
+            'title': 'Milton Thermosteel Flip Lid Flask',
+            'brand': 'Milton'
+        },
+        'perfume': {
+            'asin': 'B07QMVKXZT',
+            'title': 'Fogg Black Collection Scent',
+            'brand': 'Fogg'
+        },
+        'chocolate': {
+            'asin': 'B07BVLVTQJ',
+            'title': 'Cadbury Celebration Rich Dry Fruit Collection',
+            'brand': 'Cadbury'
+        },
+        'book': {
+            'asin': 'B08F7PJHDN',
+            'title': 'Atomic Habits: An Easy & Proven Way to Build Good Habits',
+            'brand': 'Random House'
+        },
+        'wallet': {
+            'asin': 'B01FXZGZZ8',
+            'title': 'WildHorn Leather Wallet for Men',
+            'brand': 'WildHorn'
+        }
+    }
+    
+    return popular_asins
+
+def generate_direct_product_link(search_query: str) -> Optional[str]:
+    """
+    Try to generate a direct Amazon product link using ASINs for popular products.
+    
+    Args:
+        search_query: Product search terms
+        
+    Returns:
+        Direct product URL if ASIN found, otherwise None
+    """
+    try:
+        affiliate_tag = app.config['AMAZON_AFFILIATE_TAG']
+        popular_products = get_popular_product_asins()
+        
+        # Look for matching products
+        query_lower = search_query.lower()
+        
+        for product_key, product_info in popular_products.items():
+            if any(word in query_lower for word in product_key.split()) or product_key in query_lower:
+                asin = product_info['asin']
+                
+                # Create direct product URL
+                direct_url = (
+                    f"https://www.amazon.in/dp/{asin}?"
+                    f"tag={affiliate_tag}&"
+                    f"linkCode=ur2&"
+                    f"camp=3638&"
+                    f"creative=24630"
+                )
+                
+                logger.info(f"Generated direct product link for: '{search_query}' -> ASIN: {asin}")
+                return direct_url
+                
+        return None  # No direct match found
+        
+    except Exception as e:
+        logger.error(f"Error generating direct product link: {str(e)}")
+        return None
+
+def process_gift_with_images_and_links(gift: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Process a single gift idea by adding images and Amazon affiliate links.
+    
+    Args:
+        gift: Gift dictionary from OpenAI response
+        
+    Returns:
+        Enhanced gift dictionary with images and affiliate links
+    """
+    try:
+        # Extract search terms from the gift data
+        image_search_terms = gift.get('image_search_terms', gift.get('title', ''))
+        amazon_search_query = gift.get('amazon_search_query', gift.get('title', ''))
+        
+        # Search for images
+        images = search_images_for_gift(image_search_terms, app.config['IMAGE_SEARCH_COUNT'])
+        
+        # Try to generate a direct product link first, fallback to search link
+        amazon_link = generate_direct_product_link(amazon_search_query)
+        if not amazon_link:
+            amazon_link = generate_amazon_affiliate_link(amazon_search_query)
+        
+        # Add new fields to the gift
+        enhanced_gift = gift.copy()
+        enhanced_gift['images'] = images
+        enhanced_gift['amazon_link'] = amazon_link
+        
+        # Ensure all required fields are present
+        if 'price_range' not in enhanced_gift:
+            enhanced_gift['price_range'] = 'Price varies'
+        
+        logger.info(f"Enhanced gift '{gift.get('title', 'Unknown')}' with {len(images)} images")
+        return enhanced_gift
+        
+    except Exception as e:
+        logger.error(f"Error processing gift with images: {str(e)}")
+        # Return original gift with empty images and basic Amazon link
+        fallback_gift = gift.copy()
+        fallback_gift['images'] = []
+        fallback_gift['amazon_link'] = generate_amazon_affiliate_link(gift.get('title', ''))
+        fallback_gift['price_range'] = gift.get('price_range', 'Price varies')
+        return fallback_gift
 
 def generate_gift_ideas(answers: Dict[str, str]) -> Dict[str, Any]:
     """
@@ -291,7 +707,7 @@ def generate_gift_ideas(answers: Dict[str, str]) -> Dict[str, Any]:
             "messages": [
                 {
                     "role": "system", 
-                    "content": "You are a world-class gift psychology expert. Apply step-by-step analytical thinking and respond with valid JSON containing exactly 3 gift ideas in this format: {\"gift_ideas\": [{\"title\": \"Creative gift name\", \"description\": \"Detailed psychological reasoning\", \"starter\": \"Presentation strategy\", \"reaction\": \"Authentic emotional response\"}]}"
+                    "content": "You are a world-class gift psychology expert. Apply step-by-step analytical thinking and respond with valid JSON containing exactly 3 gift ideas in this format: {\"gift_ideas\": [{\"title\": \"Creative gift name\", \"description\": \"Detailed psychological reasoning\", \"starter\": \"Presentation strategy\", \"reaction\": \"Authentic emotional response\", \"image_search_terms\": \"2-4 keywords for image search\", \"amazon_search_query\": \"Exact Amazon search term\", \"price_range\": \"Price range in INR\"}]}"
                 },
                 {
                     "role": "user", 
@@ -350,16 +766,53 @@ def serve_frontend():
             "message": "Please ensure index.html exists in the project root"
         }), 404
 
+def check_image_search_availability() -> tuple[bool, str]:
+    """
+    Check if image search functionality is available.
+    
+    Returns:
+        Tuple of (is_available, status_message)
+    """
+    try:
+        # Check if Node.js is installed
+        result = subprocess.run(['node', '--version'], capture_output=True, text=True, timeout=5)
+        if result.returncode != 0:
+            return False, "Node.js not installed"
+        
+        # Check if image search script exists
+        script_path = os.path.join(os.getcwd(), app.config['IMAGE_SEARCH_SCRIPT'])
+        if not os.path.exists(script_path):
+            return False, f"Image search script not found at {script_path}"
+        
+        # Check if package.json exists (indicates npm dependencies might be installed)
+        package_json_path = os.path.join(os.getcwd(), 'package.json')
+        if not os.path.exists(package_json_path):
+            return False, "package.json not found - npm dependencies not configured"
+        
+        return True, f"Available with Node.js {result.stdout.strip()}"
+        
+    except subprocess.TimeoutExpired:
+        return False, "Node.js check timed out"
+    except FileNotFoundError:
+        return False, "Node.js not found in PATH"
+    except Exception as e:
+        return False, f"Error checking image search: {str(e)}"
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
+    image_search_available, image_search_status = check_image_search_availability()
+    
     return jsonify({
         "status": "healthy",
         "service": "Ruby's Gifts API",
         "version": "1.0.0",
         "timestamp": datetime.utcnow().isoformat(),
         "openai_configured": bool(app.config.get('OPENAI_API_KEY')),
-        "api_key_present": bool(app.config.get('OPENAI_API_KEY'))
+        "api_key_present": bool(app.config.get('OPENAI_API_KEY')),
+        "image_search_available": image_search_available,
+        "image_search_status": image_search_status,
+        "amazon_affiliate_tag": app.config.get('AMAZON_AFFILIATE_TAG', 'Not configured')
     })
 
 @app.route('/test_openai', methods=['GET'])
@@ -419,6 +872,45 @@ def test_openai():
             "error_type": type(e).__name__
         }), 500
 
+@app.route('/test_image_search', methods=['GET'])
+def test_image_search():
+    """Test image search functionality."""
+    try:
+        # Get search terms from query parameter
+        search_terms = request.args.get('query', 'wireless headphones')
+        
+        # Check if image search is available
+        is_available, status_message = check_image_search_availability()
+        if not is_available:
+            return jsonify({
+                "success": False,
+                "error": "Image search not available",
+                "status": status_message
+            }), 503
+        
+        # Test image search
+        images = search_images_for_gift(search_terms, 2)
+        
+        # Test Amazon link generation
+        amazon_link = generate_amazon_affiliate_link(search_terms)
+        
+        return jsonify({
+            "success": True,
+            "query": search_terms,
+            "images_found": len(images),
+            "images": images,
+            "amazon_link": amazon_link,
+            "status": "Image search and Amazon link generation working"
+        })
+        
+    except Exception as e:
+        logger.error(f"Image search test failed: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__
+        }), 500
+
 @app.route('/generate_gifts', methods=['POST'])
 def generate_gifts():
     """
@@ -444,7 +936,18 @@ def generate_gifts():
                 "title": "Gift Name",
                 "description": "Why this gift is perfect",
                 "starter": "How to present it", 
-                "reaction": "Expected reaction"
+                "reaction": "Expected reaction",
+                "images": [
+                    {
+                        "url": "https://example.com/image.jpg",
+                        "title": "Image title",
+                        "width": 300,
+                        "height": 200,
+                        "thumbnail": "https://example.com/thumb.jpg"
+                    }
+                ],
+                "amazon_link": "https://amazon.in/s?k=product&tag=affiliate",
+                "price_range": "₹1,000-3,000"
             },
             ...
         ]
@@ -494,10 +997,10 @@ def generate_gifts():
         if len(gift_data['gift_ideas']) != 3:
             logger.warning(f"Expected 3 gift ideas, got {len(gift_data['gift_ideas'])}")
         
-        # Validate each gift idea has required fields
-        required_fields = ['title', 'description', 'starter', 'reaction']
+        # Validate each gift idea has core required fields
+        core_required_fields = ['title', 'description', 'starter', 'reaction']
         for i, gift in enumerate(gift_data['gift_ideas']):
-            for field in required_fields:
+            for field in core_required_fields:
                 if field not in gift or not gift[field]:
                     logger.error(f"Gift idea {i+1} missing required field: {field}")
                     return jsonify({
@@ -507,6 +1010,28 @@ def generate_gifts():
                     }), 500
         
         logger.info(f"Successfully generated {len(gift_data['gift_ideas'])} gift ideas")
+        
+        # Process each gift to add images and Amazon affiliate links
+        logger.info("Processing gifts with images and affiliate links...")
+        enhanced_gifts = []
+        
+        for i, gift in enumerate(gift_data['gift_ideas']):
+            try:
+                logger.info(f"Processing gift {i+1}/{len(gift_data['gift_ideas'])}: {gift.get('title', 'Unknown')}")
+                enhanced_gift = process_gift_with_images_and_links(gift)
+                enhanced_gifts.append(enhanced_gift)
+            except Exception as e:
+                logger.error(f"Failed to process gift {i+1}: {str(e)}")
+                # Add fallback gift with minimal data
+                fallback_gift = gift.copy()
+                fallback_gift['images'] = []
+                fallback_gift['amazon_link'] = generate_amazon_affiliate_link(gift.get('title', ''))
+                fallback_gift['price_range'] = gift.get('price_range', 'Price varies')
+                enhanced_gifts.append(fallback_gift)
+        
+        # Update gift_data with enhanced gifts
+        gift_data['gift_ideas'] = enhanced_gifts
+        logger.info(f"Successfully enhanced all {len(enhanced_gifts)} gifts with images and links")
         
         return jsonify({
             "success": True,
