@@ -12,8 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Phosphor Icons -->
-    <link rel="stylesheet" href="https://unpkg.com/phosphor-icons@2.1.1/src/css/icons.css">
-    <script src="https://unpkg.com/phosphor-icons@2.1.1"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css?v=2.0">
@@ -78,7 +77,7 @@
                 </p>
                 <div class="landing-buttons">
                     <button id="start-btn" class="btn btn-primary">
-                        <i class="ph ph-gift"></i>
+                        <i class="ph-fill ph-gift"></i>
                         start discovering
                     </button>
                 </div>
@@ -108,15 +107,15 @@
             <div class="navigation">
                 <div class="navigation-content">
                     <button id="prev-btn" class="btn btn-secondary" disabled>
-                        <i class="ph ph-arrow-left"></i>
+                        <i class="ph-bold ph-arrow-left"></i>
                         previous
                     </button>
                     <button id="next-btn" class="btn btn-primary" disabled>
                         next
-                        <i class="ph ph-arrow-right"></i>
+                        <i class="ph-bold ph-arrow-right"></i>
                     </button>
                     <button id="submit-btn" class="btn btn-primary" style="display: none;" disabled>
-                        <i class="ph ph-sparkle"></i>
+                        <i class="ph-fill ph-sparkle"></i>
                         get gift ideas
                     </button>
                 </div>
@@ -149,7 +148,7 @@
     <!-- Error Message -->
     <div id="error-message" class="error-message">
         <div class="error-content">
-            <i class="ph ph-warning-circle"></i>
+            <i class="ph-fill ph-warning-circle"></i>
             <h3>oops! something went wrong</h3>
             <p id="error-text">we couldn't generate gift ideas right now. please try again.</p>
             <button id="error-retry-btn" class="btn btn-primary">try again</button>

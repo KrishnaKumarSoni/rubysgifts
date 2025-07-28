@@ -87,7 +87,7 @@ class GiftRevealSystem {
                        target="_blank" 
                        rel="noopener noreferrer" 
                        class="amazon-btn">
-                        <i class="ph ph-shopping-cart"></i>
+                        <i class="ph-bold ph-shopping-cart"></i>
                         <span>Get products</span>
                     </a>
                 </div>
