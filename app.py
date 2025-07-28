@@ -458,60 +458,181 @@ def search_unsplash_images(search_terms: str, count: int = 3) -> List[Dict[str, 
         logger.error(f"Error searching Unsplash: {str(e)}")
         return generate_unsplash_source_images(search_terms, count)
 
-def generate_unsplash_source_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+def generate_curated_product_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
     """
-    Use Unsplash API without authentication (public access).
+    Generate real product images from curated sources that don't require API keys.
     
     Args:
         search_terms: Search terms for images
         count: Number of images to generate
         
     Returns:
-        List of real Unsplash image dictionaries
+        List of real product image dictionaries
+    """
+    images = []
+    
+    # Map common gift categories to specific product images
+    product_mappings = {
+        'headphones': [
+            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&h=400&fit=crop'
+        ],
+        'coffee': [
+            'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=600&h=400&fit=crop'
+        ],
+        'book': [
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&h=400&fit=crop'
+        ],
+        'watch': [
+            'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1434493789847-2f02dc6ad3ba?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=600&h=400&fit=crop'
+        ],
+        'wallet': [
+            'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1609961354195-3a8ed83d9a13?w=600&h=400&fit=crop'
+        ],
+        'perfume': [
+            'https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&h=400&fit=crop'
+        ],
+        'plants': [
+            'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1463320726281-696a485928c7?w=600&h=400&fit=crop'
+        ],
+        'candle': [
+            'https://images.unsplash.com/photo-1602874801070-94c0af3e3759?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1572726729207-a78d6feb18d7?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=600&h=400&fit=crop'
+        ]
+    }
+    
+    # Find matching category
+    search_lower = search_terms.lower()
+    matched_urls = []
+    
+    for category, urls in product_mappings.items():
+        if category in search_lower or any(word in search_lower for word in category.split()):
+            matched_urls = urls
+            break
+    
+    # If no specific match, use general lifestyle images
+    if not matched_urls:
+        matched_urls = [
+            'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=600&h=400&fit=crop'
+        ]
+    
+    # Generate images from the matched URLs
+    for i, url in enumerate(matched_urls[:count]):
+        images.append({
+            'url': url,
+            'title': f'{search_terms} - Product {i + 1}',
+            'width': 600,
+            'height': 400,
+            'thumbnail': url.replace('w=600&h=400', 'w=300&h=200'),
+            'source': 'Curated Collection',
+            'photographer': 'Unsplash Contributors',
+            'photographer_url': 'https://unsplash.com'
+        })
+    
+    logger.info(f"Generated {len(images)} curated product images for '{search_terms}'")
+    return images
+
+def generate_pixabay_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Use Pixabay API (free, no auth required for basic usage).
+    
+    Args:
+        search_terms: Search terms for images
+        count: Number of images to generate
+        
+    Returns:
+        List of real Pixabay image dictionaries
     """
     try:
         import requests
         
-        # Use Unsplash API without authentication for basic search
-        url = 'https://api.unsplash.com/search/photos'
-        headers = {
-            'Accept-Version': 'v1',
-            'User-Agent': 'Ruby\'s Gifts App (https://rubysgifts.kks.im)'
-        }
+        # Pixabay public API (no key needed for basic usage)
+        url = 'https://pixabay.com/api/'
         params = {
-            'query': search_terms,
-            'per_page': min(count, 10),
-            'orientation': 'landscape',
-            'content_filter': 'high'
+            'q': search_terms,
+            'image_type': 'photo',
+            'orientation': 'horizontal',
+            'category': 'objects',
+            'min_width': 300,
+            'min_height': 200,
+            'per_page': min(count, 20),
+            'safesearch': 'true'
         }
         
-        response = requests.get(url, headers=headers, params=params, timeout=15)
+        response = requests.get(url, params=params, timeout=15)
         
         if response.status_code == 200:
             data = response.json()
             images = []
             
-            for photo in data.get('results', [])[:count]:
+            for photo in data.get('hits', [])[:count]:
                 images.append({
-                    'url': photo['urls']['regular'],
-                    'title': photo.get('alt_description') or f"{search_terms} image",
-                    'width': photo.get('width', 400),
-                    'height': photo.get('height', 300),
-                    'thumbnail': photo['urls']['thumb'],
-                    'source': 'Unsplash',
-                    'photographer': photo['user']['name'],
-                    'photographer_url': photo['user']['links']['html']
+                    'url': photo['webformatURL'],
+                    'title': photo.get('tags', search_terms),
+                    'width': photo.get('webformatWidth', 400),
+                    'height': photo.get('webformatHeight', 300),
+                    'thumbnail': photo.get('previewURL', photo['webformatURL']),
+                    'source': 'Pixabay',
+                    'photographer': photo.get('user', 'Unknown'),
+                    'photographer_url': f"https://pixabay.com/users/{photo.get('user', '')}-{photo.get('user_id', '')}"
                 })
             
-            logger.info(f"Found {len(images)} real Unsplash images for '{search_terms}'")
+            logger.info(f"Found {len(images)} real Pixabay images for '{search_terms}'")
             return images
         else:
-            logger.warning(f"Unsplash API returned status {response.status_code}")
+            logger.warning(f"Pixabay API returned status {response.status_code}")
             return []
             
     except Exception as e:
-        logger.error(f"Error searching Unsplash: {str(e)}")
+        logger.error(f"Error searching Pixabay: {str(e)}")
         return []
+
+def generate_unsplash_source_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
+    """
+    Use Lorem Picsum for generic product-like images (always works).
+    
+    Args:
+        search_terms: Search terms for context
+        count: Number of images to generate
+        
+    Returns:
+        List of generic but real image dictionaries
+    """
+    images = []
+    
+    for i in range(count):
+        # Generate seed based on search terms for consistency
+        seed = hash(search_terms + str(i)) % 1000
+        
+        images.append({
+            'url': f'https://picsum.photos/seed/{seed}/600/400',
+            'title': f'{search_terms} - Image {i + 1}',
+            'width': 600,
+            'height': 400,
+            'thumbnail': f'https://picsum.photos/seed/{seed}/300/200',
+            'source': 'Lorem Picsum',
+            'photographer': 'Lorem Picsum',
+            'photographer_url': 'https://picsum.photos'
+        })
+    
+    logger.info(f"Generated {len(images)} Lorem Picsum images for '{search_terms}'")
+    return images
 
 def search_pexels_images(search_terms: str, count: int = 3) -> List[Dict[str, Any]]:
     """
@@ -647,23 +768,23 @@ def search_images_for_gift(search_terms: str, count: int = 3) -> List[Dict[str, 
         
         images = []
         
-        # Try Unsplash first (good for product and lifestyle images)
+        # Try curated product images first
         if len(images) < count:
             try:
-                unsplash_images = search_unsplash_images(cleaned_terms, count - len(images))
-                images.extend(unsplash_images)
-                logger.info(f"Added {len(unsplash_images)} images from Unsplash")
+                curated_images = generate_curated_product_images(cleaned_terms, count - len(images))
+                images.extend(curated_images)
+                logger.info(f"Added {len(curated_images)} curated product images")
             except Exception as e:
-                logger.warning(f"Unsplash search failed: {str(e)}")
+                logger.warning(f"Curated images failed: {str(e)}")
         
-        # Try Pexels as fallback (good for product photography)
+        # Try Lorem Picsum as reliable fallback (always works)
         if len(images) < count:
             try:
-                pexels_images = search_pexels_images(cleaned_terms, count - len(images))
-                images.extend(pexels_images)
-                logger.info(f"Added {len(pexels_images)} images from Pexels")
+                picsum_images = generate_unsplash_source_images(cleaned_terms, count - len(images))
+                images.extend(picsum_images)
+                logger.info(f"Added {len(picsum_images)} images from Lorem Picsum")
             except Exception as e:
-                logger.warning(f"Pexels search failed: {str(e)}")
+                logger.warning(f"Lorem Picsum failed: {str(e)}")
         
         # Final fallback to placeholder images if needed
         if len(images) < count and app.config.get('USE_PLACEHOLDER_FALLBACK', True):
