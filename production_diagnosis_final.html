@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Production Diagnosis - Ruby's Gifts</title>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #FF6600, #e55a00);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .diagnosis-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .diagnosis-section h2 {
+            color: #FF6600;
+            border-bottom: 2px solid #FF6600;
+            padding-bottom: 10px;
+        }
+        .critical {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .solution-step {
+            margin: 20px 0;
+            padding: 20px;
+            background: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            border-radius: 4px;
+        }
+        .solution-step h3 {
+            margin: 0 0 15px 0;
+            color: #0066cc;
+        }
+        .priority-high {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .priority-high h3 {
+            color: #dc3545;
+        }
+        .priority-medium {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        .priority-medium h3 {
+            color: #856404;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .checklist li:before {
+            content: "☐ ";
+            color: #FF6600;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 Ruby's Gifts Production Diagnosis</h1>
+        <p>Comprehensive analysis and solution for production deployment issues</p>
+        <p><strong>Status:</strong> ERROR IDENTIFIED - SOLUTION AVAILABLE</p>
+    </div>
+
+    <div class="diagnosis-section">
+        <h2>🚨 Critical Issue Identified</h2>
+        
+        <div class="critical">
+            <h3>❌ Root Cause: Missing OPENAI_API_KEY Environment Variable</h3>
+            <p><strong>Location:</strong> Production environment (Vercel)</p>
+            <p><strong>Error:</strong> WSGI application fails to initialize due to missing OpenAI API key</p>
+            <p><strong>Impact:</strong> Complete application failure - error overlay prevents all functionality</p>
+            
+            <h4>Technical Analysis:</h4>
+            <p>In <code>wsgi.py</code> lines 53-55, the application validates for <code>OPENAI_API_KEY</code> and raises a <code>ValueError</code> if missing:</p>
+            <div class="code-block">
+if not app.config.get('OPENAI_API_KEY'):
+    logger.error("OPENAI_API_KEY not found in environment variables")
+    raise ValueError("OPENAI_API_KEY is required for production deployment")
+            </div>
+            <p>This exception prevents the Flask app from starting, causing the error overlay to display.</p>
+        </div>
+    </div>
+
+    <div class="diagnosis-section">
+        <h2>🔧 Immediate Solution Steps</h2>
+        
+        <div class="solution-step priority-high">
+            <h3>🔥 CRITICAL - Step 1: Configure Environment Variables in Vercel</h3>
+            <p>Add the missing environment variable to your Vercel deployment:</p>
+            
+            <h4>Option A: Via Vercel Dashboard</h4>
+            <ol>
+                <li>Go to <a href="https://vercel.com/dashboard" target="_blank">Vercel Dashboard</a></li>
+                <li>Select your Ruby's Gifts project</li>
+                <li>Navigate to "Settings" → "Environment Variables"</li>
+                <li>Add new variable:
+                    <div class="code-block">
+Name: OPENAI_API_KEY
+Value: [Your OpenAI API Key]
+Environment: Production, Preview, Development
+                    </div>
+                </li>
+                <li>Click "Save"</li>
+                <li>Redeploy the application</li>
+            </ol>
+
+            <h4>Option B: Via Vercel CLI</h4>
+            <div class="code-block">
+# From your project directory
+vercel env add OPENAI_API_KEY
+# Enter your API key when prompted
+# Select: Production, Preview, Development
+
+# Redeploy
+vercel --prod
+            </div>
+
+            <h4>Get OpenAI API Key (if needed):</h4>
+            <ol>
+                <li>Go to <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a></li>
+                <li>Click "Create new secret key"</li>
+                <li>Copy the generated key</li>
+                <li>Add to Vercel as shown above</li>
+            </ol>
+        </div>
+
+        <div class="solution-step priority-medium">
+            <h3>⚠️ OPTIONAL - Step 2: Add Other Environment Variables</h3>
+            <p>For enhanced functionality, consider adding these optional variables:</p>
+            <div class="code-block">
+SECRET_KEY=your-secret-key-for-flask-sessions
+FLASK_ENV=production
+UNSPLASH_ACCESS_KEY=your-unsplash-key (for image search)
+PEXELS_API_KEY=your-pexels-key (for image search)
+AMAZON_AFFILIATE_TAG=your-affiliate-tag (for Amazon links)
+            </div>
+        </div>
+
+        <div class="solution-step">
+            <h3>✅ Step 3: Verify Deployment</h3>
+            <p>After adding the environment variable and redeploying:</p>
+            <ol>
+                <li>Wait for deployment to complete (2-3 minutes)</li>
+                <li>Visit <a href="https://rubysgifts.vercel.app/" target="_blank">https://rubysgifts.vercel.app/</a></li>
+                <li>Verify landing page displays correctly</li>
+                <li>Test "start discovering" button</li>
+                <li>Complete a full questionnaire flow</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="diagnosis-section">
+        <h2>📊 What Was Working vs What Was Broken</h2>
+        
+        <div class="success">
+            <h3>✅ Components Working Correctly</h3>
+            <ul>
+                <li><strong>Static File Serving:</strong> CSS, JavaScript, images all accessible</li>
+                <li><strong>Frontend Code:</strong> All questionnaire logic, chip data, and UI code properly deployed</li>
+                <li><strong>Vercel Configuration:</strong> Routes and build settings correctly configured</li>
+                <li><strong>Flask Application Code:</strong> Backend logic is sound</li>
+                <li><strong>Recent Fixes:</strong> Gift box image loading fix was properly implemented</li>
+            </ul>
+        </div>
+
+        <div class="critical">
+            <h3>❌ What Was Broken</h3>
+            <ul>
+                <li><strong>Environment Configuration:</strong> Missing OPENAI_API_KEY in production</li>
+                <li><strong>Application Initialization:</strong> WSGI startup fails due to validation error</li>
+                <li><strong>Error Handling:</strong> Error overlay prevents access to any functionality</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="diagnosis-section">
+        <h2>🧪 Post-Fix Testing Checklist</h2>
+        
+        <div class="info">
+            <h3>Complete this checklist after implementing the fix:</h3>
+            <ul class="checklist">
+                <li>Landing page loads without error message</li>
+                <li>"Start discovering" button is clickable and functional</li>
+                <li>All 8 questionnaire pages are accessible</li>
+                <li>Chip search/filtering works (if implemented)</li>
+                <li>Chip multi-select and text sync functions correctly</li>
+                <li>Mobile responsiveness is maintained</li>
+                <li>Gift generation API responds successfully</li>
+                <li>Gift box images display correctly (recent fix verification)</li>
+                <li>Loading animation plays properly</li>
+                <li>Error handling works for invalid inputs</li>
+                <li>Progress bar updates correctly</li>
+                <li>Navigation between questions works smoothly</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="diagnosis-section">
+        <h2>🔮 Additional Improvements to Consider</h2>
+        
+        <div class="warning">
+            <h3>⚠️ Missing Features Found During Analysis</h3>
+            <p><strong>Chip Search Functionality:</strong> The requirements specify searchable chip grids, but the current implementation doesn't include search/filter functionality. This should be added for optimal UX with 50+ chips per question.</p>
+            
+            <h4>Recommendation:</h4>
+            <p>After fixing the environment variable issue, consider implementing:</p>
+            <ul>
+                <li>Real-time chip filtering based on search input</li>
+                <li>Fuzzy search matching for better discoverability</li>
+                <li>Visual indication when no chips match search</li>
+            </ul>
+        </div>
+
+        <div class="info">
+            <h3>💡 Performance Optimizations</h3>
+            <ul>
+                <li>Consider virtual scrolling for large chip lists</li>
+                <li>Implement chip lazy loading if needed</li>
+                <li>Add performance monitoring for mobile devices</li>
+                <li>Optimize image loading with proper CDN integration</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="diagnosis-section">
+        <h2>📞 Support Information</h2>
+        
+        <div class="info">
+            <h3>If Issues Persist After Fix:</h3>
+            <ol>
+                <li><strong>Check Vercel Deployment Logs:</strong>
+                    <div class="code-block">vercel logs --app=rubysgifts</div>
+                </li>
+                <li><strong>Verify Environment Variables:</strong>
+                    <div class="code-block">vercel env ls</div>
+                </li>
+                <li><strong>Test Local Development:</strong>
+                    <div class="code-block">
+python app.py
+# Should run without errors if .env file is properly configured
+                    </div>
+                </li>
+                <li><strong>Check Browser Console:</strong> Look for any remaining JavaScript errors</li>
+            </ol>
+        </div>
+
+        <div class="success">
+            <h3>Expected Result After Fix:</h3>
+            <p>✅ Clean landing page with Ruby's Gifts branding</p>
+            <p>✅ Functional questionnaire with chip-based inputs</p>
+            <p>✅ Successful gift generation and display</p>
+            <p>✅ Mobile-responsive design throughout</p>
+            <p>✅ Proper loading states and error handling</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 40px 0; padding: 30px; background: linear-gradient(135deg, #28a745, #20c997); color: white; border-radius: 12px;">
+        <h2 style="margin: 0 0 15px 0;">🎯 Summary</h2>
+        <p style="font-size: 18px; margin: 0;"><strong>Primary Issue:</strong> Missing OPENAI_API_KEY environment variable in Vercel</p>
+        <p style="font-size: 16px; margin: 10px 0 0 0;"><strong>Solution:</strong> Add API key to Vercel environment variables and redeploy</p>
+        <p style="font-size: 14px; margin: 10px 0 0 0;"><strong>Expected Fix Time:</strong> 5-10 minutes</p>
+    </div>
+
+    <div style="text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+        <p><strong>Diagnosis completed by Claude Code</strong></p>
+        <p>Senior QA Engineer and Test Automation Specialist</p>
+        <p><em>The application architecture is solid - this is purely an environment configuration issue.</em></p>
+    </div>
+</body>
+</html>

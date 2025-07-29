@@ -648,7 +648,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Gift Box Reveal System - Mobile First */
 .gift-card > * {
-    padding: 0 1.25rem;
+    padding: 0 0.75rem;
 }
 
 .gift-card .gift-image-container {
@@ -659,7 +659,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Gift Image Styles */
 .gift-image-container {
     width: 100%;
-    height: 140px;
+    height: 220px;
     overflow: hidden;
     background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
     display: flex;
@@ -737,9 +737,9 @@ h1, h2, h3, h4, h5, h6 {
 .gift-actions {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
     margin-top: auto;
-    padding: 0.75rem 1.25rem 1.25rem;
+    padding: 0.6rem 0.75rem 0.75rem;
     flex-shrink: 0;
 }
 
@@ -802,7 +802,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .gift-card {
-    flex: 0 0 320px;
+    flex: 0 0 420px;
     background: white;
     border-radius: 16px;
     overflow: hidden;
@@ -811,7 +811,7 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     flex-direction: column;
     height: fit-content;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 150px);
     border: 1px solid rgba(255, 102, 0, 0.1);
 }
 
@@ -869,10 +869,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .gift-title {
     font-family: 'Playfair Display', serif;
-    font-size: 1.25rem;
+    font-size: 1.45rem;
     font-weight: 600;
     color: #ff6600;
-    margin: 0.75rem 0 0.5rem;
+    margin: 0.5rem 0 0.4rem;
     line-height: 1.3;
     text-transform: lowercase;
     display: -webkit-box;
@@ -885,11 +885,11 @@ h1, h2, h3, h4, h5, h6 {
 .gift-description {
     color: #4a5568;
     line-height: 1.5;
-    margin-bottom: 0.75rem;
-    font-size: 0.9rem;
+    margin-bottom: 0.6rem;
+    font-size: 1rem;
     flex-grow: 1;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -897,13 +897,13 @@ h1, h2, h3, h4, h5, h6 {
 
 .gift-starter, .gift-reaction {
     background: rgba(255, 102, 0, 0.05);
-    padding: 0.5rem 0.75rem;
+    padding: 0.6rem 0.75rem;
     border-radius: 8px;
-    margin: 0 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1.3;
+    margin: 0 0.15rem 0.4rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -921,6 +921,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Desktop enhancements */
 @media (min-width: 768px) {
+    .gift-card {
+        flex: 0 0 480px;
+    }
+    
     .gift-box {
         height: auto;
         min-height: 600px;
@@ -938,18 +942,18 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .gift-image-container {
-        height: 200px;
+        height: 280px;
     }
     
     .gift-title {
-        font-size: clamp(1.3rem, 3vw, 1.6rem);
-        min-height: 2.9rem; /* Adjust for larger font */
-        max-height: 2.9rem;
+        font-size: clamp(1.5rem, 3vw, 1.8rem);
+        min-height: 3.2rem; /* Adjust for larger font */
+        max-height: 3.2rem;
     }
     
     .gift-description {
-        font-size: 1.1rem;
-        max-height: 7rem; /* Adjust for larger font */
+        font-size: 1.15rem;
+        max-height: 8rem; /* Adjust for larger font */
     }
     
     .gift-starter, .gift-reaction {

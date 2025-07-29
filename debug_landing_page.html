@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Landing Page Issue - Ruby's Gifts</title>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .debug-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .debug-section h2 {
+            color: #FF6600;
+            border-bottom: 2px solid #FF6600;
+            padding-bottom: 10px;
+        }
+        .debug-script {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            overflow-x: auto;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            border-radius: 4px;
+        }
+        .step h3 {
+            margin: 0 0 10px 0;
+            color: #0066cc;
+        }
+        .copy-button {
+            background: #FF6600;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .copy-button:hover {
+            background: #e55a00;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Landing Page Issue - Ruby's Gifts</h1>
+    <p><strong>Issue:</strong> Production site shows error message instead of landing page</p>
+    <p><strong>URL:</strong> <a href="https://rubysgifts.vercel.app/" target="_blank">https://rubysgifts.vercel.app/</a></p>
+
+    <div class="debug-section">
+        <h2>🚨 Current Issue Analysis</h2>
+        <div class="step">
+            <h3>Problem Observed:</h3>
+            <p>The application shows "oops! something went wrong" error message instead of the expected landing page with "Ruby's Gifts" title and "start discovering" button.</p>
+        </div>
+
+        <div class="step">
+            <h3>Likely Causes:</h3>
+            <ul>
+                <li>JavaScript initialization error preventing proper page rendering</li>
+                <li>Missing or failed resource loading (scripts, fonts, icons)</li>
+                <li>API endpoint failure during initial load</li>
+                <li>Environment variable issues in production</li>
+                <li>CORS or security policy blocking resources</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🛠️ Manual Debug Steps</h2>
+        
+        <div class="step">
+            <h3>Step 1: Open Browser Console</h3>
+            <p>Navigate to <a href="https://rubysgifts.vercel.app/" target="_blank">https://rubysgifts.vercel.app/</a> and open browser developer tools (F12)</p>
+            <p>Check the Console tab for JavaScript errors</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Check Network Tab</h3>
+            <p>Look for failed resource requests (red entries):</p>
+            <ul>
+                <li>styles.css</li>
+                <li>chip-data.js</li>
+                <li>questionnaire.js</li>
+                <li>gift-reveal.js</li>
+                <li>loading.mp4</li>
+                <li>favicon.png</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Run Console Debug Script</h3>
+            <p>Copy and paste this script in the browser console:</p>
+            <button class="copy-button" onclick="copyToClipboard('debugScript')">Copy Debug Script</button>
+            <div class="debug-script" id="debugScript">
+// Ruby's Gifts Debug Script
+console.log('=== Ruby\'s Gifts Debug Analysis ===');
+
+// Check if main elements exist
+const landing = document.getElementById('landing');
+const errorMessage = document.getElementById('error-message');
+const startBtn = document.getElementById('start-btn');
+
+console.log('Landing element:', landing);
+console.log('Error message element:', errorMessage);
+console.log('Start button:', startBtn);
+
+// Check element visibility
+if (landing) {
+    console.log('Landing page classes:', landing.className);
+    console.log('Landing page style.display:', landing.style.display);
+}
+
+if (errorMessage) {
+    console.log('Error message classes:', errorMessage.className);
+    console.log('Error message style.display:', errorMessage.style.display);
+    console.log('Error is visible:', !errorMessage.classList.contains('hidden'));
+}
+
+// Check script loading
+console.log('Window variables:');
+console.log('- CHIP_DATA exists:', typeof CHIP_DATA !== 'undefined');
+console.log('- Questionnaire functions:', typeof initializeQuestionnaire !== 'undefined');
+
+// Check for JavaScript errors
+console.log('Checking for missing resources...');
+const scripts = document.querySelectorAll('script[src]');
+scripts.forEach(script => {
+    console.log('Script:', script.src, 'loaded:', script.readyState);
+});
+
+// Test start button functionality
+if (startBtn) {
+    console.log('Start button exists and is clickable');
+    console.log('Start button event listeners:', getEventListeners(startBtn));
+} else {
+    console.log('❌ Start button not found!');
+}
+
+// Check CSS loading
+const styles = document.querySelectorAll('link[rel="stylesheet"]');
+styles.forEach(style => {
+    console.log('Stylesheet:', style.href);
+});
+
+console.log('=== End Debug Analysis ===');
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Test Individual Resources</h3>
+            <p>Test these URLs directly in browser:</p>
+            <ul>
+                <li><a href="https://rubysgifts.vercel.app/styles.css" target="_blank">styles.css</a></li>
+                <li><a href="https://rubysgifts.vercel.app/chip-data.js" target="_blank">chip-data.js</a></li>
+                <li><a href="https://rubysgifts.vercel.app/questionnaire.js" target="_blank">questionnaire.js</a></li>
+                <li><a href="https://rubysgifts.vercel.app/gift-reveal.js" target="_blank">gift-reveal.js</a></li>
+                <li><a href="https://rubysgifts.vercel.app/loading.mp4" target="_blank">loading.mp4</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🔧 Quick Fix Attempts</h2>
+        
+        <div class="step">
+            <h3>Force Hide Error Message</h3>
+            <p>If error is incorrectly displayed, try this in console:</p>
+            <button class="copy-button" onclick="copyToClipboard('hideError')">Copy Fix Script</button>
+            <div class="debug-script" id="hideError">
+// Force hide error and show landing page
+const errorMsg = document.getElementById('error-message');
+const landing = document.getElementById('landing');
+
+if (errorMsg) {
+    errorMsg.style.display = 'none';
+    console.log('Error message hidden');
+}
+
+if (landing) {
+    landing.classList.add('active');
+    landing.style.display = 'block';
+    console.log('Landing page shown');
+}
+
+// Test start button
+const startBtn = document.getElementById('start-btn');
+if (startBtn) {
+    startBtn.addEventListener('click', function() {
+        console.log('Start button clicked!');
+        // Try basic navigation
+        document.getElementById('landing').classList.remove('active');
+        document.getElementById('questionnaire').classList.add('active');
+    });
+    console.log('Start button event listener added');
+}
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Manual Script Loading</h3>
+            <p>If scripts aren't loading, try manual loading:</p>
+            <button class="copy-button" onclick="copyToClipboard('loadScripts')">Copy Script Loader</button>
+            <div class="debug-script" id="loadScripts">
+// Manually load required scripts
+function loadScript(src, callback) {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = callback;
+    script.onerror = () => console.error('Failed to load:', src);
+    document.head.appendChild(script);
+}
+
+console.log('Loading scripts manually...');
+loadScript('/chip-data.js', () => {
+    console.log('chip-data.js loaded');
+    loadScript('/questionnaire.js', () => {
+        console.log('questionnaire.js loaded');
+        loadScript('/gift-reveal.js', () => {
+            console.log('All scripts loaded, trying to initialize...');
+            if (typeof initializeQuestionnaire === 'function') {
+                initializeQuestionnaire();
+            }
+        });
+    });
+});
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>📋 Report Template</h2>
+        <div class="step">
+            <h3>After running debug steps, report findings:</h3>
+            <div class="debug-script">
+=== DEBUG REPORT ===
+Browser: [Chrome/Firefox/Safari] Version: [version]
+Device: [Desktop/Mobile] OS: [Windows/Mac/iOS/Android]
+
+CONSOLE ERRORS:
+[Paste any red error messages from console]
+
+NETWORK FAILURES:
+[List any failed resource requests from Network tab]
+
+DEBUG SCRIPT OUTPUT:
+[Paste output from debug script]
+
+FIX ATTEMPTS:
+[Report if quick fixes worked or failed]
+
+ADDITIONAL OBSERVATIONS:
+[Any other relevant findings]
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🎯 Most Likely Solutions</h2>
+        <div style="display: grid; gap: 15px;">
+            <div style="padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <h4 style="margin: 0 0 10px 0; color: #856404;">Solution 1: Script Loading Order</h4>
+                <p>Check if scripts are loading in correct order. questionnaire.js might be trying to access CHIP_DATA before chip-data.js loads.</p>
+            </div>
+            <div style="padding: 15px; background: #d1ecf1; border-radius: 8px; border-left: 4px solid #bee5eb;">
+                <h4 style="margin: 0 0 10px 0; color: #0c5460;">Solution 2: Vercel Deployment Issue</h4>
+                <p>Static files might not be properly deployed. Check Vercel dashboard for deployment logs and file structure.</p>
+            </div>
+            <div style="padding: 15px; background: #f8d7da; border-radius: 8px; border-left: 4px solid #f5c6cb;">
+                <h4 style="margin: 0 0 10px 0; color: #721c24;">Solution 3: Error Handling Bug</h4>
+                <p>The error message might be showing inappropriately due to a bug in error handling logic.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
