@@ -2437,14 +2437,21 @@ def generate_gifts():
         
         data = request.get_json()
         
+        # Log the received data for debugging
+        logger.info(f"Received request data: {list(data.keys()) if data else 'None'}")
+        
         # Validate input data
         is_valid, error_message = validate_questionnaire_data(data)
         if not is_valid:
             logger.warning(f"Invalid input data: {error_message}")
+            logger.warning(f"Received data: {data}")
             return jsonify({
                 "success": False,
                 "error": error_message,
-                "code": "INVALID_INPUT"
+                "code": "INVALID_INPUT",
+                "received_fields": list(data.keys()) if data else [],
+                "required_fields": REQUIRED_QUESTIONS,
+                "debug_info": f"Environment: {Config.FLASK_ENV}"
             }), 400
         
         # Sanitize all inputs
@@ -2518,10 +2525,32 @@ def generate_gifts():
         
     except Exception as e:
         logger.error(f"Error in generate_gifts endpoint: {str(e)}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        
+        # Provide more specific error messages for debugging
+        error_message = "Internal server error occurred while generating gift ideas"
+        error_code = "INTERNAL_ERROR"
+        
+        # Check if it's an OpenAI-related error
+        if "OpenAI" in str(e) or "AI service" in str(e):
+            error_message = str(e)
+            error_code = "AI_SERVICE_ERROR"
+        elif "timeout" in str(e).lower():
+            error_message = "Request timed out while generating gift ideas. Please try again."
+            error_code = "TIMEOUT_ERROR"
+        elif "connection" in str(e).lower():
+            error_message = "Failed to connect to AI service. Please try again."
+            error_code = "CONNECTION_ERROR"
+        
         return jsonify({
             "success": False,
-            "error": "Internal server error occurred while generating gift ideas",
-            "code": "INTERNAL_ERROR"
+            "error": error_message,
+            "code": error_code,
+            "debug_info": {
+                "environment": Config.FLASK_ENV,
+                "error_type": type(e).__name__,
+                "openai_configured": bool(app.config.get('OPENAI_API_KEY'))
+            }
         }), 500
 
 @app.route('/results/<result_id>')

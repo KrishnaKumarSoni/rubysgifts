@@ -606,7 +606,18 @@ class QuestionnaireSystem {
             });
             
             if (!response.ok) {
-                throw new Error(`API call failed with status ${response.status}`);
+                // Try to get error details from response
+                let errorMessage = `API call failed with status ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    if (errorData.error) {
+                        errorMessage = errorData.error;
+                    }
+                    console.error('API Error Details:', errorData);
+                } catch (parseError) {
+                    console.error('Failed to parse error response:', parseError);
+                }
+                throw new Error(errorMessage);
             }
             
             const data = await response.json();
@@ -636,11 +647,14 @@ class QuestionnaireSystem {
                 
                 this.renderGiftCards(data.gift_ideas);
             } else {
-                throw new Error('Invalid response format from API');
+                console.error('Invalid API response structure:', data);
+                const errorMsg = data.error || 'Invalid response format from API';
+                throw new Error(errorMsg);
             }
             
         } catch (error) {
             console.error('Error generating gift ideas:', error);
+            console.error('Request data that was sent:', requestData);
             
             // Fallback to mock data if API fails
             console.log('Falling back to mock data...');
