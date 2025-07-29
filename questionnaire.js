@@ -170,10 +170,10 @@ class QuestionnaireSystem {
         
         this.renderCurrentQuestion();
         
-        // Focus management for accessibility
+        // Focus management - focus on textarea instead of first chip
         setTimeout(() => {
-            const firstChip = document.querySelector('.chip');
-            if (firstChip) firstChip.focus();
+            const textarea = document.querySelector('.answer-input');
+            if (textarea) textarea.focus();
         }, 100);
     }
 
@@ -257,8 +257,11 @@ class QuestionnaireSystem {
             chipElement.setAttribute('aria-selected', 'false');
         }
 
+        // Add fallback icon if the specified icon doesn't exist
+        const iconClass = chip.icon || 'ph ph-circle';
+        
         chipElement.innerHTML = `
-            <i class="ph ${chip.icon} chip-icon" aria-hidden="true"></i>
+            <i class="${iconClass} chip-icon" aria-hidden="true"></i>
             <span class="chip-text">${chip.text}</span>
         `;
 
