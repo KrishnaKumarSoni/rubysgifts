@@ -110,6 +110,9 @@ class QuestionnaireSystem {
             this.elements.totalQuestions.textContent = this.totalQuestions;
         }
         
+        // Handle URL routing and browser history
+        this.initializeUrlRouting();
+        
         // Initialize first question when questionnaire is shown
         this.renderCurrentQuestion();
     }
@@ -167,6 +170,9 @@ class QuestionnaireSystem {
         if (progressContainer) {
             progressContainer.classList.add('fixed-nav');
         }
+        
+        // Update URL to questionnaire page
+        window.history.pushState({ page: 'questionnaire' }, 'Ruby\'s Gifts - Questions', '/questionnaire');
         
         this.renderCurrentQuestion();
         
@@ -606,6 +612,28 @@ class QuestionnaireSystem {
             const data = await response.json();
             
             if (data.success && data.gift_ideas) {
+                // Store result information for URL routing
+                this.giftIdeas = data.gift_ideas;
+                this.resultId = data.result_id;
+                this.resultUrl = data.result_url;
+                
+                console.log('Result ID:', this.resultId);
+                
+                // Update URL with result ID and update browser history
+                if (this.resultId) {
+                    const newUrl = `/results/${this.resultId}`;
+                    window.history.pushState(
+                        { 
+                            page: 'results', 
+                            resultId: this.resultId,
+                            giftIdeas: this.giftIdeas 
+                        }, 
+                        'Ruby\'s Gifts - Results', 
+                        newUrl
+                    );
+                    console.log('Updated URL to:', newUrl);
+                }
+                
                 this.renderGiftCards(data.gift_ideas);
             } else {
                 throw new Error('Invalid response format from API');
@@ -771,6 +799,143 @@ class QuestionnaireSystem {
         
         // Reset progress
         this.updateProgressBar();
+        
+        // Update URL back to home
+        window.history.pushState({ page: 'landing' }, 'Ruby\'s Gifts', '/');
+    }
+
+    // URL ROUTING AND BROWSER HISTORY METHODS
+
+    initializeUrlRouting() {
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', (event) => {
+            this.handlePopState(event);
+        });
+
+        // Check if we're loading a results page directly
+        this.handleInitialUrl();
+    }
+
+    handleInitialUrl() {
+        const path = window.location.pathname;
+        const resultMatch = path.match(/^\/results\/([a-zA-Z0-9-]+)$/);
+        
+        if (resultMatch) {
+            const resultId = resultMatch[1];
+            console.log('Loading results page for ID:', resultId);
+            
+            // Check if result data is injected by server
+            if (window.RESULT_DATA && window.RESULT_ID === resultId) {
+                console.log('Using server-injected result data');
+                this.loadResultsFromData(window.RESULT_DATA);
+            } else {
+                console.log('Fetching result data from API');
+                this.loadResultsFromApi(resultId);
+            }
+        } else if (path === '/questionnaire') {
+            // If directly accessing questionnaire, set up state but stay on landing
+            // The user will need to click "start discovering" to begin
+            console.log('Direct access to questionnaire URL - staying on landing');
+            window.history.replaceState({ page: 'landing' }, 'Ruby\'s Gifts', '/');
+        } else {
+            // Landing page - set initial state
+            window.history.replaceState({ page: 'landing' }, 'Ruby\'s Gifts', '/');
+        }
+    }
+
+    handlePopState(event) {
+        const state = event.state;
+        
+        if (!state) {
+            // No state, go to landing page
+            this.showLanding();
+            return;
+        }
+
+        switch (state.page) {
+            case 'landing':
+                this.showLanding();
+                break;
+            case 'questionnaire':
+                this.showQuestionnaire();
+                break;
+            case 'results':
+                if (state.resultId && state.giftIdeas) {
+                    this.showResultsWithData(state.giftIdeas, state.resultId);
+                }
+                break;
+            default:
+                this.showLanding();
+        }
+    }
+
+    async loadResultsFromApi(resultId) {
+        try {
+            this.showLoading();
+            
+            const response = await fetch(`/api/results/${resultId}`);
+            if (!response.ok) {
+                throw new Error(`Failed to load results: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            if (data.success) {
+                this.loadResultsFromData(data);
+            } else {
+                throw new Error(data.error || 'Failed to load results');
+            }
+            
+        } catch (error) {
+            console.error('Error loading results from API:', error);
+            this.showError('Failed to load results. The link may have expired.');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    loadResultsFromData(resultData) {
+        // Store the data
+        this.giftIdeas = resultData.gift_ideas;
+        this.resultId = resultData.result_id || resultData.id;
+        
+        // Show results page
+        this.showResultsWithData(resultData.gift_ideas, this.resultId);
+    }
+
+    showResultsWithData(giftIdeas, resultId) {
+        // Hide other pages
+        if (this.elements.landing) {
+            this.elements.landing.classList.remove('active');
+        }
+        if (this.elements.questionnaire) {
+            this.elements.questionnaire.classList.remove('active');
+        }
+        
+        // Show results page
+        if (this.elements.results) {
+            this.elements.results.classList.add('active');
+        }
+        
+        // Render the gift cards
+        this.renderGiftCards(giftIdeas);
+        
+        // Announce to screen readers
+        this.announceToScreenReader('Gift recommendations loaded successfully');
+    }
+
+    showLanding() {
+        // Hide other pages
+        if (this.elements.questionnaire) {
+            this.elements.questionnaire.classList.remove('active');
+        }
+        if (this.elements.results) {
+            this.elements.results.classList.remove('active');
+        }
+        
+        // Show landing page
+        if (this.elements.landing) {
+            this.elements.landing.classList.add('active');
+        }
     }
 
     announceChipChange(chipText, isSelected) {

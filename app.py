@@ -27,7 +27,9 @@ import logging
 import json
 import random
 import time
-from datetime import datetime
+import uuid
+import hashlib
+from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 from urllib.parse import quote_plus
 
@@ -104,6 +106,62 @@ if os.getenv('PRODUCTION_URL'):
 
 # Enable CORS for all routes
 CORS(app, origins=cors_origins, supports_credentials=True)
+
+# Results storage system for URL routing
+# In production, this should be moved to a database like Redis or PostgreSQL
+results_store = {}
+
+def generate_result_id():
+    """Generate a unique ID for results."""
+    return str(uuid.uuid4())[:8]  # Short 8-character ID for cleaner URLs
+
+def store_result(questions_answers: dict, gift_ideas: list) -> str:
+    """Store results and return a unique ID."""
+    result_id = generate_result_id()
+    
+    # Ensure ID is unique (unlikely collision but handle it)
+    while result_id in results_store:
+        result_id = generate_result_id()
+    
+    results_store[result_id] = {
+        'id': result_id,
+        'questions_answers': questions_answers,
+        'gift_ideas': gift_ideas,
+        'created_at': datetime.utcnow(),
+        'expires_at': datetime.utcnow() + timedelta(days=30)  # Results expire after 30 days
+    }
+    
+    logger.info(f"Stored results with ID: {result_id}")
+    return result_id
+
+def get_result(result_id: str) -> Optional[dict]:
+    """Retrieve results by ID."""
+    result = results_store.get(result_id)
+    
+    if not result:
+        return None
+    
+    # Check if result has expired
+    if datetime.utcnow() > result['expires_at']:
+        del results_store[result_id]
+        logger.info(f"Expired result {result_id} removed from storage")
+        return None
+    
+    return result
+
+def cleanup_expired_results():
+    """Clean up expired results from storage."""
+    now = datetime.utcnow()
+    expired_ids = [
+        result_id for result_id, result_data in results_store.items()
+        if now > result_data['expires_at']
+    ]
+    
+    for result_id in expired_ids:
+        del results_store[result_id]
+        logger.info(f"Cleaned up expired result: {result_id}")
+    
+    logger.info(f"Cleanup complete. Removed {len(expired_ids)} expired results.")
 
 # Verify OpenAI API key is configured
 if not app.config['OPENAI_API_KEY']:
@@ -2163,6 +2221,11 @@ def serve_frontend():
             "message": "Please ensure index.html exists in the project root"
         }), 404
 
+@app.route('/questionnaire')
+def serve_questionnaire():
+    """Serve questionnaire page - same as main page but different URL."""
+    return serve_frontend()
+
 def check_image_search_availability() -> tuple[bool, str]:
     """
     Check if Python-based image search functionality is available.
@@ -2442,9 +2505,14 @@ def generate_gifts():
         gift_data['gift_ideas'] = enhanced_gifts
         logger.info(f"Successfully enhanced all {len(enhanced_gifts)} gifts with images and links")
         
+        # Store results with unique ID for URL routing
+        result_id = store_result(data, gift_data['gift_ideas'])
+        
         return jsonify({
             "success": True,
             "gift_ideas": gift_data['gift_ideas'],
+            "result_id": result_id,
+            "result_url": f"/results/{result_id}",
             "timestamp": datetime.utcnow().isoformat()
         })
         
@@ -2454,6 +2522,125 @@ def generate_gifts():
             "success": False,
             "error": "Internal server error occurred while generating gift ideas",
             "code": "INTERNAL_ERROR"
+        }), 500
+
+@app.route('/results/<result_id>')
+def view_results(result_id: str):
+    """
+    Serve results page with specific result ID.
+    This allows for bookmarkable/shareable result URLs.
+    """
+    try:
+        # Get results from storage
+        result_data = get_result(result_id)
+        
+        if not result_data:
+            # Result not found or expired
+            logger.warning(f"Result not found or expired: {result_id}")
+            return render_template_string("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results Not Found - Ruby's Gifts</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        .error { color: #ff6600; margin: 20px 0; }
+        .btn { background: #ff6600; color: white; padding: 10px 20px; 
+               text-decoration: none; border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Results Not Found</h1>
+    <p class="error">The results you're looking for have expired or don't exist.</p>
+    <a href="/" class="btn">Start New Search</a>
+</body>
+</html>
+            """), 404
+        
+        # Load the main HTML with the result_id in URL
+        with open('index.html', 'r') as f:
+            html_content = f.read()
+        
+        # Inject result data into the page for JavaScript to use
+        # Convert datetime objects to ISO strings for JSON serialization
+        serializable_data = {
+            'id': result_data['id'],
+            'gift_ideas': result_data['gift_ideas'],
+            'questions_answers': result_data['questions_answers'],
+            'created_at': result_data['created_at'].isoformat(),
+            'expires_at': result_data['expires_at'].isoformat()
+        }
+        
+        script_injection = f"""
+    <script>
+        window.RESULT_DATA = {json.dumps(serializable_data)};
+        window.RESULT_ID = "{result_id}";
+    </script>
+        """
+        
+        # Insert before closing head tag
+        html_content = html_content.replace('</head>', f'{script_injection}</head>')
+        
+        return html_content
+        
+    except Exception as e:
+        logger.error(f"Error serving results page for {result_id}: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Error loading results page",
+            "code": "RESULTS_PAGE_ERROR"
+        }), 500
+
+@app.route('/api/results/<result_id>')
+def get_results_api(result_id: str):
+    """
+    API endpoint to get results data by ID.
+    Used by JavaScript to load results dynamically.
+    """
+    try:
+        result_data = get_result(result_id)
+        
+        if not result_data:
+            return jsonify({
+                "success": False,
+                "error": "Results not found or expired",
+                "code": "RESULTS_NOT_FOUND"
+            }), 404
+        
+        return jsonify({
+            "success": True,
+            "result_id": result_id,
+            "gift_ideas": result_data['gift_ideas'],
+            "questions_answers": result_data['questions_answers'],
+            "created_at": result_data['created_at'].isoformat(),
+            "expires_at": result_data['expires_at'].isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error retrieving results {result_id}: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Error retrieving results",
+            "code": "RESULTS_RETRIEVAL_ERROR"
+        }), 500
+
+@app.route('/cleanup', methods=['POST'])
+def manual_cleanup():
+    """Manual cleanup endpoint for expired results (admin use)."""
+    try:
+        cleanup_expired_results()
+        return jsonify({
+            "success": True,
+            "message": "Cleanup completed successfully"
+        })
+    except Exception as e:
+        logger.error(f"Error during manual cleanup: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Cleanup failed",
+            "code": "CLEANUP_ERROR"
         }), 500
 
 @app.errorhandler(404)
