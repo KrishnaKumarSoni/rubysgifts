@@ -1151,6 +1151,45 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0 auto;
     border-radius: 12px;
     display: block;
+    /* Ensure no controls are visible */
+    outline: none;
+    border: none;
+}
+
+.loading-video::-webkit-media-controls {
+    display: none !important;
+}
+
+.loading-video::-webkit-media-controls-panel {
+    display: none !important;
+}
+
+.loading-video::-webkit-media-controls-play-button {
+    display: none !important;
+}
+
+.loading-video::-webkit-media-controls-timeline {
+    display: none !important;
+}
+
+.loading-video::-webkit-media-controls-current-time-display {
+    display: none !important;
+}
+
+.loading-video::-webkit-media-controls-time-remaining-display {
+    display: none !important;
+}
+
+.loading-video::-webkit-media-controls-mute-button {
+    display: none !important;
+}
+
+.loading-video::-webkit-media-controls-volume-slider {
+    display: none !important;
+}
+
+.loading-video::-webkit-media-controls-fullscreen-button {
+    display: none !important;
 }
 
 @keyframes spin {
