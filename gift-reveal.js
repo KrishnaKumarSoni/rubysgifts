@@ -70,35 +70,46 @@ class GiftRevealSystem {
         if (!giftCardsContainer) return;
 
         const giftBoxesHTML = this.giftData.map((gift, index) => `
-            <div class="gift-card" data-gift-index="${index}" style="flex: 0 0 278px; height: 544px; position: relative; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); border: 1px solid rgba(255, 102, 0, 0.1);">
-                <div style="width: 278px; height: 234px; background: #D9D9D9; display: flex; align-items: center; justify-content: center;">
+            <div class="gift-card" data-gift-index="${index}" style="flex: 0 0 300px; height: calc(100vh - 140px); max-height: 600px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); border: 1px solid rgba(255, 102, 0, 0.1); display: flex; flex-direction: column;">
+                <div style="width: 100%; height: 180px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                     <img src="${this.getGiftImageUrl(gift)}" 
                          alt="${gift.title}" 
                          style="width: 100%; height: 100%; object-fit: cover;"
                          onerror="giftRevealSystem.handleImageError(this)"
                          onload="this.classList.add('loaded')">
                 </div>
-                <h3 style="position: absolute; left: 22px; top: 256px; color: #ff6600; font-size: 14px; font-family: 'Playfair Display', serif; font-weight: 600; text-transform: lowercase; line-height: 1.2; width: calc(100% - 44px); display: flex; align-items: center; gap: 6px;">
-                    <i class="ph ph-gift"></i>
-                    ${gift.title}
-                </h3>
-                <div style="position: absolute; left: 22px; top: 287px; color: black; font-size: 10px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4; width: calc(100% - 44px); height: 48px; overflow: hidden;">
-                    <i class="ph ph-info"></i> <strong>Description</strong><br/>${gift.description}
-                </div>
-                ${gift.reaction ? `<div style="position: absolute; left: 22px; top: 361px; color: black; font-size: 10px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4; width: calc(100% - 44px); height: 40px; overflow: hidden;">
-                    <i class="ph ph-smiley"></i> <strong>Reaction</strong><br/>${gift.reaction}
-                </div>` : ''}
-                ${gift.starter ? `<div style="position: absolute; left: 22px; top: 426px; color: black; font-size: 10px; font-family: 'Inter', sans-serif; font-weight: 400; line-height: 1.4; width: calc(100% - 44px); height: 48px; overflow: hidden;">
-                    <i class="ph ph-gift"></i> <strong>How to give</strong><br/>${gift.starter}
-                </div>` : ''}
-                <div style="position: absolute; left: 11px; top: 502px; width: 256px; height: 30px;">
-                    <a href="${gift.amazon_link || `https://www.amazon.in/s?k=${encodeURIComponent(gift.amazon_search_query || gift.title)}`}" 
-                       target="_blank" 
-                       rel="noopener noreferrer" 
-                       style="width: 256px; height: 30px; background: linear-gradient(135deg, #ff6600, #ff8533); border-radius: 100px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.3s ease; gap: 6px;">
-                        <i class="ph ph-shopping-cart" style="color: white; font-size: 12px;"></i>
-                        <span style="color: white; font-size: 11px; font-family: 'Inter', sans-serif; font-weight: 500;">get products</span>
-                    </a>
+                <div style="padding: 16px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 12px;">
+                    <h3 style="color: #ff6600; font-size: 16px; font-family: 'Playfair Display', serif; font-weight: 600; text-transform: lowercase; line-height: 1.2; margin: 0; display: flex; align-items: center; gap: 6px;">
+                        <i class="ph ph-gift" style="color: #ff6600; font-size: 16px;"></i>
+                        ${gift.title}
+                    </h3>
+                    <div style="color: #4a5568; font-size: 12px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 400; line-height: 1.4;">
+                        <div style="display: flex; align-items: flex-start; gap: 6px; margin-bottom: 8px;">
+                            <i class="ph ph-info" style="color: #666; font-size: 12px; margin-top: 2px; flex-shrink: 0;"></i>
+                            <div><strong style="color: #333;">Why this gift:</strong><br/>${gift.description}</div>
+                        </div>
+                    </div>
+                    ${gift.reaction ? `<div style="color: #4a5568; font-size: 12px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 400; line-height: 1.4;">
+                        <div style="display: flex; align-items: flex-start; gap: 6px; margin-bottom: 8px;">
+                            <i class="ph ph-smiley" style="color: #ff6600; font-size: 12px; margin-top: 2px; flex-shrink: 0;"></i>
+                            <div><strong style="color: #333;">Expected reaction:</strong><br/>${gift.reaction}</div>
+                        </div>
+                    </div>` : ''}
+                    ${gift.starter ? `<div style="color: #4a5568; font-size: 12px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 400; line-height: 1.4;">
+                        <div style="display: flex; align-items: flex-start; gap: 6px; margin-bottom: 8px;">
+                            <i class="ph ph-hand-heart" style="color: #ff6600; font-size: 12px; margin-top: 2px; flex-shrink: 0;"></i>
+                            <div><strong style="color: #333;">How to present:</strong><br/>${gift.starter}</div>
+                        </div>
+                    </div>` : ''}
+                    <div style="margin-top: auto; padding-top: 12px;">
+                        <a href="${gift.amazon_link || `https://www.amazon.in/s?k=${encodeURIComponent(gift.amazon_search_query || gift.title)}`}" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           style="width: 100%; height: 36px; background: linear-gradient(135deg, #ff6600, #ff8533); border-radius: 18px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.3s ease; gap: 6px;">
+                            <i class="ph ph-shopping-cart" style="color: white; font-size: 14px;"></i>
+                            <span style="color: white; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 500;">get products</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         `).join('');
