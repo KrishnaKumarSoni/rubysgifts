@@ -68,7 +68,7 @@ class GiftRevealSystem {
             <div class="gift-card" data-gift-index="${index}" style="flex: 0 0 280px; height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: pointer; margin: 0 20px;" onclick="giftRevealSystem.revealGift(${index})">
                 <!-- Simple Gift Box -->
                 <div class="gift-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);">
-                    <img class="gift-box-img" src="./giftbox-image.png" alt="Gift Box ${index + 1}" style="width: 150px; height: 150px; object-fit: contain; filter: drop-shadow(0 8px 24px rgba(255, 102, 0, 0.4)); transition: all 0.6s ease;">
+                    <img class="gift-box-img" src="/giftbox-image.png" alt="Gift Box ${index + 1}" style="width: 150px; height: 150px; object-fit: contain; filter: drop-shadow(0 8px 24px rgba(255, 102, 0, 0.4)); transition: all 0.6s ease;" onerror="console.error('Failed to load giftbox image:', this.src)">
                 </div>
                 
                 <!-- Gift Card (hidden initially) -->

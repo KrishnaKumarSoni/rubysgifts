@@ -88,7 +88,6 @@ test_*.py
 *_test.py
 debug_*.py
 *_debug.py
-*.png
 comprehensive_test_runner.py
 run_comprehensive_tests.py
 validate_fixes.py
