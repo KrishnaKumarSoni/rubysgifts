@@ -3,7 +3,7 @@
 <p align="center"><b>Find the perfect gift by answering 8 slightly nosy questions about someone.</b></p>
 
 <p align="center">
-  <code>● Live</code> &nbsp;·&nbsp; <a href="https://rubysgifts.kks.im"><b>rubysgifts.kks.im</b></a> &nbsp;·&nbsp; Flask · OpenAI
+  <code>● Live</code> &nbsp;·&nbsp; <a href="https://rubysgifts.vercel.app"><b>rubysgifts.vercel.app</b></a> &nbsp;·&nbsp; Flask · OpenAI
 </p>
 
 ![Ruby's Gifts landing page](landing.png)
